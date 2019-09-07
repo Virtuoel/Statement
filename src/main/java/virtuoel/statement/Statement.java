@@ -51,11 +51,6 @@ public class Statement implements ModInitializer
 		);
 	}
 	
-	public static void reorderBlockStates(final Predicate<BlockState> deferredCondition)
-	{
-		reorderStates(Registry.BLOCK, Block.STATE_IDS, Block::getStateFactory, deferredCondition);
-	}
-	
 	public static <V extends Comparable<V>> void refreshFluidStates(final MutableProperty<V> property, final Collection<V> newValues)
 	{
 		refreshStates(
@@ -63,11 +58,6 @@ public class Statement implements ModInitializer
 			property, newValues,
 			Fluid::getDefaultState, Fluid::getStateFactory, f -> {}
 		);
-	}
-	
-	public static void reorderFluidStates(final Predicate<FluidState> deferredCondition)
-	{
-		reorderStates(Registry.FLUID, Fluid.STATE_IDS, Fluid::getStateFactory, deferredCondition);
 	}
 	
 	public static <O, V extends Comparable<V>, S extends PropertyContainer<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> newValues, final Function<O, S> defaultStateGetter, final Function<O, StateFactory<O, S>> factoryGetter, final Consumer<S> newStateConsumer)
@@ -125,6 +115,16 @@ public class Statement implements ModInitializer
 				LOGGER.debug("Added {} new states for values(s) {} after {} ms.", newStates.size(), newValues, (System.nanoTime() - startTime) / 1_000_000);
 			}).join();
 		}
+	}
+	
+	public static void reorderBlockStates(final Predicate<BlockState> deferredCondition)
+	{
+		reorderStates(Registry.BLOCK, Block.STATE_IDS, Block::getStateFactory, deferredCondition);
+	}
+	
+	public static void reorderFluidStates(final Predicate<FluidState> deferredCondition)
+	{
+		reorderStates(Registry.FLUID, Fluid.STATE_IDS, Fluid::getStateFactory, deferredCondition);
 	}
 	
 	public static <O, V extends Comparable<V>, S extends PropertyContainer<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateFactory<O, S>> factoryGetter, final Predicate<S> deferredCondition)

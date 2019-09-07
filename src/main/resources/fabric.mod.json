@@ -4,7 +4,7 @@
 	"name": "Statement",
 	"version": "${version}",
 	"side": "universal",
-	"description": "Library to assist with adding properties to existing block states",
+	"description": "Library to assist with adding properties to existing block states.",
 	"license": "MIT",
 	"contact":
 	{
@@ -18,7 +18,8 @@
 	],
 	"depends":
 	{
-		"fabricloader": ">=0.4.0"
+		"fabricloader": ">=0.4.0",
+		"fabric": "*"
 	},
 	"icon": "assets/statement/icon.png",
 	"environment": "*",
