@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "statement",
+	"name": "Statement",
+	"version": "${version}",
+	"side": "universal",
+	"description": "Library to assist with adding properties to existing block states",
+	"license": "MIT",
+	"contact":
+	{
+		"homepage": "https://minecraft.curseforge.com/projects/statement",
+		"issues": "https://github.com/Virtuoel/Statement/issues",
+		"sources": "https://github.com/Virtuoel/Statement"
+	},
+	"authors":
+	[
+		"Virtuoel"
+	],
+	"depends":
+	{
+		"fabricloader": ">=0.4.0"
+	},
+	"icon": "assets/statement/icon.png",
+	"environment": "*",
+	"entrypoints":
+	{
+		
+	},
+	"mixins":
+	[
+		"statement.mixins.json"
+	],
+	"custom":
+	{
+		"modmenu:api": true
+	}
+}

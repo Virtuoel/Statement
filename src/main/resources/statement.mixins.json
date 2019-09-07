@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"package": "virtuoel.statement.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins":
+	[
+		
+		"AbstractPropertyContainerMixin",
+		"StateFactoryBuilderMixin",
+		"StateFactoryMixin",
+		"TagHelperMixin"
+	],
+	"injectors":
+	{
+		"defaultRequire": 1
+	}
+}
