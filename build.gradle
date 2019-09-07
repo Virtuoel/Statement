@@ -1,0 +1,162 @@
+plugins {
+	id "fabric-loom" version "0.2.5-SNAPSHOT"
+	id "maven-publish"
+	id "com.matthewprenger.cursegradle" version "1.4.0"
+}
+
+repositories {
+	mavenLocal()
+	maven {
+		name = "CurseForge"
+		url = "https://minecraft.curseforge.com/api/maven"
+	}
+	maven {
+		name = "JitPack"
+		url = "https://jitpack.io"
+	}
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+archivesBaseName = project.archives_base_name
+version = project.mod_version
+group = project.maven_group
+
+minecraft {
+	
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${minecraft_version}"
+	mappings "net.fabricmc:yarn:${yarn_mappings}"
+	
+	modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+	if(project.hasProperty("fabric_version")) {
+		modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+	}
+	
+	implementation "com.google.code.findbugs:jsr305:${findbugs_version}"
+	
+	modImplementation "io.github.prospector:modmenu:${modmenu_version}"
+}
+
+processResources {
+	inputs.property "version", project.version
+	
+	from(sourceSets.main.resources.srcDirs) {
+		include "fabric.mod.json"
+		expand "version": project.version
+	}
+	
+	from(sourceSets.main.resources.srcDirs) {
+		exclude "fabric.mod.json"
+	}
+}
+
+tasks.withType(JavaCompile) {
+	options.encoding = "UTF-8"
+}
+
+jar {
+	from "LICENSE"
+	manifest
+	{
+		attributes "Implementation-Title": project.archivesBaseName
+		attributes "Implementation-Version": project.version
+		attributes "Maven-Artifact": "${project.group}:${project.archivesBaseName}:${project.version}"
+		attributes "Built-On-Minecraft": "${project.minecraft_version}"
+		attributes "Built-On-Java": "${System.getProperty("java.vm.version")} (${System.getProperty("java.vm.vendor")})"
+	}
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = "sources"
+	from sourceSets.main.allSource
+	manifest
+	{
+		attributes "Implementation-Title": project.archivesBaseName + "-sources"
+		attributes "Implementation-Version": project.version
+		attributes "Maven-Artifact": "${project.group}:${project.archivesBaseName}:${project.version}:sources"
+		attributes "Built-On-Minecraft": "${project.minecraft_version}"
+		attributes "Built-On-Java": "${System.getProperty("java.vm.version")} (${System.getProperty("java.vm.vendor")})"
+	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			artifact(remapJar) {
+				builtBy remapJar
+			}
+			artifact(sourcesJar) {
+				builtBy remapSourcesJar
+			}
+		}
+	}
+	
+	repositories {
+		mavenLocal()
+	}
+}
+
+String generateHTMLChangelog() {
+	String changelog_text = ""
+	
+	File file = file("changelog.txt")
+	if(file.exists())
+	{
+		file.eachLine { String line ->
+			if(!line.isAllWhitespace())
+			{
+				changelog_text += "<p>${line.stripIndent()}</p>\n"
+			}
+		}
+		changelog_text += "<p>&nbsp;</p>\n"
+	}
+	
+	changelog_text += "<p>Last successfully tested on:</p>\n<p>Minecraft version <code>${minecraft_version}</code></p>\n<p>Yarn mappings <code>${yarn_mappings}</code></p>\n<p>Fabric-Loader <code>${loader_version}</code></p>\n"
+	
+	if(project.hasProperty("fabric_version")) {
+		changelog_text += "<p><a href=\"https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all\" rel=\"nofollow\">Fabric API <code>${fabric_version}</code></a></p>\n"
+	}
+	
+	return changelog_text
+}
+
+curseforge {
+	if(project.hasProperty("curseforge_api_key")) {
+		apiKey = project.properties.curseforge_api_key
+	}
+	
+	if(project.hasProperty("curseforge_id")) {
+		project {
+			id = project.properties.curseforge_id
+			
+			releaseType = project.release_type
+			addGameVersion project.release_version
+			addGameVersion "Fabric"
+			
+			mainArtifact(remapJar) {
+				displayName = "${mod_name}-${minecraft_version}-${mod_version}.jar"
+				relations {
+					requiredDependency "fabric-api"
+				}
+				
+				changelogType = "html"
+				changelog = project.generateHTMLChangelog()
+			}
+			
+			addArtifact(sourcesJar) {
+				displayName = "${mod_name}-${minecraft_version}-${mod_version}-sources.jar"
+			}
+			
+			afterEvaluate {
+				uploadTask.dependsOn remapSourcesJar
+			}
+		}
+		options {
+			forgeGradleIntegration = false
+		}
+	}
+}
