@@ -3,7 +3,6 @@
 	"id": "statement",
 	"name": "Statement",
 	"version": "${version}",
-	"side": "universal",
 	"description": "Library to assist with adding properties to existing block states.",
 	"license": "MIT",
 	"contact":
@@ -18,8 +17,7 @@
 	],
 	"depends":
 	{
-		"fabricloader": ">=0.4.0",
-		"fabric": "*"
+		"fabricloader": ">=0.4.0"
 	},
 	"icon": "assets/statement/icon.png",
 	"environment": "*",

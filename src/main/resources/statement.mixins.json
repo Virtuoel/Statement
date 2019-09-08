@@ -6,9 +6,9 @@
 	[
 		
 		"AbstractPropertyContainerMixin",
+		"IdListMixin",
 		"StateFactoryBuilderMixin",
-		"StateFactoryMixin",
-		"TagHelperMixin"
+		"StateFactoryMixin"
 	],
 	"injectors":
 	{

@@ -15,7 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.impl.registry.RemovableIdList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.Fluid;
@@ -24,6 +23,7 @@ import net.minecraft.state.PropertyContainer;
 import net.minecraft.state.StateFactory;
 import net.minecraft.util.IdList;
 import net.minecraft.util.registry.Registry;
+import virtuoel.statement.api.ClearableIdList;
 import virtuoel.statement.api.MutableProperty;
 import virtuoel.statement.api.RefreshableStateFactory;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
@@ -129,9 +129,7 @@ public class Statement implements ModInitializer
 	
 	public static <O, V extends Comparable<V>, S extends PropertyContainer<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateFactory<O, S>> factoryGetter, final Predicate<S> deferredCondition)
 	{
-		@SuppressWarnings("unchecked")
-		final RemovableIdList<S> removableIdList = ((RemovableIdList<S>) stateIdList);
-		removableIdList.fabric_clear();
+		((ClearableIdList) stateIdList).statement_clear();
 		
 		final Collection<S> allStates = new LinkedList<>();
 		
