@@ -88,7 +88,7 @@ public class StateRefresherImpl implements StateRefresher
 		}
 	}
 	
-	public static final Predicate<PropertyContainer<?>> DEFERRED_STATE_PREDICATE = state -> StatementApi.ENTRYPOINTS.stream().anyMatch(api -> api.shouldDeferProperty(state));
+	public static final Predicate<PropertyContainer<?>> DEFERRED_STATE_PREDICATE = state -> StatementApi.ENTRYPOINTS.stream().anyMatch(api -> api.shouldDeferState(state));
 	
 	@Override
 	public <O, V extends Comparable<V>, S extends PropertyContainer<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateFactory<O, S>> factoryGetter)

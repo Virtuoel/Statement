@@ -11,7 +11,7 @@ public interface StatementApi
 	
 	public static final Collection<StatementApi> ENTRYPOINTS = FabricLoader.getInstance().getEntrypoints(MOD_ID, StatementApi.class);
 	
-	default boolean shouldDeferProperty(PropertyContainer<?> t)
+	default boolean shouldDeferState(PropertyContainer<?> state)
 	{
 		return false;
 	}
