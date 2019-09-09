@@ -27,11 +27,14 @@ public class StateFactoryMixin<O, S extends PropertyContainer<S>> implements Ref
 	@Shadow @Final @Mutable ImmutableList<S> states;
 	
 	@Unique StateFactory.Factory<O, S, ?> statement_factory;
+	@Unique BiFunction<O, ImmutableMap<Property<?>, Comparable<?>>, S> statement_stateFunction;
 	
+	@SuppressWarnings("unchecked")
 	@Inject(at = @At("RETURN"), method = "<init>")
 	public void onConstruct(Object object_1, StateFactory.Factory<O, S, ?> stateFactory$Factory_1, Map<String, Property<?>> map_1, CallbackInfo info)
 	{
 		statement_factory = stateFactory$Factory_1;
+		statement_stateFunction = (o, m) -> (S) statement_factory.create(o, m);
 	}
 	
 	@Override
@@ -40,11 +43,10 @@ public class StateFactoryMixin<O, S extends PropertyContainer<S>> implements Ref
 		return Optional.of(statement_factory);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public BiFunction<O, ImmutableMap<Property<?>, Comparable<?>>, S> statement_getStateFunction()
 	{
-		return (o, m) -> (S) statement_factory.create(o, m);
+		return statement_stateFunction;
 	}
 	
 	@Override

@@ -1,4 +1,4 @@
-package virtuoel.statement;
+package virtuoel.statement.util;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -14,53 +14,24 @@ import java.util.function.Predicate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.fabricmc.api.ModInitializer;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.state.PropertyContainer;
 import net.minecraft.state.StateFactory;
 import net.minecraft.util.IdList;
-import net.minecraft.util.registry.Registry;
 import virtuoel.statement.api.ClearableIdList;
 import virtuoel.statement.api.MutableProperty;
 import virtuoel.statement.api.RefreshableStateFactory;
+import virtuoel.statement.api.StateRefresher;
+import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
 
-public class Statement implements ModInitializer
+public class StateRefresherImpl implements StateRefresher
 {
-	public static final String MOD_ID = "statement";
-	
-	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+	public static final Logger LOGGER = LogManager.getLogger(StatementApi.MOD_ID);
 	
 	private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 	
 	@Override
-	public void onInitialize()
-	{
-		
-	}
-	
-	public static <V extends Comparable<V>> void refreshBlockStates(final MutableProperty<V> property, final Collection<V> newValues)
-	{
-		refreshStates(
-			Registry.BLOCK, Block.STATE_IDS,
-			property, newValues,
-			Block::getDefaultState, Block::getStateFactory, BlockState::initShapeCache
-		);
-	}
-	
-	public static <V extends Comparable<V>> void refreshFluidStates(final MutableProperty<V> property, final Collection<V> newValues)
-	{
-		refreshStates(
-			Registry.FLUID, Fluid.STATE_IDS,
-			property, newValues,
-			Fluid::getDefaultState, Fluid::getStateFactory, f -> {}
-		);
-	}
-	
-	public static <O, V extends Comparable<V>, S extends PropertyContainer<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> newValues, final Function<O, S> defaultStateGetter, final Function<O, StateFactory<O, S>> factoryGetter, final Consumer<S> newStateConsumer)
+	public <O, V extends Comparable<V>, S extends PropertyContainer<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> newValues, final Function<O, S> defaultStateGetter, final Function<O, StateFactory<O, S>> factoryGetter, final Consumer<S> newStateConsumer)
 	{
 		final long startTime = System.nanoTime();
 		
@@ -117,17 +88,10 @@ public class Statement implements ModInitializer
 		}
 	}
 	
-	public static void reorderBlockStates(final Predicate<BlockState> deferredCondition)
-	{
-		reorderStates(Registry.BLOCK, Block.STATE_IDS, Block::getStateFactory, deferredCondition);
-	}
+	public static final Predicate<PropertyContainer<?>> DEFERRED_STATE_PREDICATE = state -> StatementApi.ENTRYPOINTS.stream().anyMatch(api -> api.shouldDeferProperty(state));
 	
-	public static void reorderFluidStates(final Predicate<FluidState> deferredCondition)
-	{
-		reorderStates(Registry.FLUID, Fluid.STATE_IDS, Fluid::getStateFactory, deferredCondition);
-	}
-	
-	public static <O, V extends Comparable<V>, S extends PropertyContainer<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateFactory<O, S>> factoryGetter, final Predicate<S> deferredCondition)
+	@Override
+	public <O, V extends Comparable<V>, S extends PropertyContainer<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateFactory<O, S>> factoryGetter)
 	{
 		((ClearableIdList) stateIdList).statement_clear();
 		
@@ -142,7 +106,7 @@ public class Statement implements ModInitializer
 		
 		for(final S state : allStates)
 		{
-			if(deferredCondition.test(state))
+			if(DEFERRED_STATE_PREDICATE.test(state))
 			{
 				deferredStates.add(state);
 			}
