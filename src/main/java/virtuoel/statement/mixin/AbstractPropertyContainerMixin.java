@@ -30,12 +30,12 @@ public abstract class AbstractPropertyContainerMixin<O, S> implements PropertyCo
 		final Comparable<?> comparable_2 = this.entries.get(property_1);
 		if(comparable_2 == null)
 		{
-			LOGGER.info("Cannot set property " + property_1 + " as it does not exist in " + this.owner);
+			LOGGER.info("Cannot set property {} as it does not exist in {}", property_1, this.owner);
 			info.setReturnValue(this);
 		}
 		else if(comparable_2 != comparable_1 && withTable.get(property_1, comparable_1) == null)
 		{
-			LOGGER.info("Cannot set property " + property_1 + " to " + comparable_1 + " on " + this.owner + ", it is not an allowed value");
+			LOGGER.info("Cannot set property {} to {} on {}, it is not an allowed value", property_1, comparable_1, this.owner);
 			info.setReturnValue(this);
 		}
 	}
