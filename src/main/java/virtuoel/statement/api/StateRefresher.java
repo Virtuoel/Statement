@@ -17,25 +17,25 @@ public interface StateRefresher
 {
 	public static final StateRefresher INSTANCE = new StateRefresherImpl();
 	
-	default <V extends Comparable<V>> void refreshBlockStates(final MutableProperty<V> property, final Collection<V> newValues)
+	default <V extends Comparable<V>> void refreshBlockStates(final MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues)
 	{
 		refreshStates(
 			Registry.BLOCK, Block.STATE_IDS,
-			property, newValues,
+			property, addedValues, removedValues,
 			Block::getDefaultState, Block::getStateFactory, BlockState::initShapeCache
 		);
 	}
 	
-	default <V extends Comparable<V>> void refreshFluidStates(final MutableProperty<V> property, final Collection<V> newValues)
+	default <V extends Comparable<V>> void refreshFluidStates(final MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues)
 	{
 		refreshStates(
 			Registry.FLUID, Fluid.STATE_IDS,
-			property, newValues,
+			property, addedValues, removedValues,
 			Fluid::getDefaultState, Fluid::getStateFactory, f -> {}
 		);
 	}
 	
-	default <O, V extends Comparable<V>, S extends PropertyContainer<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> newValues, final Function<O, S> defaultStateGetter, final Function<O, StateFactory<O, S>> factoryGetter, final Consumer<S> newStateConsumer)
+	default <O, V extends Comparable<V>, S extends PropertyContainer<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateFactory<O, S>> factoryGetter, final Consumer<S> newStateConsumer)
 	{
 		
 	}

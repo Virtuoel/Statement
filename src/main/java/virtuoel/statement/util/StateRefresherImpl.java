@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,12 +25,12 @@ import virtuoel.statement.api.compatibility.FoamFixCompatibility;
 
 public class StateRefresherImpl implements StateRefresher
 {
-	public static final Logger LOGGER = LogManager.getLogger(StatementApi.MOD_ID);
+	private static final Logger LOGGER = LogManager.getLogger(StatementApi.MOD_ID);
 	
 	private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 	
 	@Override
-	public <O, V extends Comparable<V>, S extends PropertyContainer<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> newValues, final Function<O, S> defaultStateGetter, final Function<O, StateFactory<O, S>> factoryGetter, final Consumer<S> newStateConsumer)
+	public <O, V extends Comparable<V>, S extends PropertyContainer<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateFactory<O, S>> factoryGetter, final Consumer<S> newStateConsumer)
 	{
 		final long startTime = System.nanoTime();
 		
@@ -50,15 +49,17 @@ public class StateRefresherImpl implements StateRefresher
 		
 		final int entryQuantity = factoriesToRefresh.size();
 		
-		final Collection<S> newStates = new ConcurrentLinkedQueue<>();
+		final Collection<S> addedStates = new ConcurrentLinkedQueue<>();
+		final Collection<S> removedStates = new ConcurrentLinkedQueue<>();
 		
 		final Collection<CompletableFuture<?>> allFutures = new LinkedList<>();
 		
-		LOGGER.debug("Refreshing states of {} entries for values(s) {} after {} ns of setup.", entryQuantity, newValues, System.nanoTime() - startTime);
+		LOGGER.debug("Refreshing states of {} entries for new values(s) {} and removed value(s) {} after {} ns of setup.", entryQuantity, addedValues, removedValues, System.nanoTime() - startTime);
 		
 		synchronized(property)
 		{
-			newValues.forEach(property::addValue);
+			property.addAll(addedValues);
+			property.removeAll(removedValues);
 			
 			FoamFixCompatibility.INSTANCE.removePropertyFromEntryMap(property);
 		}
@@ -69,26 +70,28 @@ public class StateRefresherImpl implements StateRefresher
 			{
 				allFutures.add(CompletableFuture.supplyAsync(() ->
 				{
-					return factory.statement_refreshPropertyValues(property, newValues);
+					@SuppressWarnings("unchecked")
+					final StateFactory<O, S> f = ((StateFactory<O, S>) factory);
+					f.getStates().parallelStream().filter(s -> removedValues.contains(s.get(property))).forEach(removedStates::add);
+					
+					return factory.statement_refreshPropertyValues(property, addedValues);
 				},
-				EXECUTOR).thenAccept(newStates::addAll));
+				EXECUTOR).thenAccept(addedStates::addAll));
 			}
 			
 			CompletableFuture.allOf(allFutures.stream().toArray(CompletableFuture<?>[]::new))
 			.thenAccept(v ->
 			{
-				newStates.forEach(state ->
+				addedStates.forEach(state ->
 				{
 					newStateConsumer.accept(state);
 					stateIdList.add(state);
 				});
 				
-				LOGGER.debug("Added {} new states for values(s) {} after {} ms.", newStates.size(), newValues, (System.nanoTime() - startTime) / 1_000_000);
+				LOGGER.debug("Added {} new state(s) for new values(s) {} and removed {} states for old value(s) {} after {} ms.", addedStates.size(), addedValues, removedStates.size(), removedValues, (System.nanoTime() - startTime) / 1_000_000);
 			}).join();
 		}
 	}
-	
-	public static final Predicate<PropertyContainer<?>> DEFERRED_STATE_PREDICATE = state -> StatementApi.ENTRYPOINTS.stream().anyMatch(api -> api.shouldDeferState(state));
 	
 	@Override
 	public <O, V extends Comparable<V>, S extends PropertyContainer<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateFactory<O, S>> factoryGetter)
@@ -106,7 +109,7 @@ public class StateRefresherImpl implements StateRefresher
 		
 		for(final S state : allStates)
 		{
-			if(DEFERRED_STATE_PREDICATE.test(state))
+			if(StatementApi.ENTRYPOINTS.stream().anyMatch(api -> api.shouldDeferState(state)))
 			{
 				deferredStates.add(state);
 			}

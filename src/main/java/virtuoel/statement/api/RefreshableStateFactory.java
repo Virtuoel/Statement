@@ -1,8 +1,10 @@
 package virtuoel.statement.api;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +16,6 @@ import org.apache.commons.lang3.tuple.MutableTriple;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import net.minecraft.state.AbstractPropertyContainer;
 import net.minecraft.state.PropertyContainer;
@@ -41,7 +41,7 @@ public interface RefreshableStateFactory<O, S extends PropertyContainer<S>>
 		
 	}
 	
-	default Collection<S> statement_refreshPropertyValues(final Property<?> property, final Collection<? extends Comparable<?>> newValues)
+	default Collection<S> statement_refreshPropertyValues(final Property<?> property, final Collection<? extends Comparable<?>> addedValues)
 	{
 		@SuppressWarnings("unchecked")
 		final StateFactory<O, S> self = ((StateFactory<O, S>) (Object) this);
@@ -58,17 +58,17 @@ public interface RefreshableStateFactory<O, S extends PropertyContainer<S>>
 			{
 				return entry.getValues().stream().map((val) ->
 				{
-					final List<Comparable<?>> list = Lists.newArrayList(propertyList);
+					final List<Comparable<?>> list = new ArrayList<>(propertyList);
 					list.add(val);
 					return list;
 				});
 			});
 		}
 		
-		final List<S> allStates = new LinkedList<>();
-		final List<S> newStates = new LinkedList<>();
+		final Collection<S> currentStates = new LinkedList<>();
+		final Collection<S> addedStates = new LinkedList<>();
 		
-		final Map<Map<Property<?>, Comparable<?>>, S> stateMap = Maps.newLinkedHashMap();
+		final Map<Map<Property<?>, Comparable<?>>, S> stateMap = new LinkedHashMap<>();
 		
 		final BiFunction<O, ImmutableMap<Property<?>, Comparable<?>>, S> function = statement_getStateFunction();
 		
@@ -79,12 +79,12 @@ public interface RefreshableStateFactory<O, S extends PropertyContainer<S>>
 			final Map<Property<?>, Comparable<?>> propertyValueMap = MapUtil.createMap(properties, valueList);
 			
 			final S currentState;
-			if(newValues.contains(propertyValueMap.get(property)))
+			if(addedValues.contains(propertyValueMap.get(property)))
 			{
 				currentState = function.apply(baseObject, ImmutableMap.copyOf(propertyValueMap));
 				if(currentState != null)
 				{
-					newStates.add(currentState);
+					addedStates.add(currentState);
 				}
 				
 				FoamFixCompatibility.INSTANCE.loadFactoryMapperData(compatibilityData);
@@ -97,13 +97,13 @@ public interface RefreshableStateFactory<O, S extends PropertyContainer<S>>
 			if(currentState != null)
 			{
 				stateMap.put(propertyValueMap, currentState);
-				allStates.add(currentState);
+				currentStates.add(currentState);
 			}
 		});
 		
-		if(!newStates.isEmpty())
+		if(!addedStates.isEmpty())
 		{
-			allStates.parallelStream().forEach(propertyContainer ->
+			currentStates.parallelStream().forEach(propertyContainer ->
 			{
 				FoamFixCompatibility.INSTANCE.setStateOwnerData(compatibilityData, propertyContainer);
 				
@@ -115,9 +115,9 @@ public interface RefreshableStateFactory<O, S extends PropertyContainer<S>>
 				}
 			});
 			
-			statement_setStates(ImmutableList.copyOf(allStates));
+			statement_setStates(ImmutableList.copyOf(currentStates));
 		}
 		
-		return newStates;
+		return addedStates;
 	}
 }
