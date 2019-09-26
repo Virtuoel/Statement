@@ -26,7 +26,7 @@ import net.minecraft.state.property.Property;
 import net.minecraft.util.MapUtil;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
 
-public interface RefreshableStateFactory<O, S extends PropertyContainer<S>>
+public interface MutableStateFactory<O, S extends PropertyContainer<S>>
 {
 	default BiFunction<O, ImmutableMap<Property<?>, Comparable<?>>, S> statement_getStateFunction()
 	{

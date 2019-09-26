@@ -18,7 +18,7 @@ import net.minecraft.state.StateFactory;
 import net.minecraft.util.IdList;
 import virtuoel.statement.api.ClearableIdList;
 import virtuoel.statement.api.MutableProperty;
-import virtuoel.statement.api.RefreshableStateFactory;
+import virtuoel.statement.api.MutableStateFactory;
 import virtuoel.statement.api.StateRefresher;
 import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
@@ -34,14 +34,14 @@ public class StateRefresherImpl implements StateRefresher
 	{
 		final long startTime = System.nanoTime();
 		
-		final List<RefreshableStateFactory<O, S>> factoriesToRefresh = new LinkedList<>();
+		final List<MutableStateFactory<O, S>> factoriesToRefresh = new LinkedList<>();
 		
 		for(final O entry : registry)
 		{
 			if(defaultStateGetter.apply(entry).getEntries().containsKey(property))
 			{
 				@SuppressWarnings("unchecked")
-				final RefreshableStateFactory<O, S> factory = (RefreshableStateFactory<O, S>) factoryGetter.apply(entry);
+				final MutableStateFactory<O, S> factory = (MutableStateFactory<O, S>) factoryGetter.apply(entry);
 				
 				factoriesToRefresh.add(factory);
 			}
@@ -83,7 +83,7 @@ public class StateRefresherImpl implements StateRefresher
 		
 		synchronized(stateIdList)
 		{
-			for(final RefreshableStateFactory<O, S> factory : factoriesToRefresh)
+			for(final MutableStateFactory<O, S> factory : factoriesToRefresh)
 			{
 				allFutures.add(CompletableFuture.supplyAsync(() ->
 				{
