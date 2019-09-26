@@ -47,14 +47,31 @@ public class StateRefresherImpl implements StateRefresher
 			}
 		}
 		
-		final int entryQuantity = factoriesToRefresh.size();
-		
 		final Collection<S> addedStates = new ConcurrentLinkedQueue<>();
 		final Collection<S> removedStates = new ConcurrentLinkedQueue<>();
 		
 		final Collection<CompletableFuture<?>> allFutures = new LinkedList<>();
 		
-		LOGGER.debug("Refreshing states of {} entries for new values(s) {} and removed value(s) {} after {} ns of setup.", entryQuantity, addedValues, removedValues, System.nanoTime() - startTime);
+		final int entryQuantity = factoriesToRefresh.size();
+		
+		final int addedValueQuantity = addedValues.size();
+		final int removedValueQuantity = removedValues.size();
+		
+		final boolean noAddedValues = addedValueQuantity == 0;
+		final boolean noRemovedValues = removedValueQuantity == 0;
+		
+		if(noAddedValues && noRemovedValues)
+		{
+			LOGGER.debug("Refreshing states of {} entries after {} ns of setup.", entryQuantity, System.nanoTime() - startTime);
+		}
+		else if(noAddedValues || noRemovedValues)
+		{
+			LOGGER.debug("Refreshing states of {} entries for {} values(s) {} after {} ns of setup.", entryQuantity, noRemovedValues ? "new" : "removed", noRemovedValues ? addedValues : removedValues, System.nanoTime() - startTime);
+		}
+		else
+		{
+			LOGGER.debug("Refreshing states of {} entries for new values(s) {} and removed value(s) {} after {} ns of setup.", entryQuantity, addedValues, removedValues, System.nanoTime() - startTime);
+		}
 		
 		synchronized(property)
 		{
@@ -70,9 +87,12 @@ public class StateRefresherImpl implements StateRefresher
 			{
 				allFutures.add(CompletableFuture.supplyAsync(() ->
 				{
-					@SuppressWarnings("unchecked")
-					final StateFactory<O, S> f = ((StateFactory<O, S>) factory);
-					f.getStates().parallelStream().filter(s -> removedValues.contains(s.get(property))).forEach(removedStates::add);
+					if(!noRemovedValues)
+					{
+						@SuppressWarnings("unchecked")
+						final StateFactory<O, S> f = ((StateFactory<O, S>) factory);
+						f.getStates().parallelStream().filter(state -> state.getEntries().containsKey(property) && removedValues.contains(state.get(property))).forEach(removedStates::add);
+					}
 					
 					return factory.statement_refreshPropertyValues(property, addedValues);
 				},
@@ -88,7 +108,24 @@ public class StateRefresherImpl implements StateRefresher
 					stateIdList.add(state);
 				});
 				
-				LOGGER.debug("Added {} new state(s) for new values(s) {} and removed {} states for old value(s) {} after {} ms.", addedStates.size(), addedValues, removedStates.size(), removedValues, (System.nanoTime() - startTime) / 1_000_000);
+				final int addedStateQuantity = addedStates.size();
+				final int removedStateQuantity = removedStates.size();
+				
+				final boolean noAdditions = addedStateQuantity == 0;
+				final boolean noRemovals = removedStateQuantity == 0;
+				
+				if(noAdditions && noRemovals)
+				{
+					LOGGER.debug("Refreshed states with no additions or removals after {} ms.", System.nanoTime() - startTime);
+				}
+				else if(noAdditions || noRemovals)
+				{
+					LOGGER.debug("{} {} state(s) for {} values(s) {} after {} ms.", noRemovals ? "Added" : "Removed", noRemovals ? addedStateQuantity : removedStateQuantity, noRemovals ? "new" : "old", noRemovals ? addedValues : removedValues, (System.nanoTime() - startTime) / 1_000_000);
+				}
+				else
+				{
+					LOGGER.debug("Added {} state(s) for new values(s) {} and removed {} states for old value(s) {} after {} ms.", addedStateQuantity, addedValues, removedStateQuantity, removedValues, (System.nanoTime() - startTime) / 1_000_000);
+				}
 			}).join();
 		}
 	}
@@ -96,8 +133,6 @@ public class StateRefresherImpl implements StateRefresher
 	@Override
 	public <O, V extends Comparable<V>, S extends PropertyContainer<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateFactory<O, S>> factoryGetter)
 	{
-		((ClearableIdList) stateIdList).statement_clear();
-		
 		final Collection<S> allStates = new LinkedList<>();
 		
 		for(final O entry : registry)
@@ -105,6 +140,7 @@ public class StateRefresherImpl implements StateRefresher
 			factoryGetter.apply(entry).getStates().forEach(allStates::add);
 		}
 		
+		final Collection<S> initialStates = new LinkedList<>();
 		final Collection<S> deferredStates = new LinkedList<>();
 		
 		for(final S state : allStates)
@@ -115,10 +151,12 @@ public class StateRefresherImpl implements StateRefresher
 			}
 			else
 			{
-				stateIdList.add(state);
+				initialStates.add(state);
 			}
 		}
 		
+		((ClearableIdList) stateIdList).statement_clear();
+		initialStates.forEach(stateIdList::add);
 		deferredStates.forEach(stateIdList::add);
 	}
 }
