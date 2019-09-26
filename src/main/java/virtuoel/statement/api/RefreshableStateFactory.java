@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.tuple.MutableTriple;
 
 import com.google.common.collect.ImmutableList;
@@ -39,6 +41,23 @@ public interface RefreshableStateFactory<O, S extends PropertyContainer<S>>
 	default void statement_setStates(ImmutableList<S> states)
 	{
 		
+	}
+	
+	@Nullable
+	default Property<?> statement_addProperty(final Property<?> property)
+	{
+		return null;
+	}
+	
+	@Nullable
+	default Property<?> statement_removeProperty(final String propertyName)
+	{
+		return null;
+	}
+	
+	default boolean statement_removeProperty(final Property<?> property)
+	{
+		return false;
 	}
 	
 	default Collection<S> statement_refreshPropertyValues(final Property<?> property, final Collection<? extends Comparable<?>> addedValues)

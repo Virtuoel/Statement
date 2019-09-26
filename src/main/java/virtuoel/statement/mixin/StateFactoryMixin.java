@@ -1,5 +1,6 @@
 package virtuoel.statement.mixin;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -15,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
 
 import net.minecraft.state.PropertyContainer;
 import net.minecraft.state.StateFactory;
@@ -24,6 +26,7 @@ import virtuoel.statement.api.RefreshableStateFactory;
 @Mixin(StateFactory.class)
 public class StateFactoryMixin<O, S extends PropertyContainer<S>> implements RefreshableStateFactory<O, S>
 {
+	@Shadow @Final @Mutable ImmutableSortedMap<String, Property<?>> propertyMap;
 	@Shadow @Final @Mutable ImmutableList<S> states;
 	
 	@Unique StateFactory.Factory<O, S, ?> statement_factory;
@@ -53,5 +56,32 @@ public class StateFactoryMixin<O, S extends PropertyContainer<S>> implements Ref
 	public void statement_setStates(ImmutableList<S> states)
 	{
 		this.states = states;
+	}
+	
+	@Override
+	public Property<?> statement_addProperty(final Property<?> property)
+	{
+		final Map<String, Property<?>> map = new HashMap<>(propertyMap);
+		final Property<?> ret = map.put(property.getName(), property);
+		propertyMap = ImmutableSortedMap.copyOf(map);
+		return ret;
+	}
+	
+	@Override
+	public Property<?> statement_removeProperty(final String propertyName)
+	{
+		final Map<String, Property<?>> map = new HashMap<>(propertyMap);
+		final Property<?> ret = map.remove(propertyName);
+		propertyMap = ImmutableSortedMap.copyOf(map);
+		return ret;
+	}
+	
+	@Override
+	public boolean statement_removeProperty(final Property<?> property)
+	{
+		final Map<String, Property<?>> map = new HashMap<>(propertyMap);
+		final boolean ret = map.remove(property.getName(), property);
+		propertyMap = ImmutableSortedMap.copyOf(map);
+		return ret;
 	}
 }
