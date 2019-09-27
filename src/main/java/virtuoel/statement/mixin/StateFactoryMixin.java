@@ -21,10 +21,10 @@ import com.google.common.collect.ImmutableSortedMap;
 import net.minecraft.state.PropertyContainer;
 import net.minecraft.state.StateFactory;
 import net.minecraft.state.property.Property;
-import virtuoel.statement.api.MutableStateFactory;
+import virtuoel.statement.api.RefreshableStateFactory;
 
 @Mixin(StateFactory.class)
-public class StateFactoryMixin<O, S extends PropertyContainer<S>> implements MutableStateFactory<O, S>
+public class StateFactoryMixin<O, S extends PropertyContainer<S>> implements RefreshableStateFactory<O, S>
 {
 	@Shadow @Final @Mutable ImmutableSortedMap<String, Property<?>> propertyMap;
 	@Shadow @Final @Mutable ImmutableList<S> states;
