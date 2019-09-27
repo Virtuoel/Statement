@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.google.common.collect.ImmutableMap;
@@ -40,9 +40,9 @@ public abstract class AbstractPropertyContainerMixin<O, S> implements PropertyCo
 		}
 	}
 	
-	@Redirect(method = "createWithTable", at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/state/AbstractPropertyContainer;withTable:Lcom/google/common/collect/Table;"))
-	public Table<Property<?>, Comparable<?>, S> onCreateWithTable(AbstractPropertyContainer<O, S> this$0, Map<Map<Property<?>, Comparable<?>>, S> map_1)
+	@Inject(at = @At("HEAD"), method = "createWithTable")
+	public void onCreateWithTable(Map<Map<Property<?>, Comparable<?>>, S> map, CallbackInfo info)
 	{
-		return null;
+		withTable = null;
 	}
 }
