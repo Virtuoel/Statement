@@ -1,8 +1,10 @@
 package virtuoel.statement.util;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -158,5 +160,19 @@ public class StateRefresherImpl implements StateRefresher
 		((ClearableIdList) stateIdList).statement_clear();
 		initialStates.forEach(stateIdList::add);
 		deferredStates.forEach(stateIdList::add);
+	}
+	
+	protected final Set<Object> taskObjectSet = new HashSet<>();
+	
+	@Override
+	public <O, T> boolean provideTask(final O object, final Function<O, Consumer<T>> taskConsumerFunction, final Function<StateRefresher, T> task)
+	{
+		if(!taskObjectSet.contains(object))
+		{
+			taskObjectSet.add(object);
+			return StateRefresher.super.provideTask(object, taskConsumerFunction, task);
+		}
+		
+		return false;
 	}
 }
