@@ -41,7 +41,7 @@ public interface RefreshableStateFactory<O, S extends PropertyContainer<S>> exte
 		
 	}
 	
-	default Collection<S> statement_refreshPropertyValues(final Property<?> property, final Collection<? extends Comparable<?>> addedValues)
+	default <V extends Comparable<V>> Collection<S> statement_refreshPropertyValues(final Map<Property<V>, Collection<V>> addedValueMap)
 	{
 		@SuppressWarnings("unchecked")
 		final StateFactory<O, S> self = ((StateFactory<O, S>) (Object) this);
@@ -79,7 +79,7 @@ public interface RefreshableStateFactory<O, S extends PropertyContainer<S>> exte
 			final Map<Property<?>, Comparable<?>> propertyValueMap = MapUtil.createMap(properties, valueList);
 			
 			final S currentState;
-			if(addedValues.contains(propertyValueMap.get(property)))
+			if(addedValueMap.entrySet().stream().anyMatch(e -> e.getValue().contains(propertyValueMap.get(e.getKey()))))
 			{
 				currentState = function.apply(baseObject, ImmutableMap.copyOf(propertyValueMap));
 				if(currentState != null)

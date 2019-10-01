@@ -1,9 +1,11 @@
 package virtuoel.statement.util;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -17,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 import net.minecraft.state.PropertyContainer;
 import net.minecraft.state.StateFactory;
+import net.minecraft.state.property.Property;
 import net.minecraft.util.IdList;
 import virtuoel.statement.api.ClearableIdList;
 import virtuoel.statement.api.MutableProperty;
@@ -48,6 +51,9 @@ public class StateRefresherImpl implements StateRefresher
 				factoriesToRefresh.add(factory);
 			}
 		}
+		
+		final Map<Property<V>, Collection<V>> addedValueMap = new HashMap<>();
+		addedValueMap.put(property, addedValues);
 		
 		final Collection<S> addedStates = new ConcurrentLinkedQueue<>();
 		final Collection<S> removedStates = new ConcurrentLinkedQueue<>();
@@ -96,7 +102,7 @@ public class StateRefresherImpl implements StateRefresher
 						f.getStates().parallelStream().filter(state -> state.getEntries().containsKey(property) && removedValues.contains(state.get(property))).forEach(removedStates::add);
 					}
 					
-					return factory.statement_refreshPropertyValues(property, addedValues);
+					return factory.statement_refreshPropertyValues(addedValueMap);
 				},
 				EXECUTOR).thenAccept(addedStates::addAll));
 			}
