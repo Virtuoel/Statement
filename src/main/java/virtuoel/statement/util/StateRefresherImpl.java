@@ -23,7 +23,7 @@ import net.minecraft.state.property.Property;
 import net.minecraft.util.IdList;
 import virtuoel.statement.api.ClearableIdList;
 import virtuoel.statement.api.MutableProperty;
-import virtuoel.statement.api.RefreshableStateFactory;
+import virtuoel.statement.api.RefreshableStateManager;
 import virtuoel.statement.api.StateRefresher;
 import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
@@ -39,16 +39,16 @@ public class StateRefresherImpl implements StateRefresher
 	{
 		final long startTime = System.nanoTime();
 		
-		final List<RefreshableStateFactory<O, S>> factoriesToRefresh = new LinkedList<>();
+		final List<RefreshableStateManager<O, S>> managersToRefresh = new LinkedList<>();
 		
 		for(final O entry : registry)
 		{
 			if(defaultStateGetter.apply(entry).getEntries().containsKey(property))
 			{
 				@SuppressWarnings("unchecked")
-				final RefreshableStateFactory<O, S> factory = (RefreshableStateFactory<O, S>) factoryGetter.apply(entry);
+				final RefreshableStateManager<O, S> manager = (RefreshableStateManager<O, S>) factoryGetter.apply(entry);
 				
-				factoriesToRefresh.add(factory);
+				managersToRefresh.add(manager);
 			}
 		}
 		
@@ -60,7 +60,7 @@ public class StateRefresherImpl implements StateRefresher
 		
 		final Collection<CompletableFuture<?>> allFutures = new LinkedList<>();
 		
-		final int entryQuantity = factoriesToRefresh.size();
+		final int entryQuantity = managersToRefresh.size();
 		
 		final int addedValueQuantity = addedValues.size();
 		final int removedValueQuantity = removedValues.size();
@@ -91,18 +91,18 @@ public class StateRefresherImpl implements StateRefresher
 		
 		synchronized(stateIdList)
 		{
-			for(final RefreshableStateFactory<O, S> factory : factoriesToRefresh)
+			for(final RefreshableStateManager<O, S> manager : managersToRefresh)
 			{
 				allFutures.add(CompletableFuture.supplyAsync(() ->
 				{
 					if(!noRemovedValues)
 					{
 						@SuppressWarnings("unchecked")
-						final StateFactory<O, S> f = ((StateFactory<O, S>) factory);
+						final StateFactory<O, S> f = ((StateFactory<O, S>) manager);
 						f.getStates().parallelStream().filter(state -> state.getEntries().containsKey(property) && removedValues.contains(state.get(property))).forEach(removedStates::add);
 					}
 					
-					return factory.statement_refreshPropertyValues(addedValueMap);
+					return manager.statement_reconstructStateList(addedValueMap);
 				},
 				EXECUTOR).thenAccept(addedStates::addAll));
 			}

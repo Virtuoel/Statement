@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import net.minecraft.state.property.Property;
 
-public interface MutableStateFactory
+public interface MutableStateManager
 {
 	@Nullable
 	default Property<?> statement_addProperty(final Property<?> property)

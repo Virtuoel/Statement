@@ -29,7 +29,7 @@ public interface FoamFixCompatibility
 		
 	}
 	
-	default <T extends Triple<Optional<Field>, Optional<?>, ?>> void setStateOwnerData(final Optional<T> data, final PropertyContainer<?> propertyContainer)
+	default <T extends Triple<Optional<Field>, Optional<?>, ?>> void setStateOwnerData(final Optional<T> data, final PropertyContainer<?> state)
 	{
 		
 	}

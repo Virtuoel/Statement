@@ -21,10 +21,10 @@ import com.google.common.collect.ImmutableSortedMap;
 import net.minecraft.state.PropertyContainer;
 import net.minecraft.state.StateFactory;
 import net.minecraft.state.property.Property;
-import virtuoel.statement.api.RefreshableStateFactory;
+import virtuoel.statement.api.RefreshableStateManager;
 
 @Mixin(StateFactory.class)
-public class StateFactoryMixin<O, S extends PropertyContainer<S>> implements RefreshableStateFactory<O, S>
+public class StateFactoryMixin<O, S extends PropertyContainer<S>> implements RefreshableStateManager<O, S>
 {
 	@Shadow @Final @Mutable ImmutableSortedMap<String, Property<?>> propertyMap;
 	@Shadow @Final @Mutable ImmutableList<S> states;
@@ -53,7 +53,7 @@ public class StateFactoryMixin<O, S extends PropertyContainer<S>> implements Ref
 	}
 	
 	@Override
-	public void statement_setStates(ImmutableList<S> states)
+	public void statement_setStateList(ImmutableList<S> states)
 	{
 		this.states = states;
 	}

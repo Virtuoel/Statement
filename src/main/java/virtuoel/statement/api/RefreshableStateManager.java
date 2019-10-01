@@ -24,7 +24,7 @@ import net.minecraft.state.property.Property;
 import net.minecraft.util.MapUtil;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
 
-public interface RefreshableStateFactory<O, S extends PropertyContainer<S>> extends MutableStateFactory
+public interface RefreshableStateManager<O, S extends PropertyContainer<S>> extends MutableStateManager
 {
 	default BiFunction<O, ImmutableMap<Property<?>, Comparable<?>>, S> statement_getStateFunction()
 	{
@@ -36,17 +36,17 @@ public interface RefreshableStateFactory<O, S extends PropertyContainer<S>> exte
 		return Optional.empty();
 	}
 	
-	default void statement_setStates(ImmutableList<S> states)
+	default void statement_setStateList(ImmutableList<S> states)
 	{
 		
 	}
 	
-	default <V extends Comparable<V>> Collection<S> statement_refreshPropertyValues(final Map<Property<V>, Collection<V>> addedValueMap)
+	default <V extends Comparable<V>> Collection<S> statement_reconstructStateList(final Map<Property<V>, Collection<V>> addedValueMap)
 	{
 		@SuppressWarnings("unchecked")
 		final StateFactory<O, S> self = ((StateFactory<O, S>) (Object) this);
 		
-		final O baseObject = self.getBaseObject();
+		final O owner = self.getBaseObject();
 		final Collection<Property<?>> properties = self.getProperties();
 		final ImmutableList<S> states = self.getStates();
 		
@@ -81,7 +81,7 @@ public interface RefreshableStateFactory<O, S extends PropertyContainer<S>> exte
 			final S currentState;
 			if(addedValueMap.entrySet().stream().anyMatch(e -> e.getValue().contains(propertyValueMap.get(e.getKey()))))
 			{
-				currentState = function.apply(baseObject, ImmutableMap.copyOf(propertyValueMap));
+				currentState = function.apply(owner, ImmutableMap.copyOf(propertyValueMap));
 				if(currentState != null)
 				{
 					addedStates.add(currentState);
@@ -115,7 +115,7 @@ public interface RefreshableStateFactory<O, S extends PropertyContainer<S>> exte
 				}
 			});
 			
-			statement_setStates(ImmutableList.copyOf(currentStates));
+			statement_setStateList(ImmutableList.copyOf(currentStates));
 		}
 		
 		return addedStates;

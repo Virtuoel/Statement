@@ -82,15 +82,15 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	}
 	
 	@Override
-	public <T extends Triple<Optional<Field>, Optional<?>, ?>> void setStateOwnerData(final Optional<T> data, final PropertyContainer<?> propertyContainer)
+	public <T extends Triple<Optional<Field>, Optional<?>, ?>> void setStateOwnerData(final Optional<T> data, final PropertyContainer<?> state)
 	{
 		data.map(Triple::getMiddle).ifPresent(m ->
 		{
-			STATE_CLASS.filter(c -> c.isInstance(propertyContainer)).flatMap(c -> STATE_OWNER).ifPresent(f ->
+			STATE_CLASS.filter(c -> c.isInstance(state)).flatMap(c -> STATE_OWNER).ifPresent(f ->
 			{
 				try
 				{
-					f.set(propertyContainer, m);
+					f.set(state, m);
 				}
 				catch(IllegalArgumentException | IllegalAccessException e)
 				{
