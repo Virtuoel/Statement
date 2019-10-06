@@ -103,8 +103,7 @@ public class StateRefresherImpl implements StateRefresher
 					}
 					
 					return manager.statement_reconstructStateList(addedValueMap);
-				},
-				EXECUTOR).thenAccept(addedStates::addAll));
+				}, EXECUTOR).thenAccept(addedStates::addAll));
 			}
 			
 			CompletableFuture.allOf(allFutures.stream().toArray(CompletableFuture<?>[]::new))
