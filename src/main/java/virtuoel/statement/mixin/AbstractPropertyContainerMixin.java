@@ -25,23 +25,23 @@ public abstract class AbstractPropertyContainerMixin<O, S> implements PropertyCo
 	@Shadow private Table<Property<?>, Comparable<?>, S> withTable;
 	
 	@Inject(at = @At("HEAD"), method = "with", cancellable = true)
-	public <T extends Comparable<T>, V extends T> void onWith(Property<T> property_1, V comparable_1, CallbackInfoReturnable<Object> info)
+	private <T extends Comparable<T>, V extends T> void onWith(Property<T> property, V value, CallbackInfoReturnable<Object> info)
 	{
-		final Comparable<?> comparable_2 = this.entries.get(property_1);
-		if(comparable_2 == null)
+		final Comparable<?> currentValue = this.entries.get(property);
+		if(currentValue == null)
 		{
-			LOGGER.info("Cannot set property {} as it does not exist in {}", property_1, this.owner);
+			LOGGER.info("Cannot set property {} as it does not exist in {}", property, this.owner);
 			info.setReturnValue(this);
 		}
-		else if(comparable_2 != comparable_1 && withTable.get(property_1, comparable_1) == null)
+		else if(currentValue != value && withTable.get(property, value) == null)
 		{
-			LOGGER.info("Cannot set property {} to {} on {}, it is not an allowed value", property_1, comparable_1, this.owner);
+			LOGGER.info("Cannot set property {} to {} on {}, it is not an allowed value", property, value, this.owner);
 			info.setReturnValue(this);
 		}
 	}
 	
 	@Inject(at = @At("HEAD"), method = "createWithTable")
-	public void onCreateWithTable(Map<Map<Property<?>, Comparable<?>>, S> map, CallbackInfo info)
+	private void onCreateWithTable(Map<Map<Property<?>, Comparable<?>>, S> map, CallbackInfo info)
 	{
 		withTable = null;
 	}

@@ -19,10 +19,10 @@ public abstract class StateFactoryBuilderMixin
 {
 	@Unique private static final Logger LOGGER = LogManager.getLogger(StatementApi.MOD_ID);
 	
-	@Shadow abstract <T extends Comparable<T>> void validate(Property<T> property_1);
+	@Shadow abstract <T extends Comparable<T>> void validate(Property<T> property);
 	
 	@Redirect(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/state/StateFactory$Builder;validate(Lnet/minecraft/state/property/Property;)V"))
-	public void addValidateProxy(StateFactory.Builder<?, ?> obj, Property<?> property)
+	private void addValidateProxy(StateFactory.Builder<?, ?> obj, Property<?> property)
 	{
 		try
 		{
@@ -36,13 +36,13 @@ public abstract class StateFactoryBuilderMixin
 	}
 	
 	@ModifyConstant(method = "validate", constant = @Constant(stringValue = " with <= 1 possible values"))
-	public String validateExceptionMessageProxy(String orig)
+	private String validateExceptionMessageProxy(String orig)
 	{
 		return " with no possible values";
 	}
 	
 	@ModifyConstant(method = "validate", constant = @Constant(ordinal = 0, intValue = 1))
-	public int validateSizeProxy(int orig)
+	private int validateSizeProxy(int orig)
 	{
 		return 0;
 	}

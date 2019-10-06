@@ -34,9 +34,9 @@ public class StateFactoryMixin<O, S extends PropertyContainer<S>> implements Ref
 	
 	@SuppressWarnings("unchecked")
 	@Inject(at = @At("RETURN"), method = "<init>")
-	public void onConstruct(Object object_1, StateFactory.Factory<O, S, ?> stateFactory$Factory_1, Map<String, Property<?>> map_1, CallbackInfo info)
+	private void onConstruct(Object object, StateFactory.Factory<O, S, ?> factory, Map<String, Property<?>> map, CallbackInfo info)
 	{
-		statement_factory = stateFactory$Factory_1;
+		statement_factory = factory;
 		statement_stateFunction = (o, m) -> (S) statement_factory.create(o, m);
 	}
 	
