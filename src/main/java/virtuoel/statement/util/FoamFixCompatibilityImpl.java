@@ -25,6 +25,26 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	private static final Optional<Field> FACTORY_MAPPER = getField(FACTORY_CLASS, "mapper");
 	private static final Optional<Field> STATE_OWNER = getField(STATE_CLASS, "owner");
 	
+	private boolean enabled = FOAMFIX_LOADED;
+	
+	@Override
+	public void enable()
+	{
+		enabled = FOAMFIX_LOADED;
+	}
+	
+	@Override
+	public void disable()
+	{
+		enabled = false;
+	}
+	
+	@Override
+	public boolean isEnabled()
+	{
+		return enabled;
+	}
+	
 	@Override
 	public void removePropertyFromEntryMap(Property<?> property)
 	{
@@ -37,67 +57,80 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	@Override
 	public Optional<MutableTriple<Optional<Field>, Optional<?>, ?>> resetFactoryMapperData(final Optional<Object> factory)
 	{
-		final MutableTriple<Optional<Field>, Optional<?>, Object> data = MutableTriple.of(Optional.empty(), Optional.empty(), Optional.empty());
-		factory.ifPresent(f ->
+		if(isEnabled())
 		{
-			data.setRight(factory);
-			
-			final Optional<Field> mapper = FACTORY_CLASS.filter(c -> c.isInstance(f)).flatMap(c -> FACTORY_MAPPER);
-			mapper.ifPresent(field ->
+			final MutableTriple<Optional<Field>, Optional<?>, Object> data = MutableTriple.of(Optional.empty(), Optional.empty(), Optional.empty());
+			factory.ifPresent(f ->
 			{
-				data.setLeft(mapper);
-				try
+				data.setRight(factory);
+				
+				final Optional<Field> mapper = FACTORY_CLASS.filter(c -> c.isInstance(f)).flatMap(c -> FACTORY_MAPPER);
+				mapper.ifPresent(field ->
 				{
-					field.set(f, null);
-				}
-				catch(IllegalArgumentException | IllegalAccessException e)
-				{
-					
-				}
+					data.setLeft(mapper);
+					try
+					{
+						field.set(f, null);
+					}
+					catch(IllegalArgumentException | IllegalAccessException e)
+					{
+						
+					}
+				});
 			});
-		});
-		return Optional.of(data);
+			return Optional.of(data);
+		}
+		else
+		{
+			return Optional.empty();
+		}
 	}
 	
 	@Override
 	public void loadFactoryMapperData(final Optional<MutableTriple<Optional<Field>, Optional<?>, ?>> data)
 	{
-		data.ifPresent(d ->
+		if(isEnabled())
 		{
-			if(!d.getMiddle().isPresent())
+			data.ifPresent(d ->
 			{
-				d.getLeft().ifPresent(field ->
+				if(!d.getMiddle().isPresent())
 				{
-					try
+					d.getLeft().ifPresent(field ->
 					{
-						d.setMiddle(Optional.ofNullable(field.get(d.getRight())));
-					}
-					catch(IllegalArgumentException | IllegalAccessException e)
-					{
-						d.setMiddle(Optional.empty());
-					}
-				});
-			}
-		});
+						try
+						{
+							d.setMiddle(Optional.ofNullable(field.get(d.getRight())));
+						}
+						catch(IllegalArgumentException | IllegalAccessException e)
+						{
+							d.setMiddle(Optional.empty());
+						}
+					});
+				}
+			});
+		}
 	}
 	
 	@Override
 	public <T extends Triple<Optional<Field>, Optional<?>, ?>> void setStateOwnerData(final Optional<T> data, final PropertyContainer<?> state)
 	{
-		data.map(Triple::getMiddle).ifPresent(m ->
+		if(isEnabled())
 		{
-			STATE_CLASS.filter(c -> c.isInstance(state)).flatMap(c -> STATE_OWNER).ifPresent(f ->
+			data.map(Triple::getMiddle).ifPresent(m ->
 			{
-				try
+				STATE_CLASS.filter(c -> c.isInstance(state)).flatMap(c -> STATE_OWNER).ifPresent(f ->
 				{
-					f.set(state, m);
-				}
-				catch(IllegalArgumentException | IllegalAccessException e)
-				{
-					
-				}
+					try
+					{
+						f.set(state, m);
+					}
+					catch(IllegalArgumentException | IllegalAccessException e)
+					{
+						
+					}
+				});
 			});
-		});
+		}
 	}
 	
 	private static Optional<Map<Property<?>, ?>> getEntryMap()

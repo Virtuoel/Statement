@@ -14,6 +14,21 @@ public interface FoamFixCompatibility
 {
 	public static final FoamFixCompatibility INSTANCE = new FoamFixCompatibilityImpl();
 	
+	default void enable()
+	{
+		
+	}
+	
+	default void disable()
+	{
+		
+	}
+	
+	default boolean isEnabled()
+	{
+		return false;
+	}
+	
 	default void removePropertyFromEntryMap(Property<?> property)
 	{
 		
