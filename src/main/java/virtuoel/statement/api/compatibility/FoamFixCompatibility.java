@@ -1,6 +1,7 @@
 package virtuoel.statement.api.compatibility;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.Optional;
 
 import org.apache.commons.lang3.tuple.MutableTriple;
@@ -34,16 +35,34 @@ public interface FoamFixCompatibility
 		
 	}
 	
+	default Optional<Object> constructPropertyValueMapper(Collection<Property<?>> properties)
+	{
+		return Optional.empty();
+	}
+	
+	default void setFactoryMapper(final Optional<?> factory, final Optional<?> mapper)
+	{
+		
+	}
+	
+	default void setStateOwner(final PropertyContainer<?> state, final Optional<?> owner)
+	{
+		
+	}
+	
+	@Deprecated
 	default Optional<MutableTriple<Optional<Field>, Optional<?>, ?>> resetFactoryMapperData(final Optional<Object> factory)
 	{
 		return Optional.empty();
 	}
 	
+	@Deprecated
 	default void loadFactoryMapperData(final Optional<MutableTriple<Optional<Field>, Optional<?>, ?>> data)
 	{
 		
 	}
 	
+	@Deprecated
 	default <T extends Triple<Optional<Field>, Optional<?>, ?>> void setStateOwnerData(final Optional<T> data, final PropertyContainer<?> state)
 	{
 		

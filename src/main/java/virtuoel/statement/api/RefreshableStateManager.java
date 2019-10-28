@@ -1,6 +1,5 @@
 package virtuoel.statement.api;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,8 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
-
-import org.apache.commons.lang3.tuple.MutableTriple;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -72,7 +69,9 @@ public interface RefreshableStateManager<O, S extends PropertyContainer<S>> exte
 		
 		final BiFunction<O, ImmutableMap<Property<?>, Comparable<?>>, S> function = statement_getStateFunction();
 		
-		final Optional<MutableTriple<Optional<Field>, Optional<?>, ?>> compatibilityData = FoamFixCompatibility.INSTANCE.resetFactoryMapperData(statement_getFactory());
+		final Optional<?> mapper = FoamFixCompatibility.INSTANCE.constructPropertyValueMapper(properties);
+		
+		FoamFixCompatibility.INSTANCE.setFactoryMapper(statement_getFactory(), mapper);
 		
 		tableStream.forEach((valueList) ->
 		{
@@ -86,8 +85,6 @@ public interface RefreshableStateManager<O, S extends PropertyContainer<S>> exte
 				{
 					addedStates.add(currentState);
 				}
-				
-				FoamFixCompatibility.INSTANCE.loadFactoryMapperData(compatibilityData);
 			}
 			else
 			{
@@ -105,7 +102,7 @@ public interface RefreshableStateManager<O, S extends PropertyContainer<S>> exte
 		{
 			currentStates.parallelStream().forEach(propertyContainer ->
 			{
-				FoamFixCompatibility.INSTANCE.setStateOwnerData(compatibilityData, propertyContainer);
+				FoamFixCompatibility.INSTANCE.setStateOwner(propertyContainer, mapper);
 				
 				if(propertyContainer instanceof AbstractPropertyContainer<?, ?>)
 				{
@@ -116,6 +113,13 @@ public interface RefreshableStateManager<O, S extends PropertyContainer<S>> exte
 			});
 			
 			statement_setStateList(ImmutableList.copyOf(currentStates));
+		}
+		else if(FoamFixCompatibility.INSTANCE.isEnabled())
+		{
+			currentStates.parallelStream().forEach(propertyContainer ->
+			{
+				FoamFixCompatibility.INSTANCE.setStateOwner(propertyContainer, mapper);
+			});
 		}
 		
 		return addedStates;
