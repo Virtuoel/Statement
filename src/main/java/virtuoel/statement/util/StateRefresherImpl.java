@@ -22,11 +22,11 @@ import net.minecraft.state.StateFactory;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.IdList;
 import virtuoel.statement.api.ClearableIdList;
-import virtuoel.statement.api.MutableProperty;
 import virtuoel.statement.api.RefreshableStateManager;
 import virtuoel.statement.api.StateRefresher;
 import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
+import virtuoel.statement.api.property.MutableProperty;
 
 public class StateRefresherImpl implements StateRefresher
 {

@@ -6,6 +6,7 @@
 	[
 		
 		"AbstractPropertyContainerMixin",
+		"DefaultedRegistryMixin",
 		"IdListMixin",
 		"StateFactoryBuilderMixin",
 		"StateFactoryMixin"

@@ -11,6 +11,7 @@ import net.minecraft.state.PropertyContainer;
 import net.minecraft.state.StateFactory;
 import net.minecraft.util.IdList;
 import net.minecraft.util.registry.Registry;
+import virtuoel.statement.api.property.MutableProperty;
 import virtuoel.statement.util.StateRefresherImpl;
 
 public interface StateRefresher
