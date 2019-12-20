@@ -26,7 +26,7 @@ import virtuoel.statement.api.RefreshableStateManager;
 @Mixin(StateManager.class)
 public class StateFactoryMixin<O, S extends State<S>> implements RefreshableStateManager<O, S>
 {
-	@Shadow @Final @Mutable ImmutableSortedMap<String, Property<?>> propertyMap;
+	@Shadow @Final @Mutable ImmutableSortedMap<String, Property<?>> properties;
 	@Shadow @Final @Mutable ImmutableList<S> states;
 	
 	@Unique StateManager.Factory<O, S, ?> statement_factory;
@@ -61,27 +61,27 @@ public class StateFactoryMixin<O, S extends State<S>> implements RefreshableStat
 	@Override
 	public Property<?> statement_addProperty(final Property<?> property)
 	{
-		final Map<String, Property<?>> map = new HashMap<>(propertyMap);
+		final Map<String, Property<?>> map = new HashMap<>(properties);
 		final Property<?> ret = map.put(property.getName(), property);
-		propertyMap = ImmutableSortedMap.copyOf(map);
+		properties = ImmutableSortedMap.copyOf(map);
 		return ret;
 	}
 	
 	@Override
 	public Property<?> statement_removeProperty(final String propertyName)
 	{
-		final Map<String, Property<?>> map = new HashMap<>(propertyMap);
+		final Map<String, Property<?>> map = new HashMap<>(properties);
 		final Property<?> ret = map.remove(propertyName);
-		propertyMap = ImmutableSortedMap.copyOf(map);
+		properties = ImmutableSortedMap.copyOf(map);
 		return ret;
 	}
 	
 	@Override
 	public boolean statement_removeProperty(final Property<?> property)
 	{
-		final Map<String, Property<?>> map = new HashMap<>(propertyMap);
+		final Map<String, Property<?>> map = new HashMap<>(properties);
 		final boolean ret = map.remove(property.getName(), property);
-		propertyMap = ImmutableSortedMap.copyOf(map);
+		properties = ImmutableSortedMap.copyOf(map);
 		return ret;
 	}
 }

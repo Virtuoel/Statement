@@ -21,7 +21,7 @@ public abstract class StateFactoryBuilderMixin
 	
 	@Shadow abstract <T extends Comparable<T>> void validate(Property<T> property);
 	
-	@Redirect(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/state/StateFactory$Builder;validate(Lnet/minecraft/state/property/Property;)V"))
+	@Redirect(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/state/StateManager$Builder;validate(Lnet/minecraft/state/property/Property;)V"))
 	private void addValidateProxy(StateManager.Builder<?, ?> obj, Property<?> property)
 	{
 		try
