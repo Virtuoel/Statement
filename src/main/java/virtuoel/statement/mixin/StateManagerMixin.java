@@ -24,7 +24,7 @@ import net.minecraft.state.property.Property;
 import virtuoel.statement.api.RefreshableStateManager;
 
 @Mixin(StateManager.class)
-public class StateFactoryMixin<O, S extends State<S>> implements RefreshableStateManager<O, S>
+public class StateManagerMixin<O, S extends State<S>> implements RefreshableStateManager<O, S>
 {
 	@Shadow @Final @Mutable ImmutableSortedMap<String, Property<?>> properties;
 	@Shadow @Final @Mutable ImmutableList<S> states;

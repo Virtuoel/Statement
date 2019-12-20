@@ -8,8 +8,8 @@
 		"AbstractPropertyContainerMixin",
 		"DefaultedRegistryMixin",
 		"IdListMixin",
-		"StateFactoryBuilderMixin",
-		"StateFactoryMixin"
+		"StateManagerBuilderMixin",
+		"StateManagerMixin"
 	],
 	"injectors":
 	{

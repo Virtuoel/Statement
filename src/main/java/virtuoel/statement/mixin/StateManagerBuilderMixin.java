@@ -15,7 +15,7 @@ import net.minecraft.state.property.Property;
 import virtuoel.statement.api.StatementApi;
 
 @Mixin(StateManager.Builder.class)
-public abstract class StateFactoryBuilderMixin
+public abstract class StateManagerBuilderMixin
 {
 	@Unique private static final Logger LOGGER = LogManager.getLogger(StatementApi.MOD_ID);
 	
