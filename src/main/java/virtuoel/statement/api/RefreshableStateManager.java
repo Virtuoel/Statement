@@ -14,14 +14,14 @@ import java.util.stream.Stream;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import net.minecraft.state.AbstractPropertyContainer;
-import net.minecraft.state.PropertyContainer;
-import net.minecraft.state.StateFactory;
+import net.minecraft.state.AbstractState;
+import net.minecraft.state.State;
+import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.MapUtil;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
 
-public interface RefreshableStateManager<O, S extends PropertyContainer<S>> extends MutableStateManager
+public interface RefreshableStateManager<O, S extends State<S>> extends MutableStateManager
 {
 	default BiFunction<O, ImmutableMap<Property<?>, Comparable<?>>, S> statement_getStateFunction()
 	{
@@ -41,9 +41,9 @@ public interface RefreshableStateManager<O, S extends PropertyContainer<S>> exte
 	default <V extends Comparable<V>> Collection<S> statement_reconstructStateList(final Map<Property<V>, Collection<V>> addedValueMap)
 	{
 		@SuppressWarnings("unchecked")
-		final StateFactory<O, S> self = ((StateFactory<O, S>) (Object) this);
+		final StateManager<O, S> self = ((StateManager<O, S>) (Object) this);
 		
-		final O owner = self.getBaseObject();
+		final O owner = self.getOwner();
 		final Collection<Property<?>> properties = self.getProperties();
 		final ImmutableList<S> states = self.getStates();
 		
@@ -104,10 +104,10 @@ public interface RefreshableStateManager<O, S extends PropertyContainer<S>> exte
 			{
 				FoamFixCompatibility.INSTANCE.setStateOwner(propertyContainer, mapper);
 				
-				if(propertyContainer instanceof AbstractPropertyContainer<?, ?>)
+				if(propertyContainer instanceof AbstractState<?, ?>)
 				{
 					@SuppressWarnings("unchecked")
-					final AbstractPropertyContainer<?, S> abstractPropertyContainer = ((AbstractPropertyContainer<?, S>) propertyContainer);
+					final AbstractState<?, S> abstractPropertyContainer = ((AbstractState<?, S>) propertyContainer);
 					abstractPropertyContainer.createWithTable(stateMap);
 				}
 			});

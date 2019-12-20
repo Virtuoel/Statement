@@ -13,12 +13,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 
-import net.minecraft.state.AbstractPropertyContainer;
-import net.minecraft.state.PropertyContainer;
+import net.minecraft.state.AbstractState;
+import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
 
-@Mixin(AbstractPropertyContainer.class)
-public abstract class AbstractPropertyContainerMixin<O, S> implements PropertyContainer<S>
+@Mixin(AbstractState.class)
+public abstract class AbstractPropertyContainerMixin<O, S> implements State<S>
 {
 	@Shadow @Final protected O owner;
 	@Shadow @Final private ImmutableMap<Property<?>, Comparable<?>> entries;

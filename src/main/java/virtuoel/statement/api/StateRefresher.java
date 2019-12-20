@@ -7,8 +7,8 @@ import java.util.function.Function;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.state.PropertyContainer;
-import net.minecraft.state.StateFactory;
+import net.minecraft.state.State;
+import net.minecraft.state.StateManager;
 import net.minecraft.util.IdList;
 import net.minecraft.util.registry.Registry;
 import virtuoel.statement.api.property.MutableProperty;
@@ -23,7 +23,7 @@ public interface StateRefresher
 		refreshStates(
 			Registry.BLOCK, Block.STATE_IDS,
 			property, addedValues, removedValues,
-			Block::getDefaultState, Block::getStateFactory, BlockState::initShapeCache
+			Block::getDefaultState, Block::getStateManager, BlockState::initShapeCache
 		);
 	}
 	
@@ -32,26 +32,26 @@ public interface StateRefresher
 		refreshStates(
 			Registry.FLUID, Fluid.STATE_IDS,
 			property, addedValues, removedValues,
-			Fluid::getDefaultState, Fluid::getStateFactory, f -> {}
+			Fluid::getDefaultState, Fluid::getStateManager, f -> {}
 		);
 	}
 	
-	default <O, V extends Comparable<V>, S extends PropertyContainer<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateFactory<O, S>> factoryGetter, final Consumer<S> newStateConsumer)
+	default <O, V extends Comparable<V>, S extends State<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateManager<O, S>> managerGetter, final Consumer<S> newStateConsumer)
 	{
 		
 	}
 	
 	default void reorderBlockStates()
 	{
-		reorderStates(Registry.BLOCK, Block.STATE_IDS, Block::getStateFactory);
+		reorderStates(Registry.BLOCK, Block.STATE_IDS, Block::getStateManager);
 	}
 	
 	default void reorderFluidStates()
 	{
-		reorderStates(Registry.FLUID, Fluid.STATE_IDS, Fluid::getStateFactory);
+		reorderStates(Registry.FLUID, Fluid.STATE_IDS, Fluid::getStateManager);
 	}
 	
-	default <O, V extends Comparable<V>, S extends PropertyContainer<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateFactory<O, S>> factoryGetter)
+	default <O, V extends Comparable<V>, S extends State<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateManager<O, S>> managerGetter)
 	{
 		
 	}

@@ -18,23 +18,23 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 
-import net.minecraft.state.PropertyContainer;
-import net.minecraft.state.StateFactory;
+import net.minecraft.state.State;
+import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import virtuoel.statement.api.RefreshableStateManager;
 
-@Mixin(StateFactory.class)
-public class StateFactoryMixin<O, S extends PropertyContainer<S>> implements RefreshableStateManager<O, S>
+@Mixin(StateManager.class)
+public class StateFactoryMixin<O, S extends State<S>> implements RefreshableStateManager<O, S>
 {
 	@Shadow @Final @Mutable ImmutableSortedMap<String, Property<?>> propertyMap;
 	@Shadow @Final @Mutable ImmutableList<S> states;
 	
-	@Unique StateFactory.Factory<O, S, ?> statement_factory;
+	@Unique StateManager.Factory<O, S, ?> statement_factory;
 	@Unique BiFunction<O, ImmutableMap<Property<?>, Comparable<?>>, S> statement_stateFunction;
 	
 	@SuppressWarnings("unchecked")
 	@Inject(at = @At("RETURN"), method = "<init>")
-	private void onConstruct(Object object, StateFactory.Factory<O, S, ?> factory, Map<String, Property<?>> map, CallbackInfo info)
+	private void onConstruct(Object object, StateManager.Factory<O, S, ?> factory, Map<String, Property<?>> map, CallbackInfo info)
 	{
 		statement_factory = factory;
 		statement_stateFunction = (o, m) -> (S) statement_factory.create(o, m);

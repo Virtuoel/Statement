@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 
-import net.minecraft.state.PropertyContainer;
+import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
 import virtuoel.statement.util.FoamFixCompatibilityImpl;
 
@@ -45,7 +45,7 @@ public interface FoamFixCompatibility
 		
 	}
 	
-	default void setStateOwner(final PropertyContainer<?> state, final Optional<?> owner)
+	default void setStateOwner(final State<?> state, final Optional<?> owner)
 	{
 		
 	}
@@ -63,7 +63,7 @@ public interface FoamFixCompatibility
 	}
 	
 	@Deprecated
-	default <T extends Triple<Optional<Field>, Optional<?>, ?>> void setStateOwnerData(final Optional<T> data, final PropertyContainer<?> state)
+	default <T extends Triple<Optional<Field>, Optional<?>, ?>> void setStateOwnerData(final Optional<T> data, final State<?> state)
 	{
 		
 	}

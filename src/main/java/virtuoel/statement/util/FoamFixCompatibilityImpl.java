@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.MutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.state.PropertyContainer;
+import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
 
@@ -157,7 +157,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	}
 	
 	@Override
-	public void setStateOwner(final PropertyContainer<?> state, final Optional<?> owner)
+	public void setStateOwner(final State<?> state, final Optional<?> owner)
 	{
 		if(isEnabled())
 		{
@@ -239,7 +239,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	
 	@Deprecated
 	@Override
-	public <T extends Triple<Optional<Field>, Optional<?>, ?>> void setStateOwnerData(final Optional<T> data, final PropertyContainer<?> state)
+	public <T extends Triple<Optional<Field>, Optional<?>, ?>> void setStateOwnerData(final Optional<T> data, final State<?> state)
 	{
 		if(isEnabled())
 		{

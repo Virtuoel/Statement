@@ -17,8 +17,8 @@ import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.minecraft.state.PropertyContainer;
-import net.minecraft.state.StateFactory;
+import net.minecraft.state.State;
+import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.IdList;
 import virtuoel.statement.api.ClearableIdList;
@@ -35,7 +35,7 @@ public class StateRefresherImpl implements StateRefresher
 	private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 	
 	@Override
-	public <O, V extends Comparable<V>, S extends PropertyContainer<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateFactory<O, S>> factoryGetter, final Consumer<S> newStateConsumer)
+	public <O, V extends Comparable<V>, S extends State<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateManager<O, S>> factoryGetter, final Consumer<S> newStateConsumer)
 	{
 		final long startTime = System.nanoTime();
 		
@@ -98,7 +98,7 @@ public class StateRefresherImpl implements StateRefresher
 					if(!noRemovedValues)
 					{
 						@SuppressWarnings("unchecked")
-						final StateFactory<O, S> f = ((StateFactory<O, S>) manager);
+						final StateManager<O, S> f = ((StateManager<O, S>) manager);
 						f.getStates().parallelStream().filter(state -> state.getEntries().containsKey(property) && removedValues.contains(state.get(property))).forEach(removedStates::add);
 					}
 					
@@ -138,13 +138,13 @@ public class StateRefresherImpl implements StateRefresher
 	}
 	
 	@Override
-	public <O, V extends Comparable<V>, S extends PropertyContainer<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateFactory<O, S>> factoryGetter)
+	public <O, V extends Comparable<V>, S extends State<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateManager<O, S>> managerGetter)
 	{
 		final Collection<S> allStates = new LinkedList<>();
 		
 		for(final O entry : registry)
 		{
-			factoryGetter.apply(entry).getStates().forEach(allStates::add);
+			managerGetter.apply(entry).getStates().forEach(allStates::add);
 		}
 		
 		final Collection<S> initialStates = new LinkedList<>();

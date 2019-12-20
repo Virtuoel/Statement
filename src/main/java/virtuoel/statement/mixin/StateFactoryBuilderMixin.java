@@ -10,11 +10,11 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import net.minecraft.state.StateFactory;
+import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import virtuoel.statement.api.StatementApi;
 
-@Mixin(StateFactory.Builder.class)
+@Mixin(StateManager.Builder.class)
 public abstract class StateFactoryBuilderMixin
 {
 	@Unique private static final Logger LOGGER = LogManager.getLogger(StatementApi.MOD_ID);
@@ -22,7 +22,7 @@ public abstract class StateFactoryBuilderMixin
 	@Shadow abstract <T extends Comparable<T>> void validate(Property<T> property);
 	
 	@Redirect(method = "add", at = @At(value = "INVOKE", target = "Lnet/minecraft/state/StateFactory$Builder;validate(Lnet/minecraft/state/property/Property;)V"))
-	private void addValidateProxy(StateFactory.Builder<?, ?> obj, Property<?> property)
+	private void addValidateProxy(StateManager.Builder<?, ?> obj, Property<?> property)
 	{
 		try
 		{
