@@ -4,12 +4,16 @@
 	"compatibilityLevel": "JAVA_8",
 	"mixins":
 	[
-		
 		"AbstractPropertyContainerMixin",
+		"BlockStateParticleEffectMixin",
+		"BlockUpdateS2CPacketMixin",
+		"ChunkDeltaUpdateS2CPacketMixin",
 		"DefaultedRegistryMixin",
 		"IdListMixin",
+		"PlayerActionResponseS2CPacketMixin",
 		"StateManagerBuilderMixin",
-		"StateManagerMixin"
+		"StateManagerMixin",
+		"WorldEventS2CPacketMixin"
 	],
 	"injectors":
 	{
