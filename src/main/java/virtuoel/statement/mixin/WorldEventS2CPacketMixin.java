@@ -18,7 +18,7 @@ public class WorldEventS2CPacketMixin
 {
 	@Shadow int data;
 	
-	@Inject(at = @At("RETURN"), method = "<init>")
+	@Inject(at = @At("RETURN"), method = "<init>(ILnet/minecraft/util/math/BlockPos;IZ)V")
 	private void onConstruct(int eventId, BlockPos pos, int data, boolean global, CallbackInfo info)
 	{
 		if (eventId == 2001)
