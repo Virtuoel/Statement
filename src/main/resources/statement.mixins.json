@@ -5,6 +5,8 @@
 	"mixins":
 	[
 		"AbstractPropertyContainerMixin",
+		"ArrayPaletteMixin",
+		"BiMapPaletteMixin",
 		"BlockStateParticleEffectMixin",
 		"BlockUpdateS2CPacketMixin",
 		"ChunkDeltaUpdateS2CPacketMixin",

@@ -20,12 +20,12 @@ public interface StatementApi
 		return false;
 	}
 	
-	default <S extends State<?>> Optional<Integer> getSyncedId(IdList<S> idList, int id)
+	default <S> Optional<Integer> getSyncedId(IdList<S> idList, int id)
 	{
 		return getSyncedId(idList, idList.get(id));
 	}
 	
-	default <S extends State<?>> Optional<Integer> getSyncedId(IdList<S> idList, @Nullable S state)
+	default <S> Optional<Integer> getSyncedId(IdList<S> idList, @Nullable S state)
 	{
 		return Optional.empty();
 	}
