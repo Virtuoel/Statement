@@ -1,7 +1,5 @@
 package virtuoel.statement.mixin;
 
-import java.util.Optional;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.block.Block;
 import net.minecraft.client.network.packet.WorldEventS2CPacket;
 import net.minecraft.util.math.BlockPos;
-import virtuoel.statement.api.StatementApi;
+import virtuoel.statement.Statement;
 
 @Mixin(WorldEventS2CPacket.class)
 public class WorldEventS2CPacketMixin
@@ -23,16 +21,10 @@ public class WorldEventS2CPacketMixin
 	{
 		if (eventId == 2001)
 		{
-			for (final StatementApi api : StatementApi.ENTRYPOINTS)
+			Statement.getSyncedBlockStateId(Block.STATE_IDS.get(data)).ifPresent(id ->
 			{
-				final Optional<Integer> syncedId = api.getSyncedId(Block.STATE_IDS, data);
-				
-				if(syncedId.isPresent())
-				{
-					this.data = syncedId.get();
-					break;
-				}
-			}
+				this.data = id;
+			});
 		}
 	}
 }

@@ -21,6 +21,17 @@
 	{
 		"fabricloader": ">=0.4.0"
 	},
+	"entrypoints":
+	{
+		"main":
+		[
+			"virtuoel.statement.Statement"
+		],
+		"statement":
+		[
+			"virtuoel.statement.Statement"
+		]
+	},
 	"mixins":
 	[
 		"statement.mixins.json"
