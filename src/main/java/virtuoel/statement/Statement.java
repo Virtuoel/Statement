@@ -145,7 +145,7 @@ public class Statement implements ModInitializer, StatementApi
 						final Property<?> property = manager.getProperty(p.getKey());
 						if (property != null)
 						{
-							property.parse(p.getValue().getAsString()).ifPresent(val -> predicates.put(property, val::equals));
+							property.parse(p.getValue().getAsString()).ifPresent(val -> predicates.put(property, ((Object) val)::equals));
 						}
 					}
 					
