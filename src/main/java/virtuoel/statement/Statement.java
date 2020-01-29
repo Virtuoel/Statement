@@ -18,6 +18,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.Fluid;
@@ -32,6 +33,7 @@ import net.minecraft.util.registry.DefaultedRegistry;
 import net.minecraft.util.registry.Registry;
 import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.StatementConfig;
+import virtuoel.statement.util.StateIdListSync;
 
 public class Statement implements ModInitializer, StatementApi
 {
@@ -41,7 +43,27 @@ public class Statement implements ModInitializer, StatementApi
 	public void onInitialize()
 	{
 		StatementConfig.DATA.getClass();
+		
+		final boolean fabricCommandsLoaded = FabricLoader.getInstance().isModLoaded("fabric-commands-v0");
+		final boolean fabricNetworkingLoaded = FabricLoader.getInstance().isModLoaded("fabric-networking-v0");
+		
+		if (fabricCommandsLoaded)
+		{
+			StateIdListSync.setupCommands(fabricNetworkingLoaded);
+		}
+		
+		if (fabricNetworkingLoaded)
+		{
+			StateIdListSync.setupServerNetworking();
+		}
 	}
+	
+	public static Identifier id(String name)
+	{
+		return new Identifier(MOD_ID, name);
+	}
+	
+	public static final Identifier CLIENT_STATES_PACKET = id("client_states");
 	
 	public static Optional<Integer> getSyncedBlockStateId(@Nullable final BlockState state)
 	{
