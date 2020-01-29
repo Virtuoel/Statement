@@ -5,17 +5,17 @@
 	"mixins":
 	[
 		"AbstractPropertyContainerMixin",
-		"ArrayPaletteMixin",
-		"BiMapPaletteMixin",
-		"BlockStateParticleEffectMixin",
-		"BlockUpdateS2CPacketMixin",
-		"ChunkDeltaUpdateS2CPacketMixin",
 		"DefaultedRegistryMixin",
 		"IdListMixin",
-		"PlayerActionResponseS2CPacketMixin",
 		"StateManagerBuilderMixin",
 		"StateManagerMixin",
-		"WorldEventS2CPacketMixin"
+		"sync.ArrayPaletteMixin",
+		"sync.BiMapPaletteMixin",
+		"sync.BlockStateParticleEffectMixin",
+		"sync.BlockUpdateS2CPacketMixin",
+		"sync.ChunkDeltaUpdateS2CPacketMixin",
+		"sync.PlayerActionResponseS2CPacketMixin",
+		"sync.WorldEventS2CPacketMixin"
 	],
 	"injectors":
 	{

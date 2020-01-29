@@ -1,4 +1,4 @@
-package virtuoel.statement.mixin;
+package virtuoel.statement.mixin.sync;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
