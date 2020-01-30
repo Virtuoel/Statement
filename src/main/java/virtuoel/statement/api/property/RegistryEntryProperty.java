@@ -17,7 +17,7 @@ public class RegistryEntryProperty<T> extends IdentifierProperty
 		
 		this.registry = registry;
 		
-		if(this.registry instanceof DefaultedRegistry)
+		if (this.registry instanceof DefaultedRegistry)
 		{
 			this.defaultId = ((DefaultedRegistry<T>) this.registry).getDefaultId();
 			add(this.defaultId);

@@ -36,7 +36,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	{
 		this.enabled = FOAMFIX_LOADED;
 		
-		if(this.enabled)
+		if (this.enabled)
 		{
 			this.orderingClass = getClass("pl.asie.foamfix.state.PropertyOrdering");
 			this.factoryClass = getClass("pl.asie.foamfix.state.FoamyStateFactory$Factory");
@@ -51,7 +51,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 					final Map<Property<?>, ?> map = (Map<Property<?>, ?>) f.get(null);
 					return map;
 				}
-				catch(IllegalArgumentException | IllegalAccessException e)
+				catch (IllegalArgumentException | IllegalAccessException e)
 				{
 					
 				}
@@ -96,7 +96,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	@Override
 	public void removePropertyFromEntryMap(Property<?> property)
 	{
-		if(isEnabled())
+		if (isEnabled())
 		{
 			propertyEntryMap.ifPresent(map ->
 			{
@@ -108,7 +108,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	@Override
 	public Optional<Object> constructPropertyValueMapper(Collection<Property<?>> properties)
 	{
-		if(isEnabled())
+		if (isEnabled())
 		{
 			return valueMapperClass.map(c ->
 			{
@@ -125,7 +125,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 		{
 			return clazz.getConstructor(Collection.class).newInstance(properties);
 		}
-		catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e)
+		catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e)
 		{
 			return null;
 		}
@@ -134,7 +134,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	@Override
 	public void setFactoryMapper(final Optional<?> factory, final Optional<?> mapper)
 	{
-		if(isEnabled())
+		if (isEnabled())
 		{
 			mapper.ifPresent(m ->
 			{
@@ -146,7 +146,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 						{
 							field.set(f, m);
 						}
-						catch(IllegalArgumentException | IllegalAccessException e)
+						catch (IllegalArgumentException | IllegalAccessException e)
 						{
 							
 						}
@@ -159,7 +159,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	@Override
 	public void setStateOwner(final State<?> state, final Optional<?> owner)
 	{
-		if(isEnabled())
+		if (isEnabled())
 		{
 			owner.ifPresent(o ->
 			{
@@ -169,7 +169,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 					{
 						f.set(state, o);
 					}
-					catch(IllegalArgumentException | IllegalAccessException e)
+					catch (IllegalArgumentException | IllegalAccessException e)
 					{
 						
 					}
@@ -182,7 +182,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	@Override
 	public Optional<MutableTriple<Optional<Field>, Optional<?>, ?>> resetFactoryMapperData(final Optional<Object> factory)
 	{
-		if(isEnabled())
+		if (isEnabled())
 		{
 			final MutableTriple<Optional<Field>, Optional<?>, Object> data = MutableTriple.of(Optional.empty(), Optional.empty(), Optional.empty());
 			factory.ifPresent(f ->
@@ -197,7 +197,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 					{
 						field.set(f, null);
 					}
-					catch(IllegalArgumentException | IllegalAccessException e)
+					catch (IllegalArgumentException | IllegalAccessException e)
 					{
 						
 					}
@@ -215,11 +215,11 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	@Override
 	public void loadFactoryMapperData(final Optional<MutableTriple<Optional<Field>, Optional<?>, ?>> data)
 	{
-		if(isEnabled())
+		if (isEnabled())
 		{
 			data.ifPresent(d ->
 			{
-				if(!d.getMiddle().isPresent())
+				if (!d.getMiddle().isPresent())
 				{
 					d.getLeft().ifPresent(field ->
 					{
@@ -227,7 +227,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 						{
 							d.setMiddle(Optional.ofNullable(field.get(d.getRight())));
 						}
-						catch(IllegalArgumentException | IllegalAccessException e)
+						catch (IllegalArgumentException | IllegalAccessException e)
 						{
 							d.setMiddle(Optional.empty());
 						}
@@ -241,7 +241,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	@Override
 	public <T extends Triple<Optional<Field>, Optional<?>, ?>> void setStateOwnerData(final Optional<T> data, final State<?> state)
 	{
-		if(isEnabled())
+		if (isEnabled())
 		{
 			setStateOwner(state, data.map(Triple::getMiddle));
 		}
@@ -257,7 +257,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 				f.setAccessible(true);
 				return f;
 			}
-			catch(SecurityException | NoSuchFieldException e)
+			catch (SecurityException | NoSuchFieldException e)
 			{
 				
 			}
@@ -271,7 +271,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 		{
 			return Optional.of(Class.forName(className));
 		}
-		catch(ClassNotFoundException e)
+		catch (ClassNotFoundException e)
 		{
 			
 		}

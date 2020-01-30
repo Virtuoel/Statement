@@ -28,7 +28,7 @@ public abstract class StateManagerBuilderMixin
 		{
 			validate(property);
 		}
-		catch(IllegalArgumentException e)
+		catch (IllegalArgumentException e)
 		{
 			LOGGER.warn(e.getMessage());
 			LOGGER.catching(e);

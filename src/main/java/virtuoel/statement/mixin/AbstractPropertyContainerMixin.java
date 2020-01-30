@@ -28,12 +28,12 @@ public abstract class AbstractPropertyContainerMixin<O, S> implements State<S>
 	private <T extends Comparable<T>, V extends T> void onWith(Property<T> property, V value, CallbackInfoReturnable<Object> info)
 	{
 		final Comparable<?> currentValue = this.entries.get(property);
-		if(currentValue == null)
+		if (currentValue == null)
 		{
 			LOGGER.info("Cannot set property {} as it does not exist in {}", property, this.owner);
 			info.setReturnValue(this);
 		}
-		else if(currentValue != value && withTable.get(property, value) == null)
+		else if (currentValue != value && withTable.get(property, value) == null)
 		{
 			LOGGER.info("Cannot set property {} to {} on {}, it is not an allowed value", property, value, this.owner);
 			info.setReturnValue(this);

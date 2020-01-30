@@ -26,14 +26,14 @@ public class IdentifierProperty extends AbstractProperty<Identifier> implements 
 	public Optional<Identifier> parse(final String valueName)
 	{
 		final int underscoreIndex = valueName.lastIndexOf('_');
-		if(underscoreIndex != -1)
+		if (underscoreIndex != -1)
 		{
 			try
 			{
 				final int namespaceLength = Integer.parseInt(valueName.substring(underscoreIndex + 1));
 				return Optional.of(new Identifier(valueName.substring(0, namespaceLength), valueName.substring(namespaceLength + 1, underscoreIndex)));
 			}
-			catch(NumberFormatException e)
+			catch (NumberFormatException e)
 			{
 				
 			}

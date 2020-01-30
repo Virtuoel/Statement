@@ -41,9 +41,9 @@ public class StateRefresherImpl implements StateRefresher
 		
 		final List<RefreshableStateManager<O, S>> managersToRefresh = new LinkedList<>();
 		
-		for(final O entry : registry)
+		for (final O entry : registry)
 		{
-			if(defaultStateGetter.apply(entry).getEntries().containsKey(property))
+			if (defaultStateGetter.apply(entry).getEntries().containsKey(property))
 			{
 				@SuppressWarnings("unchecked")
 				final RefreshableStateManager<O, S> manager = (RefreshableStateManager<O, S>) factoryGetter.apply(entry);
@@ -68,11 +68,11 @@ public class StateRefresherImpl implements StateRefresher
 		final boolean noAddedValues = addedValueQuantity == 0;
 		final boolean noRemovedValues = removedValueQuantity == 0;
 		
-		if(noAddedValues && noRemovedValues)
+		if (noAddedValues && noRemovedValues)
 		{
 			LOGGER.debug("Refreshing states of {} entries after {} ns of setup.", entryQuantity, System.nanoTime() - startTime);
 		}
-		else if(noAddedValues || noRemovedValues)
+		else if (noAddedValues || noRemovedValues)
 		{
 			LOGGER.debug("Refreshing states of {} entries for {} values(s) {} after {} ns of setup.", entryQuantity, noRemovedValues ? "new" : "removed", noRemovedValues ? addedValues : removedValues, System.nanoTime() - startTime);
 		}
@@ -81,7 +81,7 @@ public class StateRefresherImpl implements StateRefresher
 			LOGGER.debug("Refreshing states of {} entries for new values(s) {} and removed value(s) {} after {} ns of setup.", entryQuantity, addedValues, removedValues, System.nanoTime() - startTime);
 		}
 		
-		synchronized(property)
+		synchronized (property)
 		{
 			property.addAll(addedValues);
 			property.removeAll(removedValues);
@@ -89,13 +89,13 @@ public class StateRefresherImpl implements StateRefresher
 			FoamFixCompatibility.INSTANCE.removePropertyFromEntryMap(property);
 		}
 		
-		synchronized(stateIdList)
+		synchronized (stateIdList)
 		{
-			for(final RefreshableStateManager<O, S> manager : managersToRefresh)
+			for (final RefreshableStateManager<O, S> manager : managersToRefresh)
 			{
 				allFutures.add(CompletableFuture.supplyAsync(() ->
 				{
-					if(!noRemovedValues)
+					if (!noRemovedValues)
 					{
 						@SuppressWarnings("unchecked")
 						final StateManager<O, S> f = ((StateManager<O, S>) manager);
@@ -121,11 +121,11 @@ public class StateRefresherImpl implements StateRefresher
 				final boolean noAdditions = addedStateQuantity == 0;
 				final boolean noRemovals = removedStateQuantity == 0;
 				
-				if(noAdditions && noRemovals)
+				if (noAdditions && noRemovals)
 				{
 					LOGGER.debug("Refreshed states with no additions or removals after {} ms.", System.nanoTime() - startTime);
 				}
-				else if(noAdditions || noRemovals)
+				else if (noAdditions || noRemovals)
 				{
 					LOGGER.debug("{} {} state(s) for {} values(s) {} after {} ms.", noRemovals ? "Added" : "Removed", noRemovals ? addedStateQuantity : removedStateQuantity, noRemovals ? "new" : "old", noRemovals ? addedValues : removedValues, (System.nanoTime() - startTime) / 1_000_000);
 				}
@@ -142,7 +142,7 @@ public class StateRefresherImpl implements StateRefresher
 	{
 		final Collection<S> allStates = new LinkedList<>();
 		
-		for(final O entry : registry)
+		for (final O entry : registry)
 		{
 			managerGetter.apply(entry).getStates().forEach(allStates::add);
 		}
@@ -150,9 +150,9 @@ public class StateRefresherImpl implements StateRefresher
 		final Collection<S> initialStates = new LinkedList<>();
 		final Collection<S> deferredStates = new LinkedList<>();
 		
-		for(final S state : allStates)
+		for (final S state : allStates)
 		{
-			if(StatementApi.ENTRYPOINTS.stream().anyMatch(api -> api.shouldDeferState(stateIdList, state)))
+			if (StatementApi.ENTRYPOINTS.stream().anyMatch(api -> api.shouldDeferState(stateIdList, state)))
 			{
 				deferredStates.add(state);
 			}
@@ -172,7 +172,7 @@ public class StateRefresherImpl implements StateRefresher
 	@Override
 	public <O, T> boolean provideTask(final O object, final Function<O, Consumer<T>> taskConsumerFunction, final Function<StateRefresher, T> task)
 	{
-		if(!taskObjectSet.contains(object))
+		if (!taskObjectSet.contains(object))
 		{
 			taskObjectSet.add(object);
 			return StateRefresher.super.provideTask(object, taskConsumerFunction, task);

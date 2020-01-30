@@ -49,7 +49,7 @@ public interface RefreshableStateManager<O, S extends State<S>> extends MutableS
 		
 		Stream<List<Comparable<?>>> tableStream = Stream.of(Collections.emptyList());
 		
-		for(final Property<?> entry : properties)
+		for (final Property<?> entry : properties)
 		{
 			tableStream = tableStream.flatMap((propertyList) ->
 			{
@@ -78,10 +78,10 @@ public interface RefreshableStateManager<O, S extends State<S>> extends MutableS
 			final Map<Property<?>, Comparable<?>> propertyValueMap = MapUtil.createMap(properties, valueList);
 			
 			final S currentState;
-			if(addedValueMap.entrySet().stream().anyMatch(e -> e.getValue().contains(propertyValueMap.get(e.getKey()))))
+			if (addedValueMap.entrySet().stream().anyMatch(e -> e.getValue().contains(propertyValueMap.get(e.getKey()))))
 			{
 				currentState = function.apply(owner, ImmutableMap.copyOf(propertyValueMap));
-				if(currentState != null)
+				if (currentState != null)
 				{
 					addedStates.add(currentState);
 				}
@@ -91,20 +91,20 @@ public interface RefreshableStateManager<O, S extends State<S>> extends MutableS
 				currentState = states.parallelStream().filter(state -> state.getEntries().equals(propertyValueMap)).findFirst().orElse(null);
 			}
 			
-			if(currentState != null)
+			if (currentState != null)
 			{
 				stateMap.put(propertyValueMap, currentState);
 				currentStates.add(currentState);
 			}
 		});
 		
-		if(!addedStates.isEmpty())
+		if (!addedStates.isEmpty())
 		{
 			currentStates.parallelStream().forEach(propertyContainer ->
 			{
 				FoamFixCompatibility.INSTANCE.setStateOwner(propertyContainer, mapper);
 				
-				if(propertyContainer instanceof AbstractState<?, ?>)
+				if (propertyContainer instanceof AbstractState<?, ?>)
 				{
 					@SuppressWarnings("unchecked")
 					final AbstractState<?, S> abstractPropertyContainer = ((AbstractState<?, S>) propertyContainer);
@@ -114,7 +114,7 @@ public interface RefreshableStateManager<O, S extends State<S>> extends MutableS
 			
 			statement_setStateList(ImmutableList.copyOf(currentStates));
 		}
-		else if(FoamFixCompatibility.INSTANCE.isEnabled())
+		else if (FoamFixCompatibility.INSTANCE.isEnabled())
 		{
 			currentStates.parallelStream().forEach(propertyContainer ->
 			{
