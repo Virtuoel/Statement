@@ -152,7 +152,7 @@ public class StateRefresherImpl implements StateRefresher
 		
 		for(final S state : allStates)
 		{
-			if(StatementApi.ENTRYPOINTS.stream().anyMatch(api -> api.shouldDeferState(state)))
+			if(StatementApi.ENTRYPOINTS.stream().anyMatch(api -> api.shouldDeferState(stateIdList, state)))
 			{
 				deferredStates.add(state);
 			}

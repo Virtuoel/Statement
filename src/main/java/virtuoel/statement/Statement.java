@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -65,17 +66,17 @@ public class Statement implements ModInitializer, StatementApi
 	
 	public static final Identifier CLIENT_STATES_PACKET = id("client_states");
 	
-	public static Optional<Integer> getSyncedBlockStateId(@Nullable final BlockState state)
+	public static OptionalInt getSyncedBlockStateId(@Nullable final BlockState state)
 	{
 		return getSyncedStateId(Block.STATE_IDS, state);
 	}
 	
-	public static Optional<Integer> getSyncedFluidStateId(@Nullable final FluidState state)
+	public static OptionalInt getSyncedFluidStateId(@Nullable final FluidState state)
 	{
 		return getSyncedStateId(Fluid.STATE_IDS, state);
 	}
 	
-	public static <S> Optional<Integer> getSyncedStateId(final IdList<S> idList, @Nullable final S state)
+	public static <S> OptionalInt getSyncedStateId(final IdList<S> idList, @Nullable final S state)
 	{
 		if (state != null)
 		{
@@ -86,7 +87,7 @@ public class Statement implements ModInitializer, StatementApi
 			
 			if (enableIdSyncApi)
 			{
-				Optional<Integer> syncedId;
+				OptionalInt syncedId;
 				
 				for (final StatementApi api : StatementApi.ENTRYPOINTS)
 				{
@@ -100,18 +101,18 @@ public class Statement implements ModInitializer, StatementApi
 			}
 			else if (idList == Block.STATE_IDS)
 			{
-				return BLOCK_STATE_SYNC_DATA.get().getOrDefault(state, Optional.empty());
+				return BLOCK_STATE_SYNC_DATA.get().getOrDefault(state, OptionalInt.empty());
 			}
 			else if (idList == Fluid.STATE_IDS)
 			{
-				return FLUID_STATE_SYNC_DATA.get().getOrDefault(state, Optional.empty());
+				return FLUID_STATE_SYNC_DATA.get().getOrDefault(state, OptionalInt.empty());
 			}
 		}
 		
-		return Optional.empty();
+		return OptionalInt.empty();
 	}
 	
-	private static final Lazy<Map<BlockState, Optional<Integer>>> BLOCK_STATE_SYNC_DATA = new Lazy<>(() ->
+	private static final Lazy<Map<BlockState, OptionalInt>> BLOCK_STATE_SYNC_DATA = new Lazy<>(() ->
 	{
 		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customBlockStateSync"))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
@@ -120,7 +121,7 @@ public class Statement implements ModInitializer, StatementApi
 		return loadStateSyncData(data, Registry.BLOCK, Block::getStateManager);
 	});
 	
-	private static final Lazy<Map<FluidState, Optional<Integer>>> FLUID_STATE_SYNC_DATA = new Lazy<>(() ->
+	private static final Lazy<Map<FluidState, OptionalInt>> FLUID_STATE_SYNC_DATA = new Lazy<>(() ->
 	{
 		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customFluidStateSync"))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
@@ -129,9 +130,9 @@ public class Statement implements ModInitializer, StatementApi
 		return loadStateSyncData(data, Registry.FLUID, Fluid::getStateManager);
 	});
 	
-	private static <O, S extends State<S>> Map<S, Optional<Integer>> loadStateSyncData(final JsonObject data, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
+	private static <O, S extends State<S>> Map<S, OptionalInt> loadStateSyncData(final JsonObject data, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
 	{
-		final Map<S, Optional<Integer>> syncData = new HashMap<>();
+		final Map<S, OptionalInt> syncData = new HashMap<>();
 		
 		for (final Entry<String, JsonElement> e : data.entrySet())
 		{
@@ -156,9 +157,10 @@ public class Statement implements ModInitializer, StatementApi
 						.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
 						.orElseGet(JsonObject::new);
 					
-					final Optional<Integer> syncedId = Optional.ofNullable(stateSyncData.get("syncedId"))
+					final OptionalInt syncedId = Optional.ofNullable(stateSyncData.get("syncedId"))
 						.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsJsonPrimitive)
-						.filter(JsonPrimitive::isNumber).map(JsonPrimitive::getAsInt);
+						.filter(JsonPrimitive::isNumber).map(JsonPrimitive::getAsInt)
+						.map(OptionalInt::of).orElseGet(OptionalInt::empty);
 					
 					final Map<Property<?>, Predicate<Object>> predicates = new HashMap<>();
 					
@@ -182,15 +184,15 @@ public class Statement implements ModInitializer, StatementApi
 	}
 	
 	@Override
-	public <S> Optional<Integer> getSyncedId(IdList<S> idList, @Nullable S state)
+	public <S> OptionalInt getSyncedId(IdList<S> idList, @Nullable S state)
 	{
 		if (idList == Block.STATE_IDS)
 		{
-			return BLOCK_STATE_SYNC_DATA.get().getOrDefault(state, Optional.empty());
+			return BLOCK_STATE_SYNC_DATA.get().getOrDefault(state, OptionalInt.empty());
 		}
 		else if (idList == Fluid.STATE_IDS)
 		{
-			return FLUID_STATE_SYNC_DATA.get().getOrDefault(state, Optional.empty());
+			return FLUID_STATE_SYNC_DATA.get().getOrDefault(state, OptionalInt.empty());
 		}
 		
 		return StatementApi.super.getSyncedId(idList, state);

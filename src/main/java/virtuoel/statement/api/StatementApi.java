@@ -1,12 +1,11 @@
 package virtuoel.statement.api;
 
 import java.util.Collection;
-import java.util.Optional;
+import java.util.OptionalInt;
 
 import javax.annotation.Nullable;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.state.State;
 import net.minecraft.util.IdList;
 
 public interface StatementApi
@@ -15,18 +14,18 @@ public interface StatementApi
 	
 	public static final Collection<StatementApi> ENTRYPOINTS = FabricLoader.getInstance().getEntrypoints(MOD_ID, StatementApi.class);
 	
-	default boolean shouldDeferState(State<?> state)
+	default <S> boolean shouldDeferState(IdList<S> idList, S state)
 	{
 		return false;
 	}
 	
-	default <S> Optional<Integer> getSyncedId(IdList<S> idList, int id)
+	default <S> OptionalInt getSyncedId(IdList<S> idList, int id)
 	{
 		return getSyncedId(idList, idList.get(id));
 	}
 	
-	default <S> Optional<Integer> getSyncedId(IdList<S> idList, @Nullable S state)
+	default <S> OptionalInt getSyncedId(IdList<S> idList, @Nullable S state)
 	{
-		return Optional.empty();
+		return OptionalInt.empty();
 	}
 }
