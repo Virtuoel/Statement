@@ -8,9 +8,6 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.tuple.MutableTriple;
-import org.apache.commons.lang3.tuple.Triple;
-
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
@@ -175,75 +172,6 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 					}
 				});
 			});
-		}
-	}
-	
-	@Deprecated
-	@Override
-	public Optional<MutableTriple<Optional<Field>, Optional<?>, ?>> resetFactoryMapperData(final Optional<Object> factory)
-	{
-		if (isEnabled())
-		{
-			final MutableTriple<Optional<Field>, Optional<?>, Object> data = MutableTriple.of(Optional.empty(), Optional.empty(), Optional.empty());
-			factory.ifPresent(f ->
-			{
-				data.setRight(factory);
-				
-				final Optional<Field> mapper = factoryClass.filter(c -> c.isInstance(f)).flatMap(c -> factoryMapper);
-				mapper.ifPresent(field ->
-				{
-					data.setLeft(mapper);
-					try
-					{
-						field.set(f, null);
-					}
-					catch (IllegalArgumentException | IllegalAccessException e)
-					{
-						
-					}
-				});
-			});
-			return Optional.of(data);
-		}
-		else
-		{
-			return Optional.empty();
-		}
-	}
-	
-	@Deprecated
-	@Override
-	public void loadFactoryMapperData(final Optional<MutableTriple<Optional<Field>, Optional<?>, ?>> data)
-	{
-		if (isEnabled())
-		{
-			data.ifPresent(d ->
-			{
-				if (!d.getMiddle().isPresent())
-				{
-					d.getLeft().ifPresent(field ->
-					{
-						try
-						{
-							d.setMiddle(Optional.ofNullable(field.get(d.getRight())));
-						}
-						catch (IllegalArgumentException | IllegalAccessException e)
-						{
-							d.setMiddle(Optional.empty());
-						}
-					});
-				}
-			});
-		}
-	}
-	
-	@Deprecated
-	@Override
-	public <T extends Triple<Optional<Field>, Optional<?>, ?>> void setStateOwnerData(final Optional<T> data, final State<?> state)
-	{
-		if (isEnabled())
-		{
-			setStateOwner(state, data.map(Triple::getMiddle));
 		}
 	}
 	

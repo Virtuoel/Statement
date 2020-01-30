@@ -1,11 +1,7 @@
 package virtuoel.statement.api.compatibility;
 
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Optional;
-
-import org.apache.commons.lang3.tuple.MutableTriple;
-import org.apache.commons.lang3.tuple.Triple;
 
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
@@ -46,24 +42,6 @@ public interface FoamFixCompatibility
 	}
 	
 	default void setStateOwner(final State<?> state, final Optional<?> owner)
-	{
-		
-	}
-	
-	@Deprecated
-	default Optional<MutableTriple<Optional<Field>, Optional<?>, ?>> resetFactoryMapperData(final Optional<Object> factory)
-	{
-		return Optional.empty();
-	}
-	
-	@Deprecated
-	default void loadFactoryMapperData(final Optional<MutableTriple<Optional<Field>, Optional<?>, ?>> data)
-	{
-		
-	}
-	
-	@Deprecated
-	default <T extends Triple<Optional<Field>, Optional<?>, ?>> void setStateOwnerData(final Optional<T> data, final State<?> state)
 	{
 		
 	}
