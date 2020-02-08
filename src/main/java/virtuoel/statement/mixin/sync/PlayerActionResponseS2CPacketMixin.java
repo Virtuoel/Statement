@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.network.packet.PlayerActionResponseS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerActionResponseS2CPacket;
 import virtuoel.statement.Statement;
 
 @Mixin(PlayerActionResponseS2CPacket.class)

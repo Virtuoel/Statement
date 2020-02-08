@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.network.packet.WorldEventS2CPacket;
+import net.minecraft.network.packet.s2c.play.WorldEventS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import virtuoel.statement.Statement;
 

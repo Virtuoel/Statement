@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.network.packet.BlockUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import virtuoel.statement.Statement;
 
 @Mixin(BlockUpdateS2CPacket.class)
