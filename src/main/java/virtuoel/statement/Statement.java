@@ -53,6 +53,7 @@ public class Statement implements ModInitializer, StatementApi
 	{
 		final boolean fabricCommandsLoaded = FabricLoader.getInstance().isModLoaded("fabric-commands-v0");
 		final boolean fabricNetworkingLoaded = FabricLoader.getInstance().isModLoaded("fabric-networking-v0");
+		final boolean fabricRegistrySyncLoaded = FabricLoader.getInstance().isModLoaded("fabric-registry-sync-v0");
 		
 		if (fabricCommandsLoaded)
 		{
@@ -62,6 +63,11 @@ public class Statement implements ModInitializer, StatementApi
 		if (fabricNetworkingLoaded)
 		{
 			FabricApiCompatibility.setupServerNetworking();
+		}
+		
+		if (fabricRegistrySyncLoaded)
+		{
+			FabricApiCompatibility.setupIdRemapCallbacks();
 		}
 	}
 	

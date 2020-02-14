@@ -2,7 +2,6 @@ package virtuoel.statement.util;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +12,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +22,7 @@ import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.IdList;
+import net.minecraft.util.registry.Registry;
 import virtuoel.statement.api.ClearableIdList;
 import virtuoel.statement.api.RefreshableStateManager;
 import virtuoel.statement.api.StateRefresher;
@@ -167,8 +169,10 @@ public class StateRefresherImpl implements StateRefresher
 		deferredStates.forEach(stateIdList::add);
 	}
 	
-	protected final Set<Object> taskObjectSet = new HashSet<>();
+	@Deprecated
+	protected final Set<Object> taskObjectSet = Stream.of(Registry.BLOCK, Registry.FLUID).collect(Collectors.toSet());
 	
+	@Deprecated
 	@Override
 	public <O, T> boolean provideTask(final O object, final Function<O, Consumer<T>> taskConsumerFunction, final Function<StateRefresher, T> task)
 	{

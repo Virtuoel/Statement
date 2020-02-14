@@ -56,6 +56,7 @@ public interface StateRefresher
 		
 	}
 	
+	@Deprecated
 	default <O, T> boolean provideTask(final O object, final Function<O, Consumer<T>> taskConsumerFunction, final Function<StateRefresher, T> task)
 	{
 		taskConsumerFunction.apply(object).accept(task.apply(this));

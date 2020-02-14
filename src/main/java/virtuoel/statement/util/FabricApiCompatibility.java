@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.event.registry.RegistryIdRemapCallback;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
@@ -21,7 +22,9 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.PacketByteBuf;
+import net.minecraft.util.registry.Registry;
 import virtuoel.statement.Statement;
+import virtuoel.statement.api.StateRefresher;
 
 public class FabricApiCompatibility
 {
@@ -241,5 +244,11 @@ public class FabricApiCompatibility
 				}
 			});
 		});
+	}
+	
+	public static void setupIdRemapCallbacks()
+	{
+		RegistryIdRemapCallback.event(Registry.BLOCK).register(s -> StateRefresher.INSTANCE.reorderBlockStates());
+		RegistryIdRemapCallback.event(Registry.FLUID).register(s -> StateRefresher.INSTANCE.reorderFluidStates());
 	}
 }
