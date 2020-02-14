@@ -23,6 +23,7 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.IdList;
 import net.minecraft.util.registry.Registry;
+import virtuoel.statement.Statement;
 import virtuoel.statement.api.ClearableIdList;
 import virtuoel.statement.api.RefreshableStateManager;
 import virtuoel.statement.api.StateRefresher;
@@ -154,7 +155,7 @@ public class StateRefresherImpl implements StateRefresher
 		
 		for (final S state : allStates)
 		{
-			if (StatementApi.ENTRYPOINTS.stream().anyMatch(api -> api.shouldDeferState(stateIdList, state)))
+			if (Statement.shouldStateBeDeferred(stateIdList, state))
 			{
 				deferredStates.add(state);
 			}

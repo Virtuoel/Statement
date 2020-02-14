@@ -41,6 +41,8 @@ import virtuoel.statement.util.FabricApiCompatibility;
 
 public class Statement implements ModInitializer, StatementApi
 {
+	public static final String MOD_ID = StatementApi.MOD_ID;
+	
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 	
 	public Statement()
@@ -136,12 +138,41 @@ public class Statement implements ModInitializer, StatementApi
 					
 					manager.getStates().stream()
 						.filter(st -> predicates.entrySet().stream().allMatch(en -> en.getValue().test(st.get(en.getKey()))))
-						.forEach(st -> {deferralData.add(st);LOGGER.info("deferring {}", st);});
+						.forEach(st -> deferralData.add(st));
 				}
 			});
 		}
 		
 		return deferralData;
+	}
+	
+	public static <S> boolean shouldStateBeDeferred(final IdList<S> idList, final S state)
+	{
+		final boolean enableStateDeferralApi = Optional.ofNullable(StatementConfig.DATA.get("enableStateDeferralApi"))
+			.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsJsonPrimitive)
+			.filter(JsonPrimitive::isBoolean).map(JsonPrimitive::getAsBoolean)
+			.orElse(true);
+		
+		if (enableStateDeferralApi)
+		{
+			for (final StatementApi api : StatementApi.ENTRYPOINTS)
+			{
+				if (api.shouldDeferState(idList, state))
+				{
+					return true;
+				}
+			}
+		}
+		else if (idList == Block.STATE_IDS)
+		{
+			return BLOCK_STATE_DEFERRAL_DATA.get().contains(state);
+		}
+		else if (idList == Fluid.STATE_IDS)
+		{
+			return FLUID_STATE_DEFERRAL_DATA.get().contains(state);
+		}
+		
+		return false;
 	}
 	
 	@Override

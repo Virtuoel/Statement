@@ -23,6 +23,8 @@ public class StatementConfig
 		
 		config.add("customBlockStateDeferral", new JsonObject());
 		
+		config.addProperty("enableStateDeferralApi", true);
+		
 		config.add("customBlockStateSync", new JsonObject());
 		
 		config.addProperty("enableIdSyncApi", true);
