@@ -1,12 +1,15 @@
 package virtuoel.statement;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -40,11 +43,14 @@ public class Statement implements ModInitializer, StatementApi
 {
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 	
+	public Statement()
+	{
+		StatementConfig.DATA.getClass();
+	}
+	
 	@Override
 	public void onInitialize()
 	{
-		StatementConfig.DATA.getClass();
-		
 		final boolean fabricCommandsLoaded = FabricLoader.getInstance().isModLoaded("fabric-commands-v0");
 		final boolean fabricNetworkingLoaded = FabricLoader.getInstance().isModLoaded("fabric-networking-v0");
 		
@@ -65,6 +71,87 @@ public class Statement implements ModInitializer, StatementApi
 	}
 	
 	public static final Identifier CLIENT_STATES_PACKET = id("client_states");
+	
+	private static final Supplier<Set<BlockState>> BLOCK_STATE_DEFERRAL_DATA = new Lazy<>(() ->
+	{
+		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customBlockStateDeferral"))
+			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
+			.orElseGet(JsonObject::new);
+		
+		return loadStateDeferralData(data, Registry.BLOCK, Block::getStateManager);
+	})::get;
+	
+	private static final Supplier<Set<FluidState>> FLUID_STATE_DEFERRAL_DATA = new Lazy<>(() ->
+	{
+		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customFluidStateDeferral"))
+			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
+			.orElseGet(JsonObject::new);
+		
+		return loadStateDeferralData(data, Registry.FLUID, Fluid::getStateManager);
+	})::get;
+	
+	private static <O, S extends State<S>> Set<S> loadStateDeferralData(final JsonObject data, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
+	{
+		final Set<S> deferralData = new HashSet<>();
+		
+		for (final Entry<String, JsonElement> e : data.entrySet())
+		{
+			registry.getOrEmpty(new Identifier(e.getKey())).ifPresent(block ->
+			{
+				final JsonArray states = Optional.ofNullable(e.getValue())
+					.filter(JsonElement::isJsonArray).map(JsonElement::getAsJsonArray)
+					.orElseGet(JsonArray::new);
+				
+				final StateManager<O, S> manager = managerFunc.apply(block);
+				
+				for (final JsonElement s : states)
+				{
+					if (!s.isJsonObject())
+					{
+						continue;
+					}
+					
+					final JsonObject stateSyncData = s.getAsJsonObject();
+					
+					final JsonObject properties = Optional.ofNullable(stateSyncData.get("properties"))
+						.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
+						.orElseGet(JsonObject::new);
+					
+					final Map<Property<?>, Predicate<Object>> predicates = new HashMap<>();
+					
+					for (final Entry<String, JsonElement> p : properties.entrySet())
+					{
+						final Property<?> property = manager.getProperty(p.getKey());
+						if (property != null)
+						{
+							property.parse(p.getValue().getAsString()).ifPresent(val -> predicates.put(property, ((Object) val)::equals));
+						}
+					}
+					
+					manager.getStates().stream()
+						.filter(st -> predicates.entrySet().stream().allMatch(en -> en.getValue().test(st.get(en.getKey()))))
+						.forEach(st -> {deferralData.add(st);LOGGER.info("deferring {}", st);});
+				}
+			});
+		}
+		
+		return deferralData;
+	}
+	
+	@Override
+	public <S> boolean shouldDeferState(IdList<S> idList, S state)
+	{
+		if (idList == Block.STATE_IDS)
+		{
+			return BLOCK_STATE_DEFERRAL_DATA.get().contains(state);
+		}
+		else if (idList == Fluid.STATE_IDS)
+		{
+			return FLUID_STATE_DEFERRAL_DATA.get().contains(state);
+		}
+		
+		return StatementApi.super.shouldDeferState(idList, state);
+	}
 	
 	public static OptionalInt getSyncedBlockStateId(@Nullable final BlockState state)
 	{
@@ -112,23 +199,23 @@ public class Statement implements ModInitializer, StatementApi
 		return OptionalInt.empty();
 	}
 	
-	private static final Lazy<Map<BlockState, OptionalInt>> BLOCK_STATE_SYNC_DATA = new Lazy<>(() ->
+	private static final Supplier<Map<BlockState, OptionalInt>> BLOCK_STATE_SYNC_DATA = new Lazy<>(() ->
 	{
 		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customBlockStateSync"))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
 			.orElseGet(JsonObject::new);
 		
 		return loadStateSyncData(data, Registry.BLOCK, Block::getStateManager);
-	});
+	})::get;
 	
-	private static final Lazy<Map<FluidState, OptionalInt>> FLUID_STATE_SYNC_DATA = new Lazy<>(() ->
+	private static final Supplier<Map<FluidState, OptionalInt>> FLUID_STATE_SYNC_DATA = new Lazy<>(() ->
 	{
 		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customFluidStateSync"))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
 			.orElseGet(JsonObject::new);
 		
 		return loadStateSyncData(data, Registry.FLUID, Fluid::getStateManager);
-	});
+	})::get;
 	
 	private static <O, S extends State<S>> Map<S, OptionalInt> loadStateSyncData(final JsonObject data, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
 	{

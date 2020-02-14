@@ -21,6 +21,8 @@ public class StatementConfig
 	{
 		final JsonObject config = new JsonObject();
 		
+		config.add("customBlockStateDeferral", new JsonObject());
+		
 		config.add("customBlockStateSync", new JsonObject());
 		
 		config.addProperty("enableIdSyncApi", true);
