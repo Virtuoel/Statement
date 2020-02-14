@@ -9,6 +9,7 @@
 		"IdListMixin",
 		"StateManagerBuilderMixin",
 		"StateManagerMixin",
+		"WallBlockMixin",
 		"sync.ArrayPaletteMixin",
 		"sync.BiMapPaletteMixin",
 		"sync.BlockStateParticleEffectMixin",
