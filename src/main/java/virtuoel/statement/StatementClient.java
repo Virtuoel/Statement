@@ -2,7 +2,7 @@ package virtuoel.statement;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import virtuoel.statement.util.StateIdListSync;
+import virtuoel.statement.util.FabricApiCompatibility;
 
 public class StatementClient implements ClientModInitializer
 {
@@ -13,7 +13,7 @@ public class StatementClient implements ClientModInitializer
 		
 		if (fabricNetworkingLoaded)
 		{
-			StateIdListSync.setupClientNetworking();
+			FabricApiCompatibility.setupClientNetworking();
 		}
 	}
 }

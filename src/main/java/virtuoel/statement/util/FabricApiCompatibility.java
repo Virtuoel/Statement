@@ -23,7 +23,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.PacketByteBuf;
 import virtuoel.statement.Statement;
 
-public class StateIdListSync
+public class FabricApiCompatibility
 {
 	public static void setupCommands(final boolean networkingLoaded)
 	{

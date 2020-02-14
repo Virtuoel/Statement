@@ -34,7 +34,7 @@ import net.minecraft.util.registry.DefaultedRegistry;
 import net.minecraft.util.registry.Registry;
 import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.StatementConfig;
-import virtuoel.statement.util.StateIdListSync;
+import virtuoel.statement.util.FabricApiCompatibility;
 
 public class Statement implements ModInitializer, StatementApi
 {
@@ -50,12 +50,12 @@ public class Statement implements ModInitializer, StatementApi
 		
 		if (fabricCommandsLoaded)
 		{
-			StateIdListSync.setupCommands(fabricNetworkingLoaded);
+			FabricApiCompatibility.setupCommands(fabricNetworkingLoaded);
 		}
 		
 		if (fabricNetworkingLoaded)
 		{
-			StateIdListSync.setupServerNetworking();
+			FabricApiCompatibility.setupServerNetworking();
 		}
 	}
 	
