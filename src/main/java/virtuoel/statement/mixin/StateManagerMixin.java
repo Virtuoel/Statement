@@ -1,6 +1,5 @@
 package virtuoel.statement.mixin;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -59,29 +58,17 @@ public class StateManagerMixin<O, S extends State<S>> implements RefreshableStat
 	}
 	
 	@Override
-	public Property<?> statement_addProperty(final Property<?> property)
+	public Map<String, Property<?>> statement_getProperties()
 	{
-		final Map<String, Property<?>> map = new HashMap<>(properties);
-		final Property<?> ret = map.put(property.getName(), property);
-		properties = ImmutableSortedMap.copyOf(map);
-		return ret;
+		return properties;
 	}
 	
 	@Override
-	public Property<?> statement_removeProperty(final String propertyName)
+	public void statement_setProperties(Map<String, Property<?>> properties)
 	{
-		final Map<String, Property<?>> map = new HashMap<>(properties);
-		final Property<?> ret = map.remove(propertyName);
-		properties = ImmutableSortedMap.copyOf(map);
-		return ret;
-	}
-	
-	@Override
-	public boolean statement_removeProperty(final Property<?> property)
-	{
-		final Map<String, Property<?>> map = new HashMap<>(properties);
-		final boolean ret = map.remove(property.getName(), property);
-		properties = ImmutableSortedMap.copyOf(map);
-		return ret;
+		if (properties instanceof ImmutableSortedMap<?, ?>)
+		{
+			this.properties = (ImmutableSortedMap<String, Property<?>>) properties;
+		}
 	}
 }
