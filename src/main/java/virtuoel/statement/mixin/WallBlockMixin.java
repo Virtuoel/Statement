@@ -1,5 +1,6 @@
 package virtuoel.statement.mixin;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.spongepowered.asm.mixin.Final;
@@ -8,10 +9,12 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.google.common.collect.ImmutableMap;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.WallBlock;
 import net.minecraft.entity.EntityContext;
@@ -25,6 +28,20 @@ public class WallBlockMixin
 {
 	@Shadow @Final @Mutable private Map<BlockState, VoxelShape> shapeMap;
 	@Shadow @Final @Mutable private Map<BlockState, VoxelShape> collisionShapeMap;
+	
+	@Inject(at = @At("RETURN"), method = "<init>")
+	private void onConstruct(Block.Settings settings, CallbackInfo info)
+	{
+		if (shapeMap instanceof ImmutableMap)
+		{
+			shapeMap = new LinkedHashMap<>(shapeMap);
+		}
+		
+		if (collisionShapeMap instanceof ImmutableMap)
+		{
+			collisionShapeMap = new LinkedHashMap<>(collisionShapeMap);
+		}
+	}
 	
 	@Inject(at = @At("RETURN"), method = "getOutlineShape", cancellable = true)
 	private void onGetOutlineShape(BlockState state, BlockView view, BlockPos pos, EntityContext context, CallbackInfoReturnable<VoxelShape> info)
@@ -40,10 +57,7 @@ public class WallBlockMixin
 					.with(Properties.WEST_WALL_SHAPE, state.get(Properties.WEST_WALL_SHAPE))
 			);
 			
-			shapeMap = ImmutableMap.<BlockState, VoxelShape>builder()
-				.putAll(shapeMap)
-				.put(state, shape)
-				.build();
+			shapeMap.put(state, shape);
 			
 			info.setReturnValue(shape);
 		}
@@ -63,10 +77,7 @@ public class WallBlockMixin
 					.with(Properties.WEST_WALL_SHAPE, state.get(Properties.WEST_WALL_SHAPE))
 			);
 			
-			collisionShapeMap = ImmutableMap.<BlockState, VoxelShape>builder()
-				.putAll(collisionShapeMap)
-				.put(state, shape)
-				.build();
+			collisionShapeMap.put(state, shape);
 			
 			info.setReturnValue(shape);
 		}
