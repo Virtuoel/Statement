@@ -40,6 +40,8 @@ public class StateRefresherImpl implements StateRefresher
 	@Override
 	public <O, V extends Comparable<V>, S extends State<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateManager<O, S>> factoryGetter, final Consumer<S> newStateConsumer)
 	{
+		Statement.invalidateCustomStateData(stateIdList);
+		
 		final long startTime = System.nanoTime();
 		
 		final List<RefreshableStateManager<O, S>> managersToRefresh = new LinkedList<>();
