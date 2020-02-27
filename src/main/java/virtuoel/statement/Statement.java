@@ -77,7 +77,8 @@ public class Statement implements ModInitializer, StatementApi
 		return new Identifier(MOD_ID, name);
 	}
 	
-	public static final Identifier CLIENT_STATES_PACKET = id("client_states");
+	public static final Identifier BLOCK_STATE_VALIDATION_PACKET = id("block_state_validation");
+	public static final Identifier FLUID_STATE_VALIDATION_PACKET = id("fluid_state_validation");
 	
 	private static final InvalidatableLazySupplier<Set<BlockState>> BLOCK_STATE_DEFERRAL_DATA = new InvalidatableLazySupplier<>(() ->
 	{
