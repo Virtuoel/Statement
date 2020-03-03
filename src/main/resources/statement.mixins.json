@@ -18,6 +18,10 @@
 		"sync.PlayerActionResponseS2CPacketMixin",
 		"sync.WorldEventS2CPacketMixin"
 	],
+	"client":
+	[
+		"client.ClientPlayNetworkHandlerMixin"
+	],
 	"injectors":
 	{
 		"defaultRequire": 1

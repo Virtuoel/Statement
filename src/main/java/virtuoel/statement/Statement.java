@@ -32,7 +32,6 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.IdList;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Lazy;
 import net.minecraft.util.registry.DefaultedRegistry;
 import net.minecraft.util.registry.Registry;
 import virtuoel.statement.api.StatementApi;
@@ -78,25 +77,26 @@ public class Statement implements ModInitializer, StatementApi
 		return new Identifier(MOD_ID, name);
 	}
 	
-	public static final Identifier CLIENT_STATES_PACKET = id("client_states");
+	public static final Identifier BLOCK_STATE_VALIDATION_PACKET = id("block_state_validation");
+	public static final Identifier FLUID_STATE_VALIDATION_PACKET = id("fluid_state_validation");
 	
-	private static final Supplier<Set<BlockState>> BLOCK_STATE_DEFERRAL_DATA = new Lazy<>(() ->
+	private static final InvalidatableLazySupplier<Set<BlockState>> BLOCK_STATE_DEFERRAL_DATA = new InvalidatableLazySupplier<>(() ->
 	{
 		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customBlockStateDeferral"))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
 			.orElseGet(JsonObject::new);
 		
 		return loadStateDeferralData(data, Registry.BLOCK, Block::getStateManager);
-	})::get;
+	});
 	
-	private static final Supplier<Set<FluidState>> FLUID_STATE_DEFERRAL_DATA = new Lazy<>(() ->
+	private static final InvalidatableLazySupplier<Set<FluidState>> FLUID_STATE_DEFERRAL_DATA = new InvalidatableLazySupplier<>(() ->
 	{
 		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customFluidStateDeferral"))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
 			.orElseGet(JsonObject::new);
 		
 		return loadStateDeferralData(data, Registry.FLUID, Fluid::getStateManager);
-	})::get;
+	});
 	
 	private static <O, S extends State<S>> Set<S> loadStateDeferralData(final JsonObject data, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
 	{
@@ -236,23 +236,23 @@ public class Statement implements ModInitializer, StatementApi
 		return OptionalInt.empty();
 	}
 	
-	private static final Supplier<Map<BlockState, OptionalInt>> BLOCK_STATE_SYNC_DATA = new Lazy<>(() ->
+	private static final InvalidatableLazySupplier<Map<BlockState, OptionalInt>> BLOCK_STATE_SYNC_DATA = new InvalidatableLazySupplier<>(() ->
 	{
 		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customBlockStateSync"))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
 			.orElseGet(JsonObject::new);
 		
 		return loadStateSyncData(data, Registry.BLOCK, Block::getStateManager);
-	})::get;
+	});
 	
-	private static final Supplier<Map<FluidState, OptionalInt>> FLUID_STATE_SYNC_DATA = new Lazy<>(() ->
+	private static final InvalidatableLazySupplier<Map<FluidState, OptionalInt>> FLUID_STATE_SYNC_DATA = new InvalidatableLazySupplier<>(() ->
 	{
 		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customFluidStateSync"))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
 			.orElseGet(JsonObject::new);
 		
 		return loadStateSyncData(data, Registry.FLUID, Fluid::getStateManager);
-	})::get;
+	});
 	
 	private static <O, S extends State<S>> Map<S, OptionalInt> loadStateSyncData(final JsonObject data, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
 	{
@@ -320,5 +320,41 @@ public class Statement implements ModInitializer, StatementApi
 		}
 		
 		return StatementApi.super.getSyncedId(idList, state);
+	}
+	
+	public static void invalidateCustomStateData(final IdList<?> idList)
+	{
+		if (idList == Block.STATE_IDS)
+		{
+			BLOCK_STATE_DEFERRAL_DATA.invalidate();
+			BLOCK_STATE_SYNC_DATA.invalidate();
+		}
+		else if (idList == Fluid.STATE_IDS)
+		{
+			FLUID_STATE_DEFERRAL_DATA.invalidate();
+			FLUID_STATE_SYNC_DATA.invalidate();
+		}
+	}
+	
+	public static class InvalidatableLazySupplier<T> implements Supplier<T>
+	{
+		private Supplier<T> delegate;
+		private T value;
+		
+		public InvalidatableLazySupplier(Supplier<T> delegate)
+		{
+			this.delegate = delegate;
+		}
+		
+		@Override
+		public T get()
+		{
+			return this.value == null ? this.value = delegate.get() : this.value;
+		}
+		
+		public void invalidate()
+		{
+			value = null;
+		}
 	}
 }
