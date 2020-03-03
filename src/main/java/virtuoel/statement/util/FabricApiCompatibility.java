@@ -153,7 +153,7 @@ public class FabricApiCompatibility
 			{
 				final PlayerEntity executor = player.getEntityWorld().getPlayerByUuid(uuid);
 				
-				if (executor.onGround || !executor.isSneaking())
+				if (!executor.isSneaking())
 				{
 					boolean idsFound = false;
 					boolean done = false;
@@ -257,7 +257,7 @@ public class FabricApiCompatibility
 			
 			ctx.getTaskQueue().execute(() ->
 			{
-				if (player.onGround || !player.isSneaking())
+				if (!player.isSneaking())
 				{
 					final PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer()).writeUuid(uuid).writeVarInt(idQuantity);
 					
