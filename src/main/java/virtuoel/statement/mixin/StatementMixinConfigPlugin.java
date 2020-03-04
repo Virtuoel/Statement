@@ -41,15 +41,19 @@ public class StatementMixinConfigPlugin implements IMixinConfigPlugin
 				String.format("Invalid package for class \"%s\": Expected \"%s\", but found \"%s\".", targetClassName, MIXIN_PACKAGE, mixinClassName)
 			);
 		}
-		else
+		
+		if (
+			(mixinClassName.contains(".compat114.") && MINOR != 14) ||
+			(mixinClassName.contains(".compat114plus.") && MINOR < 14) ||
+			(mixinClassName.contains(".compat115.") && MINOR != 15) ||
+			(mixinClassName.contains(".compat115plus.") && MINOR < 15) ||
+			(mixinClassName.contains(".compat116.") && MINOR != 16) ||
+			(mixinClassName.contains(".compat116plus.") && MINOR < 16) ||
+			(mixinClassName.contains(".compat117.") && MINOR != 17) ||
+			(mixinClassName.contains(".compat117plus.") && MINOR < 17)
+		)
 		{
-			switch (mixinClassName)
-			{
-				case MIXIN_PACKAGE + ".WallBlock116PlusMixin":
-					return getVersionComponent(MINOR) >= 16;
-				default:
-					break;
-			}
+			return false;
 		}
 		
 		return true;
@@ -80,9 +84,9 @@ public class StatementMixinConfigPlugin implements IMixinConfigPlugin
 	}
 	
 	private static final SemanticVersion MINECRAFT_VERSION = lookupMinecraftVersion();
-	protected static final int MAJOR = 0;
-	protected static final int MINOR = 1;
-	protected static final int PATCH = 2;
+	protected static final int MAJOR = getVersionComponent(0);
+	protected static final int MINOR = getVersionComponent(1);
+	protected static final int PATCH = getVersionComponent(2);
 	
 	private static SemanticVersion lookupMinecraftVersion()
 	{

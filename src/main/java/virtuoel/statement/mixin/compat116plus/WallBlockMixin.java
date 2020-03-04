@@ -1,4 +1,4 @@
-package virtuoel.statement.mixin;
+package virtuoel.statement.mixin.compat116plus;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -24,7 +24,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 
 @Mixin(WallBlock.class)
-public class WallBlock116PlusMixin
+public class WallBlockMixin
 {
 	@Shadow @Final @Mutable private Map<BlockState, VoxelShape> shapeMap;
 	@Shadow @Final @Mutable private Map<BlockState, VoxelShape> collisionShapeMap;
