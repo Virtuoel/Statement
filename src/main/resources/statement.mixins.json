@@ -2,6 +2,7 @@
 	"required": true,
 	"package": "virtuoel.statement.mixin",
 	"compatibilityLevel": "JAVA_8",
+	"plugin": "virtuoel.statement.mixin.StatementMixinConfigPlugin",
 	"mixins":
 	[
 		"AbstractPropertyContainerMixin",
@@ -9,7 +10,7 @@
 		"IdListMixin",
 		"StateManagerBuilderMixin",
 		"StateManagerMixin",
-		"WallBlockMixin",
+		"WallBlock116PlusMixin",
 		"sync.ArrayPaletteMixin",
 		"sync.BiMapPaletteMixin",
 		"sync.BlockStateParticleEffectMixin",

@@ -24,7 +24,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 
 @Mixin(WallBlock.class)
-public class WallBlockMixin
+public class WallBlock116PlusMixin
 {
 	@Shadow @Final @Mutable private Map<BlockState, VoxelShape> shapeMap;
 	@Shadow @Final @Mutable private Map<BlockState, VoxelShape> collisionShapeMap;
