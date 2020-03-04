@@ -7,9 +7,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.SemanticVersion;
-import net.fabricmc.loader.api.Version;
+import virtuoel.statement.util.VersionData;
 
 public class StatementMixinConfigPlugin implements IMixinConfigPlugin
 {
@@ -43,14 +41,14 @@ public class StatementMixinConfigPlugin implements IMixinConfigPlugin
 		}
 		
 		if (
-			(mixinClassName.contains(".compat114.") && MINOR != 14) ||
-			(mixinClassName.contains(".compat114plus.") && MINOR < 14) ||
-			(mixinClassName.contains(".compat115.") && MINOR != 15) ||
-			(mixinClassName.contains(".compat115plus.") && MINOR < 15) ||
-			(mixinClassName.contains(".compat116.") && MINOR != 16) ||
-			(mixinClassName.contains(".compat116plus.") && MINOR < 16) ||
-			(mixinClassName.contains(".compat117.") && MINOR != 17) ||
-			(mixinClassName.contains(".compat117plus.") && MINOR < 17)
+			(mixinClassName.contains(".compat114.") && VersionData.MINOR != 14) ||
+			(mixinClassName.contains(".compat114plus.") && VersionData.MINOR < 14) ||
+			(mixinClassName.contains(".compat115.") && VersionData.MINOR != 15) ||
+			(mixinClassName.contains(".compat115plus.") && VersionData.MINOR < 15) ||
+			(mixinClassName.contains(".compat116.") && VersionData.MINOR != 16) ||
+			(mixinClassName.contains(".compat116plus.") && VersionData.MINOR < 16) ||
+			(mixinClassName.contains(".compat117.") && VersionData.MINOR != 17) ||
+			(mixinClassName.contains(".compat117plus.") && VersionData.MINOR < 17)
 		)
 		{
 			return false;
@@ -81,22 +79,5 @@ public class StatementMixinConfigPlugin implements IMixinConfigPlugin
 	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo)
 	{
 		
-	}
-	
-	private static final SemanticVersion MINECRAFT_VERSION = lookupMinecraftVersion();
-	protected static final int MAJOR = getVersionComponent(0);
-	protected static final int MINOR = getVersionComponent(1);
-	protected static final int PATCH = getVersionComponent(2);
-	
-	private static SemanticVersion lookupMinecraftVersion()
-	{
-		final Version version = FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion();
-		
-		return (SemanticVersion) (version instanceof SemanticVersion ? version : null);
-	}
-	
-	private static int getVersionComponent(int pos)
-	{
-		return MINECRAFT_VERSION != null ? MINECRAFT_VERSION.getVersionComponent(pos) : -1;
 	}
 }
