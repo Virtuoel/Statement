@@ -2,6 +2,7 @@ package virtuoel.statement.util;
 
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,8 @@ import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.command.arguments.BlockPosArgumentType;
 import net.minecraft.command.arguments.EntityArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
@@ -26,13 +29,16 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.IdList;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.BlockView;
 import virtuoel.statement.Statement;
 import virtuoel.statement.api.StateRefresher;
 
@@ -53,8 +59,43 @@ public class FabricApiCompatibility
 					.then(stateValidationArgument("block_state", Statement.BLOCK_STATE_VALIDATION_PACKET, networkingLoaded))
 					.then(stateValidationArgument("fluid_state", Statement.FLUID_STATE_VALIDATION_PACKET, networkingLoaded))
 				)
+				.then(
+					CommandManager.literal("get_id")
+					.then(idGetterArgument("block_state", Block.STATE_IDS, BlockView::getBlockState, Registry.BLOCK, BlockState::getBlock))
+					.then(idGetterArgument("fluid_state", Fluid.STATE_IDS, BlockView::getFluidState, Registry.FLUID, FluidState::getFluid))
+				)
 			);
 		});
+	}
+	
+	private static <O, S extends State<S>> ArgumentBuilder<ServerCommandSource, ?> idGetterArgument(final String argumentName, IdList<S> idList, final BiFunction<ServerWorld, BlockPos, S> stateFunc, Registry<O> registry, Function<S, O> entryFunction)
+	{
+		return CommandManager.literal(argumentName)
+			.then(
+				CommandManager.argument("pos", BlockPosArgumentType.blockPos())
+				.executes(context ->
+				{
+					final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+					final S state = stateFunc.apply(context.getSource().getWorld(), pos);
+					
+					final StringBuilder stringBuilder = new StringBuilder();
+					stringBuilder.append(registry.getId(entryFunction.apply(state)));
+					
+					if (!state.getEntries().isEmpty())
+					{
+						stringBuilder.append('[');
+						stringBuilder.append(state.getEntries().entrySet().stream().map(entry ->
+						{
+							final Property<?> property = entry.getKey();
+							return property.getName() + "=" + State.nameValue(property, entry.getValue());
+						}).collect(Collectors.joining(",")));
+						stringBuilder.append(']');
+					}
+					
+					context.getSource().sendFeedback(new LiteralText(String.format("%s (%d) @ %d, %d, %d", stringBuilder.toString(), idList.getId(state), pos.getX(), pos.getY(), pos.getZ())), false);
+					return 1;
+				})
+			);
 	}
 	
 	private static ArgumentBuilder<ServerCommandSource, ?> stateValidationArgument(final String argumentName, final Identifier packetId, final boolean networkingLoaded)
