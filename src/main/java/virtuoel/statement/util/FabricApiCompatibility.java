@@ -3,6 +3,7 @@ package virtuoel.statement.util;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -61,32 +62,32 @@ public class FabricApiCompatibility
 		return CommandManager.literal(argumentName)
 			.executes(context ->
 			{
-				return execute(context, networkingLoaded, packetId, context.getSource().getPlayer(), 100, 0);
+				return executeValidation(context, networkingLoaded, packetId, context.getSource().getPlayer(), 100, 0);
 			})
 			.then(
 				CommandManager.argument("player", EntityArgumentType.player())
 				.executes(context ->
 				{
-					return execute(context, networkingLoaded, packetId, EntityArgumentType.getPlayer(context, "player"), 100, 0);
+					return executeValidation(context, networkingLoaded, packetId, EntityArgumentType.getPlayer(context, "player"), 100, 0);
 				})
 				.then(
 					CommandManager.argument("rate", IntegerArgumentType.integer(1, Block.STATE_IDS.size()))
 					.executes(context ->
 					{
-						return execute(context, networkingLoaded, packetId, EntityArgumentType.getPlayer(context, "player"), IntegerArgumentType.getInteger(context, "rate"), 0);
+						return executeValidation(context, networkingLoaded, packetId, EntityArgumentType.getPlayer(context, "player"), IntegerArgumentType.getInteger(context, "rate"), 0);
 					})
 					.then(
 						CommandManager.argument("start_id", IntegerArgumentType.integer(0, Block.STATE_IDS.size() - 1))
 						.executes(context ->
 						{
-							return execute(context, networkingLoaded, packetId, EntityArgumentType.getPlayer(context, "player"), IntegerArgumentType.getInteger(context, "rate"), IntegerArgumentType.getInteger(context, "start_id"));
+							return executeValidation(context, networkingLoaded, packetId, EntityArgumentType.getPlayer(context, "player"), IntegerArgumentType.getInteger(context, "rate"), IntegerArgumentType.getInteger(context, "start_id"));
 						})
 					)
 				)
 			);
 	}
 	
-	private static int execute(final CommandContext<ServerCommandSource> context, final boolean networkingLoaded, final Identifier packetId, final PlayerEntity player, final int rate, final int initialId) throws CommandSyntaxException
+	private static int executeValidation(final CommandContext<ServerCommandSource> context, final boolean networkingLoaded, final Identifier packetId, final PlayerEntity player, final int rate, final int initialId) throws CommandSyntaxException
 	{
 		if (networkingLoaded)
 		{
@@ -165,6 +166,21 @@ public class FabricApiCompatibility
 						try
 						{
 							final CompoundTag sentData = StringNbtReader.parse(snbts[i]);
+							final String sentName = sentData.getString("Name");
+							
+							final StringBuilder sentStringBuilder = new StringBuilder();
+							sentStringBuilder.append(sentName);
+							
+							if (sentData.contains("Properties", 10))
+							{
+								sentStringBuilder.append('[');
+								final CompoundTag properties = sentData.getCompound("Properties");
+								sentStringBuilder.append(properties.getKeys().stream().map(key ->
+								{
+									return key + "=" + properties.getString(key);
+								}).collect(Collectors.joining(",")));
+								sentStringBuilder.append(']');
+							}
 							
 							if (state != null)
 							{
@@ -175,22 +191,41 @@ public class FabricApiCompatibility
 								
 								if (sentData.equals(ownData))
 								{
-									executor.sendMessage(new LiteralText(String.format("ID %d matched (%d/%d: %.2f%%):\n%s", ids[i], ids[i] + 1, total, percent, ownData)));
-								}
-								else if(sentData.getString("Name").equals(ownData.getString("Name")))
-								{
-									executor.sendMessage(new LiteralText(String.format("ID %d partially matched (%d/%d: %.2f%%):\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownData, sentData)));
+									executor.sendMessage(new LiteralText(String.format("ID %d matched (%d/%d: %.2f%%):\n%s", ids[i], ids[i] + 1, total, percent, sentStringBuilder.toString())));
 								}
 								else
 								{
-									executor.sendMessage(new LiteralText(String.format("ID %d mismatched (%d/%d: %.2f%%)!\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownData, sentData)));
+									final String ownName = ownData.getString("Name");
+									
+									final StringBuilder ownStringBuilder = new StringBuilder();
+									ownStringBuilder.append(ownName);
+									
+									if (ownData.contains("Properties", 10))
+									{
+										ownStringBuilder.append('[');
+										final CompoundTag properties = ownData.getCompound("Properties");
+										ownStringBuilder.append(properties.getKeys().stream().map(key ->
+										{
+											return key + "=" + properties.getString(key);
+										}).collect(Collectors.joining(",")));
+										ownStringBuilder.append(']');
+									}
+									
+									if (sentName.equals(ownName))
+									{
+										executor.sendMessage(new LiteralText(String.format("ID %d partially matched (%d/%d: %.2f%%):\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())));
+									}
+									else
+									{
+										executor.sendMessage(new LiteralText(String.format("ID %d mismatched (%d/%d: %.2f%%)!\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())));
+									}
 								}
 								
 								idsFound = true;
 							}
 							else
 							{
-								executor.sendMessage(new LiteralText("Received ID not found on server: " + ids[i]));
+								executor.sendMessage(new LiteralText(String.format("Received ID %d not found on server.\nClient state:\n%s", ids[i], sentStringBuilder.toString())));
 							}
 						}
 						catch (CommandSyntaxException e)
