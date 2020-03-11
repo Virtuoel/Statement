@@ -242,7 +242,7 @@ public class Statement implements ModInitializer, StatementApi
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
 			.orElseGet(JsonObject::new);
 		
-		return loadStateSyncData(data, Registry.BLOCK, Block::getStateManager);
+		return loadStateSyncData(data, Block.STATE_IDS, Registry.BLOCK, Block::getStateManager, Block::getDefaultState);
 	});
 	
 	private static final InvalidatableLazySupplier<Map<FluidState, OptionalInt>> FLUID_STATE_SYNC_DATA = new InvalidatableLazySupplier<>(() ->
@@ -251,10 +251,10 @@ public class Statement implements ModInitializer, StatementApi
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
 			.orElseGet(JsonObject::new);
 		
-		return loadStateSyncData(data, Registry.FLUID, Fluid::getStateManager);
+		return loadStateSyncData(data, Fluid.STATE_IDS, Registry.FLUID, Fluid::getStateManager, Fluid::getDefaultState);
 	});
 	
-	private static <O, S extends State<S>> Map<S, OptionalInt> loadStateSyncData(final JsonObject data, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
+	private static <O, S extends State<S>> Map<S, OptionalInt> loadStateSyncData(final JsonObject data, final IdList<S> idList, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc, final Function<O, S> defaultStateFunc)
 	{
 		final Map<S, OptionalInt> syncData = new HashMap<>();
 		
@@ -289,41 +289,38 @@ public class Statement implements ModInitializer, StatementApi
 						.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString)
 						.map(Identifier::new);
 					
-					BlockState syncedState = syncedBlockId.map(Registry.BLOCK::getOrEmpty)
-						.orElseGet(Optional::empty)
-						.map(Block::getDefaultState)
-						.orElse(null);
+					final JsonObject syncedStateProperties = Optional.ofNullable(syncedStateData.get("properties"))
+						.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
+						.orElseGet(JsonObject::new);
 					
-					if (syncedState != null)
+					final Function<S, Integer> stateIdFunc;
+					
+					if (syncedBlockId.isPresent())
 					{
-						final JsonObject syncedStateProperties = Optional.ofNullable(syncedStateData.get("properties"))
-							.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
-							.orElseGet(JsonObject::new);
+						S syncedState = syncedBlockId.map(registry::getOrEmpty)
+							.orElseGet(Optional::empty)
+							.map(defaultStateFunc)
+							.orElse(null);
 						
-						for (final Entry<String, JsonElement> p : syncedStateProperties.entrySet())
+						if (syncedState != null)
 						{
-							final Property<?> property = manager.getProperty(p.getKey());
-							if (property != null)
-							{
-								final BlockState state = syncedState;
-								syncedState = property.parse(p.getValue().getAsString())
-									.map(val ->
-									{
-										@SuppressWarnings({ "rawtypes", "unchecked" })
-										final BlockState next = state.with((Property) property, val);
-										return next;
-									}).orElse(syncedState);
-							}
+							final int id = idList.getId(getStateWithProperties(manager, syncedState, syncedStateProperties.entrySet()));
+							stateIdFunc = state -> id;
+						}
+						else
+						{
+							stateIdFunc = state -> -1;
 						}
 					}
+					else
+					{
+						stateIdFunc = state -> idList.getId(getStateWithProperties(manager, state, syncedStateProperties.entrySet()));
+					}
 					
-					final int stateId = syncedState == null ? -1 : Block.STATE_IDS.getId(syncedState);
-					
-					final OptionalInt syncedId = stateId != -1 ? OptionalInt.of(stateId) :
-						Optional.ofNullable(stateSyncData.get("syncedId"))
-							.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsJsonPrimitive)
-							.filter(JsonPrimitive::isNumber).map(JsonPrimitive::getAsInt)
-							.map(OptionalInt::of).orElseGet(OptionalInt::empty);
+					final OptionalInt syncedId = Optional.ofNullable(stateSyncData.get("syncedId"))
+						.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsJsonPrimitive)
+						.filter(JsonPrimitive::isNumber).map(JsonPrimitive::getAsInt)
+						.map(OptionalInt::of).orElseGet(OptionalInt::empty);
 					
 					final Map<Property<?>, Predicate<Object>> predicates = new HashMap<>();
 					
@@ -338,12 +335,37 @@ public class Statement implements ModInitializer, StatementApi
 					
 					manager.getStates().stream()
 						.filter(st -> predicates.entrySet().stream().allMatch(en -> en.getValue().test(st.get(en.getKey()))))
-						.forEach(st -> syncData.put(st, syncedId));
+						.forEach(st ->
+						{
+							final int id = stateIdFunc.apply(st);
+							syncData.put(st, id == -1 ? syncedId : OptionalInt.of(id));
+						});
 				}
 			});
 		}
 		
 		return syncData;
+	}
+	
+	private static <O, S extends State<S>> S getStateWithProperties(final StateManager<O, S> manager, S state, final Set<Entry<String, JsonElement>> properties)
+	{
+		for (final Entry<String, JsonElement> p : properties)
+		{
+			final Property<?> property = manager.getProperty(p.getKey());
+			if (property != null)
+			{
+				final S st = state;
+				state = property.parse(p.getValue().getAsString())
+					.map(val ->
+					{
+						@SuppressWarnings({ "rawtypes", "unchecked" })
+						final S next = (S) st.with((Property) property, val);
+						return next;
+					}).orElse(state);
+			}
+		}
+		
+		return state;
 	}
 	
 	@Override
