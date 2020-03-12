@@ -347,21 +347,23 @@ public class Statement implements ModInitializer, StatementApi
 		return syncData;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private static <O, S extends State<S>> S getStateWithProperties(final StateManager<O, S> manager, S state, final Set<Entry<String, JsonElement>> properties)
 	{
 		for (final Entry<String, JsonElement> p : properties)
 		{
-			final Property<?> property = manager.getProperty(p.getKey());
+			@SuppressWarnings("rawtypes")
+			final Property property = manager.getProperty(p.getKey());
+			
 			if (property != null)
 			{
-				final S st = state;
-				state = property.parse(p.getValue().getAsString())
-					.map(val ->
-					{
-						@SuppressWarnings({ "rawtypes", "unchecked" })
-						final S next = (S) st.with((Property) property, val);
-						return next;
-					}).orElse(state);
+				@SuppressWarnings("rawtypes")
+				final Optional<Comparable> value = property.parse(p.getValue().getAsString());
+				
+				if (value.isPresent())
+				{
+					state = (S) state.with(property, value.get());
+				}
 			}
 		}
 		
