@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
-import net.minecraft.util.IdList;
+import net.minecraft.util.collection.IdList;
 import net.minecraft.util.registry.Registry;
 import virtuoel.statement.Statement;
 import virtuoel.statement.api.ClearableIdList;

@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.BlockStateParticleEffect;
-import net.minecraft.util.PacketByteBuf;
 import virtuoel.statement.Statement;
 
 @Mixin(BlockStateParticleEffect.class)

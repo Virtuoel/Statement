@@ -18,7 +18,7 @@ import net.minecraft.state.AbstractState;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
-import net.minecraft.util.MapUtil;
+import net.minecraft.util.collection.MapUtil;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
 
 public interface RefreshableStateManager<O, S extends State<S>> extends MutableStateManager

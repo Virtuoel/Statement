@@ -9,7 +9,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
-import net.minecraft.util.IdList;
+import net.minecraft.util.collection.IdList;
 import net.minecraft.util.registry.Registry;
 import virtuoel.statement.api.property.MutableProperty;
 import virtuoel.statement.util.StateRefresherImpl;

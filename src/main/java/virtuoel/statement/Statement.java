@@ -30,8 +30,8 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
-import net.minecraft.util.IdList;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.IdList;
 import net.minecraft.util.registry.DefaultedRegistry;
 import net.minecraft.util.registry.Registry;
 import virtuoel.statement.api.StatementApi;
@@ -138,7 +138,7 @@ public class Statement implements ModInitializer, StatementApi
 					
 					manager.getStates().stream()
 						.filter(st -> predicates.entrySet().stream().allMatch(en -> en.getValue().test(st.get(en.getKey()))))
-						.forEach(st -> deferralData.add(st));
+						.forEach(deferralData::add);
 				}
 			});
 		}
