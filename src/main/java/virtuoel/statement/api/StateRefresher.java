@@ -5,7 +5,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
@@ -20,11 +19,7 @@ public interface StateRefresher
 	
 	default <V extends Comparable<V>> void refreshBlockStates(final MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues)
 	{
-		refreshStates(
-			Registry.BLOCK, Block.STATE_IDS,
-			property, addedValues, removedValues,
-			Block::getDefaultState, Block::getStateManager, BlockState::initShapeCache
-		);
+		
 	}
 	
 	default <V extends Comparable<V>> void refreshFluidStates(final MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues)

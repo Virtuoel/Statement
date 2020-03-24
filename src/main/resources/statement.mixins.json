@@ -10,6 +10,8 @@
 		"IdListMixin",
 		"StateManagerBuilderMixin",
 		"StateManagerMixin",
+		"compat115minus.BlockStateMixin",
+		"compat116plus.AbstractBlockStateMixin",
 		"compat116plus.WallBlockMixin",
 		"sync.ArrayPaletteMixin",
 		"sync.BiMapPaletteMixin",

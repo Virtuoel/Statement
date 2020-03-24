@@ -12,7 +12,7 @@ import virtuoel.statement.Statement;
 @Mixin(BlockUpdateS2CPacket.class)
 public class BlockUpdateS2CPacketMixin
 {
-	@Redirect(method = "write(Lnet/minecraft/util/PacketByteBuf;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;getRawIdFromState(Lnet/minecraft/block/BlockState;)I"))
+	@Redirect(method = "write(Lnet/minecraft/network/PacketByteBuf;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;getRawIdFromState(Lnet/minecraft/block/BlockState;)I"))
 	private int writeGetRawIdFromStateProxy(BlockState state)
 	{
 		return Statement.getSyncedBlockStateId(state).orElseGet(() -> Block.getRawIdFromState(state));

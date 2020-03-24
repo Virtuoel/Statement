@@ -18,7 +18,6 @@ import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.command.arguments.BlockPosArgumentType;
 import net.minecraft.command.arguments.EntityArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -61,7 +60,7 @@ public class FabricApiCompatibility
 				)
 				.then(
 					CommandManager.literal("get_id")
-					.then(idGetterArgument("block_state", Block.STATE_IDS, BlockView::getBlockState, Registry.BLOCK, BlockState::getBlock))
+					.then(idGetterArgument("block_state", Block.STATE_IDS, BlockView::getBlockState, Registry.BLOCK, s -> ((StatementBlockStateExtensions) s).statement_getBlock()))
 					.then(idGetterArgument("fluid_state", Fluid.STATE_IDS, BlockView::getFluidState, Registry.FLUID, FluidState::getFluid))
 				)
 			);

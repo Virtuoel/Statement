@@ -11,7 +11,7 @@ import virtuoel.statement.Statement;
 @Mixin(BiMapPalette.class)
 public class BiMapPaletteMixin<T>
 {
-	@Redirect(method = "toPacket(Lnet/minecraft/util/PacketByteBuf;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/collection/IdList;getId(Ljava/lang/Object;)I"))
+	@Redirect(method = "toPacket(Lnet/minecraft/network/PacketByteBuf;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/collection/IdList;getId(Ljava/lang/Object;)I"))
 	private int toPacketGetIdProxy(IdList<T> idList, T state)
 	{
 		return Statement.getSyncedStateId(idList, state).orElseGet(() -> idList.getId(state));

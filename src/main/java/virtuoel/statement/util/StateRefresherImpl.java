@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.block.Block;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
@@ -36,6 +37,16 @@ public class StateRefresherImpl implements StateRefresher
 	private static final Logger LOGGER = LogManager.getLogger(StatementApi.MOD_ID);
 	
 	private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+	
+	@Override
+	public <V extends Comparable<V>> void refreshBlockStates(MutableProperty<V> property, Collection<V> addedValues, Collection<V> removedValues)
+	{
+		refreshStates(
+			Registry.BLOCK, Block.STATE_IDS,
+			property, addedValues, removedValues,
+			Block::getDefaultState, Block::getStateManager, s -> ((StatementBlockStateExtensions) s).statement_initShapeCache()
+		);
+	}
 	
 	@Override
 	public <O, V extends Comparable<V>, S extends State<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateManager<O, S>> factoryGetter, final Consumer<S> newStateConsumer)
