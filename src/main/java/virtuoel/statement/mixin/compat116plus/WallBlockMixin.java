@@ -16,8 +16,8 @@ import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.block.WallBlock;
-import net.minecraft.entity.EntityContext;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
@@ -44,7 +44,7 @@ public class WallBlockMixin
 	}
 	
 	@Inject(at = @At("RETURN"), method = "getOutlineShape", cancellable = true)
-	private void onGetOutlineShape(BlockState state, BlockView view, BlockPos pos, EntityContext context, CallbackInfoReturnable<VoxelShape> info)
+	private void onGetOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context, CallbackInfoReturnable<VoxelShape> info)
 	{
 		if (info.getReturnValue() == null)
 		{
@@ -64,7 +64,7 @@ public class WallBlockMixin
 	}
 	
 	@Inject(at = @At("RETURN"), method = "getCollisionShape", cancellable = true)
-	private void onGetCollisionShape(BlockState state, BlockView view, BlockPos pos, EntityContext context, CallbackInfoReturnable<VoxelShape> info)
+	private void onGetCollisionShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context, CallbackInfoReturnable<VoxelShape> info)
 	{
 		if (info.getReturnValue() == null)
 		{
