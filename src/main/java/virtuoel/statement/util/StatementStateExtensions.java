@@ -8,4 +8,9 @@ public interface StatementStateExtensions
 	{
 		return false;
 	}
+	
+	default <V extends Comparable<V>> boolean statement_removeEntry(final Property<V> property)
+	{
+		return false;
+	}
 }

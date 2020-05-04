@@ -90,4 +90,22 @@ public class StateManagerMixin<O, S extends State<S>> implements RefreshableStat
 		
 		return ret;
 	}
+	
+	@Override
+	public Property<?> statement_removeProperty(String propertyName)
+	{
+		final Property<?> ret =  RefreshableStateManager.super.statement_removeProperty(propertyName);
+		
+		if (ret != null)
+		{
+			final StateManager<?, ?> self = (StateManager<?, ?>) (Object) this;
+			
+			for (final Object state : self.getStates())
+			{
+				((StatementStateExtensions) state).statement_removeEntry(ret);
+			}
+		}
+		
+		return ret;
+	}
 }
