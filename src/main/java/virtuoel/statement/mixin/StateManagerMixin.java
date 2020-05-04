@@ -21,6 +21,7 @@ import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import virtuoel.statement.api.RefreshableStateManager;
+import virtuoel.statement.util.StatementStateExtensions;
 
 @Mixin(StateManager.class)
 public class StateManagerMixin<O, S extends State<S>> implements RefreshableStateManager<O, S>
@@ -70,5 +71,23 @@ public class StateManagerMixin<O, S extends State<S>> implements RefreshableStat
 		{
 			this.properties = (ImmutableSortedMap<String, Property<?>>) properties;
 		}
+	}
+	
+	@Override
+	public <V extends Comparable<V>> Property<?> statement_addProperty(Property<V> property, V defaultValue)
+	{
+		final Property<?> ret = RefreshableStateManager.super.statement_addProperty(property, defaultValue);
+		
+		if (ret == null)
+		{
+			final StateManager<?, ?> self = (StateManager<?, ?>) (Object) this;
+			
+			for (final Object state : self.getStates())
+			{
+				((StatementStateExtensions) state).statement_addEntry(property, defaultValue);
+			}
+		}
+		
+		return ret;
 	}
 }

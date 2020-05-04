@@ -6,13 +6,15 @@
 	"plugin": "virtuoel.statement.mixin.StatementMixinConfigPlugin",
 	"mixins":
 	[
-		"AbstractPropertyContainerMixin",
+		"AbstractStateMixin",
 		"DefaultedRegistryMixin",
 		"IdListMixin",
 		"StateManagerBuilderMixin",
 		"StateManagerMixin",
+		"StateMixin",
 		"compat115minus.BlockStateMixin",
 		"compat116plus.AbstractBlockStateMixin",
+		"compat116plus.RedstoneWireBlockMixin",
 		"compat116plus.WallBlockMixin",
 		"sync.ArrayPaletteMixin",
 		"sync.BiMapPaletteMixin",

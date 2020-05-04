@@ -13,10 +13,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.registry.RegistryIdRemapCallback;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
-import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.command.arguments.BlockPosArgumentType;
 import net.minecraft.command.arguments.EntityArgumentType;
@@ -45,7 +45,7 @@ public class FabricApiCompatibility
 {
 	public static void setupCommands(final boolean networkingLoaded)
 	{
-		CommandRegistry.INSTANCE.register(false, commandDispatcher ->
+		CommandRegistrationCallback.EVENT.register((commandDispatcher, dedicated) ->
 		{
 			commandDispatcher.register(
 				CommandManager.literal("statement")
@@ -231,7 +231,7 @@ public class FabricApiCompatibility
 								
 								if (sentData.equals(ownData))
 								{
-									executor.sendMessage(new LiteralText(String.format("ID %d matched (%d/%d: %.2f%%):\n%s", ids[i], ids[i] + 1, total, percent, sentStringBuilder.toString())));
+									executor.sendSystemMessage(new LiteralText(String.format("ID %d matched (%d/%d: %.2f%%):\n%s", ids[i], ids[i] + 1, total, percent, sentStringBuilder.toString())));
 								}
 								else
 								{
@@ -253,11 +253,11 @@ public class FabricApiCompatibility
 									
 									if (sentName.equals(ownName))
 									{
-										executor.sendMessage(new LiteralText(String.format("ID %d partially matched (%d/%d: %.2f%%):\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())));
+										executor.sendSystemMessage(new LiteralText(String.format("ID %d partially matched (%d/%d: %.2f%%):\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())));
 									}
 									else
 									{
-										executor.sendMessage(new LiteralText(String.format("ID %d mismatched (%d/%d: %.2f%%)!\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())));
+										executor.sendSystemMessage(new LiteralText(String.format("ID %d mismatched (%d/%d: %.2f%%)!\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())));
 									}
 								}
 								
@@ -265,18 +265,18 @@ public class FabricApiCompatibility
 							}
 							else
 							{
-								executor.sendMessage(new LiteralText(String.format("Received ID %d not found on server.\nClient state:\n%s", ids[i], sentStringBuilder.toString())));
+								executor.sendSystemMessage(new LiteralText(String.format("Received ID %d not found on server.\nClient state:\n%s", ids[i], sentStringBuilder.toString())));
 							}
 						}
 						catch (CommandSyntaxException e)
 						{
 							if (state == null)
 							{
-								executor.sendMessage(new LiteralText("Done matching after " + ids[i] + " states."));
+								executor.sendSystemMessage(new LiteralText("Done matching after " + ids[i] + " states."));
 								done = true;
 								break;
 							}
-							executor.sendMessage(new LiteralText("Failed to parse received state from SNBT:\n" + snbts[i]));
+							executor.sendSystemMessage(new LiteralText("Failed to parse received state from SNBT:\n" + snbts[i]));
 						}
 					}
 					
@@ -295,7 +295,7 @@ public class FabricApiCompatibility
 						}
 						else
 						{
-							executor.sendMessage(new LiteralText("Error: Target player cannot receive state validation packet."));
+							executor.sendSystemMessage(new LiteralText("Error: Target player cannot receive state validation packet."));
 						}
 					}
 				}

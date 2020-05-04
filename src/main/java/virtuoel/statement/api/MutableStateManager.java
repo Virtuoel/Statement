@@ -22,6 +22,12 @@ public interface MutableStateManager
 	}
 	
 	@Nullable
+	default <V extends Comparable<V>> Property<?> statement_addProperty(final Property<V> property, final V defaultValue)
+	{
+		return statement_addProperty(property);
+	}
+	
+	@Nullable
 	default Property<?> statement_addProperty(final Property<?> property)
 	{
 		final Map<String, Property<?>> properties = statement_getProperties();
@@ -83,28 +89,6 @@ public interface MutableStateManager
 	
 	default boolean statement_removeProperty(final Property<?> property)
 	{
-		final Map<String, Property<?>> properties = statement_getProperties();
-		
-		final Property<?> ret = properties.get(property.getName());
-		
-		if (ret != null)
-		{
-			final ImmutableSortedMap.Builder<String, Property<?>> builder = ImmutableSortedMap.naturalOrder();
-			
-			for (final Map.Entry<String, Property<?>> e : properties.entrySet())
-			{
-				final Property<?> value = e.getValue();
-				if (value != ret)
-				{
-					builder.put(e.getKey(), value);
-				}
-			}
-			
-			statement_setProperties(builder.build());
-			
-			return true;
-		}
-		
-		return false;
+		return statement_removeProperty(property.getName()) != null;
 	}
 }
