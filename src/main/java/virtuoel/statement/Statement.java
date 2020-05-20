@@ -52,7 +52,7 @@ public class Statement implements ModInitializer, StatementApi
 	@Override
 	public void onInitialize()
 	{
-		final boolean fabricCommandsLoaded = FabricLoader.getInstance().isModLoaded("fabric-commands-v0");
+		final boolean fabricCommandsLoaded = FabricLoader.getInstance().isModLoaded("fabric-command-api-v1");
 		final boolean fabricNetworkingLoaded = FabricLoader.getInstance().isModLoaded("fabric-networking-v0");
 		final boolean fabricRegistrySyncLoaded = FabricLoader.getInstance().isModLoaded("fabric-registry-sync-v0");
 		
@@ -190,14 +190,29 @@ public class Statement implements ModInitializer, StatementApi
 		return StatementApi.super.shouldDeferState(idList, state);
 	}
 	
+	public static OptionalInt getSyncedBlockStateId(@Nullable final int id)
+	{
+		return getSyncedStateId(Block.STATE_IDS, id);
+	}
+	
 	public static OptionalInt getSyncedBlockStateId(@Nullable final BlockState state)
 	{
 		return getSyncedStateId(Block.STATE_IDS, state);
 	}
 	
+	public static OptionalInt getSyncedFluidStateId(@Nullable final int id)
+	{
+		return getSyncedStateId(Fluid.STATE_IDS, id);
+	}
+	
 	public static OptionalInt getSyncedFluidStateId(@Nullable final FluidState state)
 	{
 		return getSyncedStateId(Fluid.STATE_IDS, state);
+	}
+	
+	public static <S> OptionalInt getSyncedStateId(final IdList<S> idList, final int id)
+	{
+		return getSyncedStateId(idList, idList.get(id));
 	}
 	
 	public static <S> OptionalInt getSyncedStateId(final IdList<S> idList, @Nullable final S state)

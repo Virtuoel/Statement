@@ -1,6 +1,7 @@
 package virtuoel.statement.util;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,6 +41,59 @@ public class StateRefresherImpl implements StateRefresher
 	private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 	
 	@Override
+	public <O, S extends State<S>, V extends Comparable<V>> Collection<S> addProperty(final Supplier<StateManager<O, S>> stateManagerGetter, final IdList<S> idList, final Property<V> property, final V defaultValue)
+	{
+		@SuppressWarnings("unchecked")
+		final RefreshableStateManager<O, S> manager = ((RefreshableStateManager<O, S>) stateManagerGetter.get());
+		
+		manager.statement_addProperty(property, defaultValue);
+		
+		final List<V> nonDefaultValues = property.getValues().stream().filter(v -> v != defaultValue).collect(Collectors.toList());
+		
+		final Collection<S> states = manager.statement_reconstructStateList(Collections.singletonMap(property, nonDefaultValues));
+		
+		for (final S s : states)
+		{
+			idList.add(s);
+			((StatementBlockStateExtensions) s).statement_initShapeCache();
+		}
+		
+		return states;
+	}
+	
+	@Override
+	public <O, S extends State<S>, V extends Comparable<V>> Collection<S> removeProperty(final Supplier<StateManager<O, S>> stateManagerGetter, final Supplier<S> defaultStateGetter, final Property<V> property)
+	{
+		final StateManager<O, S> stateManager = stateManagerGetter.get();
+		
+		@SuppressWarnings("unchecked")
+		final RefreshableStateManager<O, S> manager = ((RefreshableStateManager<O, S>) stateManager);
+		
+		final Property<?> named = stateManager.getProperty(property.getName());
+		
+		if (named != null)
+		{
+			final S defaultState = defaultStateGetter.get();
+			
+			if (defaultState.getEntries().containsKey(named))
+			{
+				final Object defaultValue = defaultState.get(named);
+				
+				final Collection<S> states = stateManager.getStates().stream().filter(s -> s.get(named) != defaultValue).collect(Collectors.toList());
+				
+				if (manager.statement_removeProperty(named))
+				{
+					manager.statement_reconstructStateList(Collections.emptyMap());
+				}
+				
+				return states;
+			}
+		}
+		
+		return Collections.emptyList();
+	}
+	
+	@Override
 	public <V extends Comparable<V>> void refreshBlockStates(MutableProperty<V> property, Collection<V> addedValues, Collection<V> removedValues)
 	{
 		refreshStates(
@@ -49,7 +104,7 @@ public class StateRefresherImpl implements StateRefresher
 	}
 	
 	@Override
-	public <O, V extends Comparable<V>, S extends State<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateManager<O, S>> factoryGetter, final Consumer<S> newStateConsumer)
+	public <O, V extends Comparable<V>, S extends State<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateManager<O, S>> stateManagerGetter, final Consumer<S> newStateConsumer)
 	{
 		Statement.invalidateCustomStateData(stateIdList);
 		
@@ -62,7 +117,7 @@ public class StateRefresherImpl implements StateRefresher
 			if (defaultStateGetter.apply(entry).getEntries().containsKey(property))
 			{
 				@SuppressWarnings("unchecked")
-				final RefreshableStateManager<O, S> manager = (RefreshableStateManager<O, S>) factoryGetter.apply(entry);
+				final RefreshableStateManager<O, S> manager = (RefreshableStateManager<O, S>) stateManagerGetter.apply(entry);
 				
 				managersToRefresh.add(manager);
 			}
@@ -154,27 +209,23 @@ public class StateRefresherImpl implements StateRefresher
 	}
 	
 	@Override
-	public <O, V extends Comparable<V>, S extends State<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateManager<O, S>> managerGetter)
+	public <O, V extends Comparable<V>, S extends State<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateManager<O, S>> stateManagerGetter)
 	{
-		final Collection<S> allStates = new LinkedList<>();
-		
-		for (final O entry : registry)
-		{
-			managerGetter.apply(entry).getStates().forEach(allStates::add);
-		}
-		
 		final Collection<S> initialStates = new LinkedList<>();
 		final Collection<S> deferredStates = new LinkedList<>();
 		
-		for (final S state : allStates)
+		for (final O entry : registry)
 		{
-			if (Statement.shouldStateBeDeferred(stateIdList, state))
+			for (final S state : stateManagerGetter.apply(entry).getStates())
 			{
-				deferredStates.add(state);
-			}
-			else
-			{
-				initialStates.add(state);
+				if (Statement.shouldStateBeDeferred(stateIdList, state))
+				{
+					deferredStates.add(state);
+				}
+				else
+				{
+					initialStates.add(state);
+				}
 			}
 		}
 		
