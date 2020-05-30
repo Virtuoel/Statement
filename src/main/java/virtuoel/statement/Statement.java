@@ -98,7 +98,7 @@ public class Statement implements ModInitializer, StatementApi
 		return loadStateDeferralData(data, Registry.FLUID, Fluid::getStateManager);
 	});
 	
-	private static <O, S extends State<S>> Set<S> loadStateDeferralData(final JsonObject data, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
+	private static <O, S extends State<O, S>> Set<S> loadStateDeferralData(final JsonObject data, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
 	{
 		final Set<S> deferralData = new HashSet<>();
 		
@@ -269,7 +269,7 @@ public class Statement implements ModInitializer, StatementApi
 		return loadStateSyncData(data, Fluid.STATE_IDS, Registry.FLUID, Fluid::getStateManager, Fluid::getDefaultState);
 	});
 	
-	private static <O, S extends State<S>> Map<S, OptionalInt> loadStateSyncData(final JsonObject data, final IdList<S> idList, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc, final Function<O, S> defaultStateFunc)
+	private static <O, S extends State<O, S>> Map<S, OptionalInt> loadStateSyncData(final JsonObject data, final IdList<S> idList, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc, final Function<O, S> defaultStateFunc)
 	{
 		final Map<S, OptionalInt> syncData = new HashMap<>();
 		
@@ -363,7 +363,7 @@ public class Statement implements ModInitializer, StatementApi
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static <O, S extends State<S>> S getStateWithProperties(final StateManager<O, S> manager, S state, final Set<Entry<String, JsonElement>> properties)
+	private static <O, S extends State<O, S>> S getStateWithProperties(final StateManager<O, S> manager, S state, final Set<Entry<String, JsonElement>> properties)
 	{
 		for (final Entry<String, JsonElement> p : properties)
 		{

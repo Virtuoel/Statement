@@ -11,17 +11,18 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import net.minecraft.state.AbstractState;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
-import net.minecraft.util.collection.MapUtil;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
+import virtuoel.statement.util.StatementStateExtensions;
 
-public interface RefreshableStateManager<O, S extends State<S>> extends MutableStateManager
+public interface RefreshableStateManager<O, S extends State<O, S>> extends MutableStateManager
 {
 	default BiFunction<O, ImmutableMap<Property<?>, Comparable<?>>, S> statement_getStateFunction()
 	{
@@ -47,7 +48,7 @@ public interface RefreshableStateManager<O, S extends State<S>> extends MutableS
 		final Collection<Property<?>> properties = self.getProperties();
 		final ImmutableList<S> states = self.getStates();
 		
-		Stream<List<Comparable<?>>> tableStream = Stream.of(Collections.emptyList());
+		Stream<List<Pair<Property<?>, Comparable<?>>>> tableStream = Stream.of(Collections.emptyList());
 		
 		for (final Property<?> entry : properties)
 		{
@@ -55,8 +56,8 @@ public interface RefreshableStateManager<O, S extends State<S>> extends MutableS
 			{
 				return entry.getValues().stream().map((val) ->
 				{
-					final List<Comparable<?>> list = new ArrayList<>(propertyList);
-					list.add(val);
+					final List<Pair<Property<?>, Comparable<?>>> list = new ArrayList<>(propertyList);
+					list.add(Pair.of(entry, val));
 					return list;
 				});
 			});
@@ -75,7 +76,7 @@ public interface RefreshableStateManager<O, S extends State<S>> extends MutableS
 		
 		tableStream.forEach((valueList) ->
 		{
-			final Map<Property<?>, Comparable<?>> propertyValueMap = MapUtil.createMap(properties, valueList);
+			final Map<Property<?>, Comparable<?>> propertyValueMap = valueList.stream().collect(ImmutableMap.toImmutableMap(Pair::getLeft, Pair::getRight));
 			
 			final S currentState;
 			if (addedValueMap.entrySet().stream().anyMatch(e -> e.getValue().contains(propertyValueMap.get(e.getKey()))))
@@ -104,12 +105,7 @@ public interface RefreshableStateManager<O, S extends State<S>> extends MutableS
 			{
 				FoamFixCompatibility.INSTANCE.setStateOwner(propertyContainer, mapper);
 				
-				if (propertyContainer instanceof AbstractState<?, ?>)
-				{
-					@SuppressWarnings("unchecked")
-					final AbstractState<?, S> abstractPropertyContainer = ((AbstractState<?, S>) propertyContainer);
-					abstractPropertyContainer.createWithTable(stateMap);
-				}
+				((StatementStateExtensions) propertyContainer).statement_createWithTable(stateMap);
 			});
 			
 			statement_setStateList(ImmutableList.copyOf(currentStates));

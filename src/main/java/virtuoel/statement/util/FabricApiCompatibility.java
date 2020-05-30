@@ -67,7 +67,8 @@ public class FabricApiCompatibility
 		});
 	}
 	
-	private static <O, S extends State<S>> ArgumentBuilder<ServerCommandSource, ?> idGetterArgument(final String argumentName, IdList<S> idList, final BiFunction<ServerWorld, BlockPos, S> stateFunc, Registry<O> registry, Function<S, O> entryFunction)
+	@SuppressWarnings("unchecked")
+	private static <O, S extends State<O, S>> ArgumentBuilder<ServerCommandSource, ?> idGetterArgument(final String argumentName, IdList<S> idList, final BiFunction<ServerWorld, BlockPos, S> stateFunc, Registry<O> registry, Function<S, O> entryFunction)
 	{
 		return CommandManager.literal(argumentName)
 			.then(
@@ -85,8 +86,9 @@ public class FabricApiCompatibility
 						stringBuilder.append('[');
 						stringBuilder.append(state.getEntries().entrySet().stream().map(entry ->
 						{
-							final Property<?> property = entry.getKey();
-							return property.getName() + "=" + State.nameValue(property, entry.getValue());
+							@SuppressWarnings("rawtypes")
+							final Property property = entry.getKey();
+							return property.getName() + "=" + property.name(entry.getValue());
 						}).collect(Collectors.joining(",")));
 						stringBuilder.append(']');
 					}
@@ -231,7 +233,7 @@ public class FabricApiCompatibility
 								
 								if (sentData.equals(ownData))
 								{
-									executor.sendSystemMessage(new LiteralText(String.format("ID %d matched (%d/%d: %.2f%%):\n%s", ids[i], ids[i] + 1, total, percent, sentStringBuilder.toString())));
+									executor.sendMessage(new LiteralText(String.format("ID %d matched (%d/%d: %.2f%%):\n%s", ids[i], ids[i] + 1, total, percent, sentStringBuilder.toString())), false);
 								}
 								else
 								{
@@ -253,11 +255,11 @@ public class FabricApiCompatibility
 									
 									if (sentName.equals(ownName))
 									{
-										executor.sendSystemMessage(new LiteralText(String.format("ID %d partially matched (%d/%d: %.2f%%):\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())));
+										executor.sendMessage(new LiteralText(String.format("ID %d partially matched (%d/%d: %.2f%%):\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())), false);
 									}
 									else
 									{
-										executor.sendSystemMessage(new LiteralText(String.format("ID %d mismatched (%d/%d: %.2f%%)!\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())));
+										executor.sendMessage(new LiteralText(String.format("ID %d mismatched (%d/%d: %.2f%%)!\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())), false);
 									}
 								}
 								
@@ -265,18 +267,18 @@ public class FabricApiCompatibility
 							}
 							else
 							{
-								executor.sendSystemMessage(new LiteralText(String.format("Received ID %d not found on server.\nClient state:\n%s", ids[i], sentStringBuilder.toString())));
+								executor.sendMessage(new LiteralText(String.format("Received ID %d not found on server.\nClient state:\n%s", ids[i], sentStringBuilder.toString())), false);
 							}
 						}
 						catch (CommandSyntaxException e)
 						{
 							if (state == null)
 							{
-								executor.sendSystemMessage(new LiteralText("Done matching after " + ids[i] + " states."));
+								executor.sendMessage(new LiteralText("Done matching after " + ids[i] + " states."), false);
 								done = true;
 								break;
 							}
-							executor.sendSystemMessage(new LiteralText("Failed to parse received state from SNBT:\n" + snbts[i]));
+							executor.sendMessage(new LiteralText("Failed to parse received state from SNBT:\n" + snbts[i]), false);
 						}
 					}
 					
@@ -295,7 +297,7 @@ public class FabricApiCompatibility
 						}
 						else
 						{
-							executor.sendSystemMessage(new LiteralText("Error: Target player cannot receive state validation packet."));
+							executor.sendMessage(new LiteralText("Error: Target player cannot receive state validation packet."), false);
 						}
 					}
 				}
@@ -355,7 +357,7 @@ public class FabricApiCompatibility
 		return fromState(Registry.FLUID, FluidState::getFluid, state);
 	}
 	
-	public static <S extends State<S>, E> CompoundTag fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
+	public static <S extends State<?, S>, E> CompoundTag fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
 	{
 		final CompoundTag compoundTag = new CompoundTag();
 		compoundTag.putString("Name", registry.getId(entryFunction.apply(state)).toString());

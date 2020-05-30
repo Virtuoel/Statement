@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -15,7 +14,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,7 +39,7 @@ public class StateRefresherImpl implements StateRefresher
 	private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 	
 	@Override
-	public <O, S extends State<S>, V extends Comparable<V>> Collection<S> addProperty(final Supplier<StateManager<O, S>> stateManagerGetter, final IdList<S> idList, final Property<V> property, final V defaultValue)
+	public <O, S extends State<O, S>, V extends Comparable<V>> Collection<S> addProperty(final Supplier<StateManager<O, S>> stateManagerGetter, final IdList<S> idList, final Property<V> property, final V defaultValue)
 	{
 		@SuppressWarnings("unchecked")
 		final RefreshableStateManager<O, S> manager = ((RefreshableStateManager<O, S>) stateManagerGetter.get());
@@ -62,7 +60,7 @@ public class StateRefresherImpl implements StateRefresher
 	}
 	
 	@Override
-	public <O, S extends State<S>, V extends Comparable<V>> Collection<S> removeProperty(final Supplier<StateManager<O, S>> stateManagerGetter, final Supplier<S> defaultStateGetter, final Property<V> property)
+	public <O, S extends State<O, S>, V extends Comparable<V>> Collection<S> removeProperty(final Supplier<StateManager<O, S>> stateManagerGetter, final Supplier<S> defaultStateGetter, final Property<V> property)
 	{
 		final StateManager<O, S> stateManager = stateManagerGetter.get();
 		
@@ -94,7 +92,7 @@ public class StateRefresherImpl implements StateRefresher
 	}
 	
 	@Override
-	public <V extends Comparable<V>> void refreshBlockStates(MutableProperty<V> property, Collection<V> addedValues, Collection<V> removedValues)
+	public <V extends Comparable<V>> void refreshBlockStates(Property<V> property, Collection<V> addedValues, Collection<V> removedValues)
 	{
 		refreshStates(
 			Registry.BLOCK, Block.STATE_IDS,
@@ -104,7 +102,7 @@ public class StateRefresherImpl implements StateRefresher
 	}
 	
 	@Override
-	public <O, V extends Comparable<V>, S extends State<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, MutableProperty<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateManager<O, S>> stateManagerGetter, final Consumer<S> newStateConsumer)
+	public <O, V extends Comparable<V>, S extends State<O, S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, Property<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateManager<O, S>> stateManagerGetter, final Consumer<S> newStateConsumer)
 	{
 		Statement.invalidateCustomStateData(stateIdList);
 		
@@ -124,7 +122,6 @@ public class StateRefresherImpl implements StateRefresher
 		}
 		
 		final Map<Property<V>, Collection<V>> addedValueMap = new HashMap<>();
-		addedValueMap.put(property, addedValues);
 		
 		final Collection<S> addedStates = new ConcurrentLinkedQueue<>();
 		final Collection<S> removedStates = new ConcurrentLinkedQueue<>();
@@ -154,10 +151,15 @@ public class StateRefresherImpl implements StateRefresher
 		
 		synchronized (property)
 		{
-			property.addAll(addedValues);
-			property.removeAll(removedValues);
-			
-			FoamFixCompatibility.INSTANCE.removePropertyFromEntryMap(property);
+			MutableProperty.of(property).ifPresent(mutableProperty ->
+			{
+				addedValueMap.put(property, addedValues);
+				
+				mutableProperty.addAll(addedValues);
+				mutableProperty.removeAll(removedValues);
+				
+				FoamFixCompatibility.INSTANCE.removePropertyFromEntryMap(property);
+			});
 		}
 		
 		synchronized (stateIdList)
@@ -209,7 +211,7 @@ public class StateRefresherImpl implements StateRefresher
 	}
 	
 	@Override
-	public <O, V extends Comparable<V>, S extends State<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateManager<O, S>> stateManagerGetter)
+	public <O, V extends Comparable<V>, S extends State<O, S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateManager<O, S>> stateManagerGetter)
 	{
 		final Collection<S> initialStates = new LinkedList<>();
 		final Collection<S> deferredStates = new LinkedList<>();
@@ -232,21 +234,5 @@ public class StateRefresherImpl implements StateRefresher
 		((ClearableIdList) stateIdList).statement_clear();
 		initialStates.forEach(stateIdList::add);
 		deferredStates.forEach(stateIdList::add);
-	}
-	
-	@Deprecated
-	protected final Set<Object> taskObjectSet = Stream.of(Registry.BLOCK, Registry.FLUID).collect(Collectors.toSet());
-	
-	@Deprecated
-	@Override
-	public <O, T> boolean provideTask(final O object, final Function<O, Consumer<T>> taskConsumerFunction, final Function<StateRefresher, T> task)
-	{
-		if (!taskObjectSet.contains(object))
-		{
-			taskObjectSet.add(object);
-			return StateRefresher.super.provideTask(object, taskConsumerFunction, task);
-		}
-		
-		return false;
 	}
 }

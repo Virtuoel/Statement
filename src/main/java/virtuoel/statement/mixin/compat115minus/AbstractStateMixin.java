@@ -1,7 +1,6 @@
-package virtuoel.statement.mixin;
+package virtuoel.statement.mixin.compat115minus;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -18,31 +17,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 
-import net.minecraft.state.AbstractState;
-import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
-import net.minecraft.util.collection.MapUtil;
+import virtuoel.statement.Statement;
 import virtuoel.statement.util.StatementStateExtensions;
 
-@Mixin(AbstractState.class)
-public abstract class AbstractStateMixin<O, S> implements State<S>, StatementStateExtensions
+@Mixin(targets = "net.minecraft.class_2679", remap = false)
+public abstract class AbstractStateMixin<O, S> implements StatementStateExtensions
 {
-	@Shadow @Final @Mutable protected O owner;
-	@Shadow @Final @Mutable private ImmutableMap<Property<?>, Comparable<?>> entries;
-	@Shadow private Table<Property<?>, Comparable<?>, S> withTable;
+	@Shadow(remap = false) @Final @Mutable protected O field_12287;
+	@Shadow(remap = false) @Final @Mutable private ImmutableMap<Property<?>, Comparable<?>> field_12285;
+	@Shadow(remap = false) private Table<Property<?>, Comparable<?>, S> field_12288;
 	
 	@Unique boolean loggedGetMissing = false;
 	
-	@Inject(at = @At("HEAD"), method = "get", cancellable = true)
+	@Inject(at = @At("HEAD"), method = "method_11654", cancellable = true, remap = false)
 	private <T extends Comparable<T>> void onGet(Property<T> property, CallbackInfoReturnable<T> info)
 	{
-		final Comparable<?> currentValue = this.entries.get(property);
+		final Comparable<?> currentValue = this.field_12285.get(property);
 		
 		if (currentValue == null)
 		{
 			if (!loggedGetMissing)
 			{
-				LOGGER.info("Cannot get property {} as it does not exist in {}", property, this.owner);
+				Statement.LOGGER.info("Cannot get property {} as it does not exist in {}", property, this.field_12287);
 				loggedGetMissing = true;
 			}
 			
@@ -53,26 +50,26 @@ public abstract class AbstractStateMixin<O, S> implements State<S>, StatementSta
 	@Unique boolean loggedWithMissing = false;
 	@Unique boolean loggedWithDisallowed = false;
 	
-	@Inject(at = @At("HEAD"), method = "with", cancellable = true)
+	@Inject(at = @At("HEAD"), method = "method_11657", cancellable = true, remap = false)
 	private <T extends Comparable<T>, V extends T> void onWith(Property<T> property, V value, CallbackInfoReturnable<Object> info)
 	{
-		final Comparable<?> currentValue = this.entries.get(property);
+		final Comparable<?> currentValue = this.field_12285.get(property);
 		
 		if (currentValue == null)
 		{
 			if (!loggedWithMissing)
 			{
-				LOGGER.info("Cannot set property {} as it does not exist in {}", property, this.owner);
+				Statement.LOGGER.info("Cannot set property {} as it does not exist in {}", property, this.field_12287);
 				loggedWithMissing = true;
 			}
 			
 			info.setReturnValue(this);
 		}
-		else if (currentValue != value && withTable.get(property, value) == null)
+		else if (currentValue != value && field_12288.get(property, value) == null)
 		{
 			if (!loggedWithDisallowed)
 			{
-				LOGGER.info("Cannot set property {} to {} on {}, it is not an allowed value", property, value, this.owner);
+				Statement.LOGGER.info("Cannot set property {} to {} on {}, it is not an allowed value", property, value, this.field_12287);
 				loggedWithDisallowed = true;
 			}
 			
@@ -80,24 +77,27 @@ public abstract class AbstractStateMixin<O, S> implements State<S>, StatementSta
 		}
 	}
 	
-	@Inject(at = @At("HEAD"), method = "createWithTable")
+	@Inject(at = @At("HEAD"), method = "method_11571", remap = false)
 	private void onCreateWithTable(Map<Map<Property<?>, Comparable<?>>, S> map, CallbackInfo info)
 	{
-		withTable = null;
+		field_12288 = null;
+	}
+	
+	@Shadow(remap = false)
+	abstract void method_11571(Map<Map<Property<?>, Comparable<?>>, ?> map);
+	
+	@Override
+	public void statement_createWithTable(Map<Map<Property<?>, Comparable<?>>, ?> states)
+	{
+		method_11571(states);
 	}
 	
 	@Override
 	public <V extends Comparable<V>> boolean statement_addEntry(final Property<V> property, final V value)
 	{
-		if (!entries.containsKey(property))
+		if (!field_12285.containsKey(property))
 		{
-			final LinkedList<Property<?>> keys = new LinkedList<>(entries.keySet());
-			keys.add(property);
-			
-			final LinkedList<Comparable<?>> values = new LinkedList<>(entries.values());
-			values.add(value);
-			
-			entries = ImmutableMap.copyOf(MapUtil.createMap(keys, values));
+			field_12285 = ImmutableMap.<Property<?>, Comparable<?>>builder().putAll(field_12285).put(property, value).build();
 			
 			return true;
 		}
@@ -110,11 +110,11 @@ public abstract class AbstractStateMixin<O, S> implements State<S>, StatementSta
 	@Override
 	public <V extends Comparable<V>> boolean statement_removeEntry(Property<V> property)
 	{
-		if (entries.containsKey(property))
+		if (field_12285.containsKey(property))
 		{
 			final ImmutableMap.Builder<Property<?>, Comparable<?>> builder = ImmutableMap.builder();
 			
-			for (final Entry<Property<?>, Comparable<?>> entry : entries.entrySet())
+			for (final Entry<Property<?>, Comparable<?>> entry : field_12285.entrySet())
 			{
 				final Property<?> key = entry.getKey();
 				
@@ -124,9 +124,9 @@ public abstract class AbstractStateMixin<O, S> implements State<S>, StatementSta
 				}
 			}
 			
-			cachedFallbacks.put(property, entries.get(property));
+			cachedFallbacks.put(property, field_12285.get(property));
 			
-			entries = builder.build();
+			field_12285 = builder.build();
 			
 			return true;
 		}

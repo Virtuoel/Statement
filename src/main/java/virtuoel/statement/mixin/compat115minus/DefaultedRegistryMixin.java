@@ -1,4 +1,4 @@
-package virtuoel.statement.mixin;
+package virtuoel.statement.mixin.compat115minus;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +14,7 @@ public abstract class DefaultedRegistryMixin
 {
 	@Shadow @Final Identifier defaultId;
 	
-	@ModifyArg(method = "set", index = 1, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/SimpleRegistry;set(ILnet/minecraft/util/Identifier;Ljava/lang/Object;)Ljava/lang/Object;"))
+	@ModifyArg(method = "method_10273(ILnet/minecraft/class_2960;Ljava/lang/Object;)Ljava/lang/Object;", index = 1, at = @At(value = "INVOKE", target = "Lnet/minecraft/class_2370;method_10273(ILnet/minecraft/class_2960;Ljava/lang/Object;)Ljava/lang/Object;", remap = false), remap = false)
 	private Identifier setDefault(Identifier id)
 	{
 		return defaultId.equals(id) ? defaultId : id;
