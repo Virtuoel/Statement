@@ -33,7 +33,8 @@
 	],
 	"client":
 	[
-		"client.ClientPlayNetworkHandlerMixin"
+		"client.ClientPlayNetworkHandlerMixin",
+		"client.compat116plus.MinecraftClientMixin"
 	],
 	"injectors":
 	{
