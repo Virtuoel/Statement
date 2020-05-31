@@ -41,7 +41,7 @@ public interface FoamFixCompatibility
 		
 	}
 	
-	default void setStateOwner(final State<?, ?> state, final Optional<?> owner)
+	default void setStateOwner(final State<?> state, final Optional<?> owner)
 	{
 		
 	}

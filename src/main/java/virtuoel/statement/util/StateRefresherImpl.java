@@ -22,7 +22,7 @@ import net.minecraft.block.Block;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
-import net.minecraft.util.collection.IdList;
+import net.minecraft.util.IdList;
 import net.minecraft.util.registry.Registry;
 import virtuoel.statement.Statement;
 import virtuoel.statement.api.ClearableIdList;
@@ -39,7 +39,7 @@ public class StateRefresherImpl implements StateRefresher
 	private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 	
 	@Override
-	public <O, S extends State<O, S>, V extends Comparable<V>> Collection<S> addProperty(final Supplier<StateManager<O, S>> stateManagerGetter, final IdList<S> idList, final Property<V> property, final V defaultValue)
+	public <O, S extends State<S>, V extends Comparable<V>> Collection<S> addProperty(final Supplier<StateManager<O, S>> stateManagerGetter, final IdList<S> idList, final Property<V> property, final V defaultValue)
 	{
 		@SuppressWarnings("unchecked")
 		final RefreshableStateManager<O, S> manager = ((RefreshableStateManager<O, S>) stateManagerGetter.get());
@@ -60,7 +60,7 @@ public class StateRefresherImpl implements StateRefresher
 	}
 	
 	@Override
-	public <O, S extends State<O, S>, V extends Comparable<V>> Collection<S> removeProperty(final Supplier<StateManager<O, S>> stateManagerGetter, final Supplier<S> defaultStateGetter, final Property<V> property)
+	public <O, S extends State<S>, V extends Comparable<V>> Collection<S> removeProperty(final Supplier<StateManager<O, S>> stateManagerGetter, final Supplier<S> defaultStateGetter, final Property<V> property)
 	{
 		final StateManager<O, S> stateManager = stateManagerGetter.get();
 		
@@ -102,7 +102,7 @@ public class StateRefresherImpl implements StateRefresher
 	}
 	
 	@Override
-	public <O, V extends Comparable<V>, S extends State<O, S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, Property<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateManager<O, S>> stateManagerGetter, final Consumer<S> newStateConsumer)
+	public <O, V extends Comparable<V>, S extends State<S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, Property<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateManager<O, S>> stateManagerGetter, final Consumer<S> newStateConsumer)
 	{
 		Statement.invalidateCustomStateData(stateIdList);
 		
@@ -211,7 +211,7 @@ public class StateRefresherImpl implements StateRefresher
 	}
 	
 	@Override
-	public <O, V extends Comparable<V>, S extends State<O, S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateManager<O, S>> stateManagerGetter)
+	public <O, V extends Comparable<V>, S extends State<S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateManager<O, S>> stateManagerGetter)
 	{
 		final Collection<S> initialStates = new LinkedList<>();
 		final Collection<S> deferredStates = new LinkedList<>();

@@ -17,7 +17,7 @@ import virtuoel.statement.api.RefreshableStateManager;
 import virtuoel.statement.util.StatementStateExtensions;
 
 @Mixin(StateManager.class)
-public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableStateManager<O, S>
+public class StateManagerMixin<O, S extends State<S>> implements RefreshableStateManager<O, S>
 {
 	@Shadow @Final @Mutable ImmutableSortedMap<String, Property<?>> properties;
 	@Shadow @Final @Mutable ImmutableList<S> states;

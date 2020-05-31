@@ -154,7 +154,7 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 	}
 	
 	@Override
-	public void setStateOwner(final State<?, ?> state, final Optional<?> owner)
+	public void setStateOwner(final State<?> state, final Optional<?> owner)
 	{
 		if (isEnabled())
 		{

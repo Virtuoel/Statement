@@ -11,7 +11,7 @@ import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 
-public interface StatementStateManagerFactoryExtensions<O, S extends State<O, S>>
+public interface StatementStateManagerFactoryExtensions<O, S extends State<S>>
 {
 	@Nullable
 	static final Method CREATE_METHOD = getCreateMethod();

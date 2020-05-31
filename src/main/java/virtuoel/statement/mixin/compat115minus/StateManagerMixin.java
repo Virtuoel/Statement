@@ -19,14 +19,14 @@ import virtuoel.statement.api.RefreshableStateManager;
 import virtuoel.statement.util.StatementStateManagerFactoryExtensions;
 
 @Mixin(StateManager.class)
-public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableStateManager<O, S>
+public class StateManagerMixin<O, S extends State<S>> implements RefreshableStateManager<O, S>
 {
-	@Unique StateManager.Factory<O, S> statement_factory;
+	@Unique StateManager.Factory<O, S, ?> statement_factory;
 	@Unique BiFunction<O, ImmutableMap<Property<?>, Comparable<?>>, S> statement_stateFunction;
 	
 	@SuppressWarnings("unchecked")
 	@Inject(at = @At("RETURN"), method = "<init>")
-	private void onConstruct(Object object, StateManager.Factory<O, S> factory, Map<String, Property<?>> map, CallbackInfo info)
+	private void onConstruct(Object object, StateManager.Factory<O, S, ?> factory, Map<String, Property<?>> map, CallbackInfo info)
 	{
 		statement_factory = factory;
 		

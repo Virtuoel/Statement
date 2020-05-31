@@ -22,7 +22,7 @@ import net.minecraft.state.property.Property;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
 import virtuoel.statement.util.StatementStateExtensions;
 
-public interface RefreshableStateManager<O, S extends State<O, S>> extends MutableStateManager
+public interface RefreshableStateManager<O, S extends State<S>> extends MutableStateManager
 {
 	default BiFunction<O, ImmutableMap<Property<?>, Comparable<?>>, S> statement_getStateFunction()
 	{

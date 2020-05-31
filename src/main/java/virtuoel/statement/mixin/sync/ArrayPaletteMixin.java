@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import net.minecraft.util.collection.IdList;
+import net.minecraft.util.IdList;
 import net.minecraft.world.chunk.ArrayPalette;
 import virtuoel.statement.Statement;
 
@@ -17,13 +17,13 @@ public class ArrayPaletteMixin<T>
 	@Shadow @Final @Mutable
 	IdList<T> idList;
 	
-	@ModifyArg(method = "toPacket(Lnet/minecraft/network/PacketByteBuf;)V", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/network/PacketByteBuf;writeVarInt(I)Lnet/minecraft/network/PacketByteBuf;"))
+	@ModifyArg(method = "toPacket(Lnet/minecraft/util/PacketByteBuf;)V", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/util/PacketByteBuf;writeVarInt(I)Lnet/minecraft/util/PacketByteBuf;"))
 	private int toPacketWriteVarIntModify(int id)
 	{
 		return Statement.getSyncedStateId(idList, id).orElse(id);
 	}
 	
-	@ModifyArg(method = "getPacketSize()I", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/network/PacketByteBuf;getVarIntSizeBytes(I)I"))
+	@ModifyArg(method = "getPacketSize()I", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/util/PacketByteBuf;getVarIntSizeBytes(I)I"))
 	private int getPacketSizeGetVarIntSizeBytesModify(int id)
 	{
 		return Statement.getSyncedStateId(idList, id).orElse(id);

@@ -10,20 +10,20 @@ import virtuoel.statement.util.StatementBlockStateExtensions;
 @Mixin(BlockState.class)
 public abstract class BlockStateMixin implements StatementBlockStateExtensions
 {
-	@Shadow(remap = false)
-	abstract void method_11590();
-	@Shadow(remap = false)
-	abstract Block method_11614();
+	@Shadow
+	abstract void initShapeCache();
+	@Shadow
+	abstract Block getBlock();
 	
 	@Override
 	public void statement_initShapeCache()
 	{
-		method_11590();
+		initShapeCache();
 	}
 	
 	@Override
 	public Block statement_getBlock()
 	{
-		return method_11614();
+		return getBlock();
 	}
 }

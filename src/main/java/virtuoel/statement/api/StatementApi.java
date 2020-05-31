@@ -6,7 +6,7 @@ import java.util.OptionalInt;
 import javax.annotation.Nullable;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.collection.IdList;
+import net.minecraft.util.IdList;
 
 public interface StatementApi
 {

@@ -26,15 +26,15 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.IdList;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.IdList;
+import net.minecraft.util.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.BlockView;
@@ -68,7 +68,7 @@ public class FabricApiCompatibility
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static <O, S extends State<O, S>> ArgumentBuilder<ServerCommandSource, ?> idGetterArgument(final String argumentName, IdList<S> idList, final BiFunction<ServerWorld, BlockPos, S> stateFunc, Registry<O> registry, Function<S, O> entryFunction)
+	private static <O, S extends State<S>> ArgumentBuilder<ServerCommandSource, ?> idGetterArgument(final String argumentName, IdList<S> idList, final BiFunction<ServerWorld, BlockPos, S> stateFunc, Registry<O> registry, Function<S, O> entryFunction)
 	{
 		return CommandManager.literal(argumentName)
 			.then(
@@ -233,7 +233,7 @@ public class FabricApiCompatibility
 								
 								if (sentData.equals(ownData))
 								{
-									executor.sendMessage(new LiteralText(String.format("ID %d matched (%d/%d: %.2f%%):\n%s", ids[i], ids[i] + 1, total, percent, sentStringBuilder.toString())), false);
+									executor.sendMessage(new LiteralText(String.format("ID %d matched (%d/%d: %.2f%%):\n%s", ids[i], ids[i] + 1, total, percent, sentStringBuilder.toString())));
 								}
 								else
 								{
@@ -255,11 +255,11 @@ public class FabricApiCompatibility
 									
 									if (sentName.equals(ownName))
 									{
-										executor.sendMessage(new LiteralText(String.format("ID %d partially matched (%d/%d: %.2f%%):\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())), false);
+										executor.sendMessage(new LiteralText(String.format("ID %d partially matched (%d/%d: %.2f%%):\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())));
 									}
 									else
 									{
-										executor.sendMessage(new LiteralText(String.format("ID %d mismatched (%d/%d: %.2f%%)!\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())), false);
+										executor.sendMessage(new LiteralText(String.format("ID %d mismatched (%d/%d: %.2f%%)!\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())));
 									}
 								}
 								
@@ -267,18 +267,18 @@ public class FabricApiCompatibility
 							}
 							else
 							{
-								executor.sendMessage(new LiteralText(String.format("Received ID %d not found on server.\nClient state:\n%s", ids[i], sentStringBuilder.toString())), false);
+								executor.sendMessage(new LiteralText(String.format("Received ID %d not found on server.\nClient state:\n%s", ids[i], sentStringBuilder.toString())));
 							}
 						}
 						catch (CommandSyntaxException e)
 						{
 							if (state == null)
 							{
-								executor.sendMessage(new LiteralText("Done matching after " + ids[i] + " states."), false);
+								executor.sendMessage(new LiteralText("Done matching after " + ids[i] + " states."));
 								done = true;
 								break;
 							}
-							executor.sendMessage(new LiteralText("Failed to parse received state from SNBT:\n" + snbts[i]), false);
+							executor.sendMessage(new LiteralText("Failed to parse received state from SNBT:\n" + snbts[i]));
 						}
 					}
 					
@@ -297,7 +297,7 @@ public class FabricApiCompatibility
 						}
 						else
 						{
-							executor.sendMessage(new LiteralText("Error: Target player cannot receive state validation packet."), false);
+							executor.sendMessage(new LiteralText("Error: Target player cannot receive state validation packet."));
 						}
 					}
 				}
@@ -357,7 +357,7 @@ public class FabricApiCompatibility
 		return fromState(Registry.FLUID, FluidState::getFluid, state);
 	}
 	
-	public static <S extends State<?, S>, E> CompoundTag fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
+	public static <S extends State<S>, E> CompoundTag fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
 	{
 		final CompoundTag compoundTag = new CompoundTag();
 		compoundTag.putString("Name", registry.getId(entryFunction.apply(state)).toString());

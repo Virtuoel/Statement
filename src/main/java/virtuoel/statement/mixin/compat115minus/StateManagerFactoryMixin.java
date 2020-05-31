@@ -7,7 +7,7 @@ import net.minecraft.state.StateManager;
 import virtuoel.statement.util.StatementStateManagerFactoryExtensions;
 
 @Mixin(StateManager.Factory.class)
-public interface StateManagerFactoryMixin<O, S extends State<O, S>> extends StatementStateManagerFactoryExtensions<O, S>
+public interface StateManagerFactoryMixin<O, S extends State<S>> extends StatementStateManagerFactoryExtensions<O, S>
 {
 	
 }
