@@ -3,7 +3,7 @@ package virtuoel.statement.api;
 import java.util.Collection;
 import java.util.OptionalInt;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.IdList;
