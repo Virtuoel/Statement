@@ -18,12 +18,10 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.minecraft.block.Block;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.collection.IdList;
-import net.minecraft.util.registry.Registry;
 import virtuoel.statement.Statement;
 import virtuoel.statement.api.ClearableIdList;
 import virtuoel.statement.api.RefreshableStateManager;
@@ -53,7 +51,6 @@ public class StateRefresherImpl implements StateRefresher
 		for (final S s : states)
 		{
 			idList.add(s);
-			((StatementBlockStateExtensions) s).statement_initShapeCache();
 		}
 		
 		return states;
@@ -89,16 +86,6 @@ public class StateRefresherImpl implements StateRefresher
 		}
 		
 		return Collections.emptyList();
-	}
-	
-	@Override
-	public <V extends Comparable<V>> void refreshBlockStates(Property<V> property, Collection<V> addedValues, Collection<V> removedValues)
-	{
-		refreshStates(
-			Registry.BLOCK, Block.STATE_IDS,
-			property, addedValues, removedValues,
-			Block::getDefaultState, Block::getStateManager, s -> ((StatementBlockStateExtensions) s).statement_initShapeCache()
-		);
 	}
 	
 	@Override

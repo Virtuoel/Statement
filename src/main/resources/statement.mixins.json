@@ -9,7 +9,6 @@
 		"IdListMixin",
 		"StateManagerBuilderMixin",
 		"StateManagerMixin",
-		"compat116plus.AbstractBlockStateMixin",
 		"compat116plus.DefaultedRegistryMixin",
 		"compat116plus.RedstoneWireBlockMixin",
 		"compat116plus.RegistryKeyAccessor",
