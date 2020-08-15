@@ -318,7 +318,7 @@ public class Statement implements ModInitializer, StatementApi
 						
 						if (syncedState != null)
 						{
-							final int id = idList.getId(getStateWithProperties(manager, syncedState, syncedStateProperties.entrySet()));
+							final int id = idList.getRawId(getStateWithProperties(manager, syncedState, syncedStateProperties.entrySet()));
 							stateIdFunc = state -> id;
 						}
 						else
@@ -328,7 +328,7 @@ public class Statement implements ModInitializer, StatementApi
 					}
 					else
 					{
-						stateIdFunc = state -> idList.getId(getStateWithProperties(manager, state, syncedStateProperties.entrySet()));
+						stateIdFunc = state -> idList.getRawId(getStateWithProperties(manager, state, syncedStateProperties.entrySet()));
 					}
 					
 					final OptionalInt syncedId = Optional.ofNullable(stateSyncData.get("syncedId"))

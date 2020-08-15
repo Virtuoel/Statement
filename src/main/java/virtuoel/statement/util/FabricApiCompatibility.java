@@ -19,8 +19,8 @@ import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.arguments.BlockPosArgumentType;
-import net.minecraft.command.arguments.EntityArgumentType;
+import net.minecraft.command.argument.BlockPosArgumentType;
+import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
@@ -94,7 +94,7 @@ public class FabricApiCompatibility
 						stringBuilder.append(']');
 					}
 					
-					context.getSource().sendFeedback(new LiteralText(String.format("%s (%d) @ %d, %d, %d", stringBuilder.toString(), idList.getId(state), pos.getX(), pos.getY(), pos.getZ())), false);
+					context.getSource().sendFeedback(new LiteralText(String.format("%s (%d) @ %d, %d, %d", stringBuilder.toString(), idList.getRawId(state), pos.getX(), pos.getY(), pos.getZ())), false);
 					return 1;
 				})
 			);

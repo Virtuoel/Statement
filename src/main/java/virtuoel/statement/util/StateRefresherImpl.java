@@ -142,8 +142,9 @@ public class StateRefresherImpl implements StateRefresher
 			{
 				addedValueMap.put(property, addedValues);
 				
-				mutableProperty.addAll(addedValues);
-				mutableProperty.removeAll(removedValues);
+				final Collection<V> values = mutableProperty.asProperty().getValues();
+				values.addAll(addedValues);
+				values.removeAll(removedValues);
 				
 				FoamFixCompatibility.INSTANCE.removePropertyFromEntryMap(property);
 			});
