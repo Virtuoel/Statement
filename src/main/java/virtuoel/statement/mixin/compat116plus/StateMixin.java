@@ -20,6 +20,7 @@ import com.google.common.collect.Table;
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
 import virtuoel.statement.Statement;
+import virtuoel.statement.util.HydrogenCompatibility;
 import virtuoel.statement.util.StatementStateExtensions;
 
 @Mixin(State.class)
@@ -141,6 +142,6 @@ public abstract class StateMixin<O, S> implements StatementStateExtensions
 	@Override
 	public void statement_setEntries(ImmutableMap<Property<?>, Comparable<?>> entries)
 	{
-		this.entries = entries;
+		this.entries = HydrogenCompatibility.INSTANCE.wrapEntries(entries);
 	}
 }
