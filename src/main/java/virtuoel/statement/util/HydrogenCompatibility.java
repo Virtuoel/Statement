@@ -47,7 +47,7 @@ public class HydrogenCompatibility
 			{
 				try
 				{
-					return (ImmutableMap<K, V>) m.invoke(entries);
+					return (ImmutableMap<K, V>) m.invoke(null, entries);
 				}
 				catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
 				{
