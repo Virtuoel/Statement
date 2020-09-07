@@ -29,7 +29,7 @@ public abstract class StateMixin<O, S> implements StatementStateExtensions
 	@Shadow @Final @Mutable private ImmutableMap<Property<?>, Comparable<?>> entries;
 	@Shadow private Table<Property<?>, Comparable<?>, S> withTable;
 	
-	@Unique boolean loggedGetMissing = false;
+	@Unique String getMissingOwner = "";
 	
 	@Inject(at = @At("HEAD"), method = "get", cancellable = true)
 	private <T extends Comparable<T>> void onGet(Property<T> property, CallbackInfoReturnable<T> info)
@@ -38,18 +38,19 @@ public abstract class StateMixin<O, S> implements StatementStateExtensions
 		
 		if (currentValue == null)
 		{
-			if (!loggedGetMissing)
+			final String ownerString = this.owner.toString();
+			if (!getMissingOwner.equals(ownerString))
 			{
 				Statement.LOGGER.info("Cannot get property {} as it does not exist in {}", property, this.owner);
-				loggedGetMissing = true;
+				getMissingOwner = ownerString;
 			}
 			
 			info.setReturnValue(cachedFallbacks.containsKey(property) ? property.getType().cast(cachedFallbacks.get(property)) : property.getValues().iterator().next());
 		}
 	}
 	
-	@Unique boolean loggedWithMissing = false;
-	@Unique boolean loggedWithDisallowed = false;
+	@Unique String withMissingOwner = "";
+	@Unique String withDisallowedOwner = "";
 	
 	@Inject(at = @At("HEAD"), method = "with", cancellable = true)
 	private <T extends Comparable<T>, V extends T> void onWith(Property<T> property, V value, CallbackInfoReturnable<Object> info)
@@ -58,20 +59,22 @@ public abstract class StateMixin<O, S> implements StatementStateExtensions
 		
 		if (currentValue == null)
 		{
-			if (!loggedWithMissing)
+			final String ownerString = this.owner.toString();
+			if (!withMissingOwner.equals(ownerString))
 			{
 				Statement.LOGGER.info("Cannot set property {} as it does not exist in {}", property, this.owner);
-				loggedWithMissing = true;
+				withMissingOwner = ownerString;
 			}
 			
 			info.setReturnValue(this);
 		}
 		else if (currentValue != value && withTable.get(property, value) == null)
 		{
-			if (!loggedWithDisallowed)
+			final String ownerString = this.owner.toString();
+			if (!withDisallowedOwner.equals(ownerString))
 			{
 				Statement.LOGGER.info("Cannot set property {} to {} on {}, it is not an allowed value", property, value, this.owner);
-				loggedWithDisallowed = true;
+				withDisallowedOwner = ownerString;
 			}
 			
 			info.setReturnValue(this);
@@ -98,7 +101,7 @@ public abstract class StateMixin<O, S> implements StatementStateExtensions
 	{
 		if (!entries.containsKey(property))
 		{
-			entries = ImmutableMap.<Property<?>, Comparable<?>>builder().putAll(entries).put(property, value).build();;
+			statement_setEntries(ImmutableMap.<Property<?>, Comparable<?>>builder().putAll(entries).put(property, value).build());
 			
 			return true;
 		}
@@ -127,11 +130,17 @@ public abstract class StateMixin<O, S> implements StatementStateExtensions
 			
 			cachedFallbacks.put(property, entries.get(property));
 			
-			entries = builder.build();
+			statement_setEntries(builder.build());
 			
 			return true;
 		}
 		
 		return false;
+	}
+	
+	@Override
+	public void statement_setEntries(ImmutableMap<Property<?>, Comparable<?>> entries)
+	{
+		this.entries = entries;
 	}
 }
