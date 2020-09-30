@@ -39,6 +39,11 @@ public interface RefreshableStateManager<O, S extends State<O, S>> extends Mutab
 		
 	}
 	
+	default void statement_rebuildCodec()
+	{
+		
+	}
+	
 	default <V extends Comparable<V>> Collection<S> statement_reconstructStateList(final Map<Property<V>, Collection<V>> addedValueMap)
 	{
 		@SuppressWarnings("unchecked")
@@ -67,6 +72,8 @@ public interface RefreshableStateManager<O, S extends State<O, S>> extends Mutab
 		final Collection<S> addedStates = new LinkedList<>();
 		
 		final Map<Map<Property<?>, Comparable<?>>, S> stateMap = new LinkedHashMap<>();
+		
+		statement_rebuildCodec();
 		
 		final BiFunction<O, ImmutableMap<Property<?>, Comparable<?>>, S> function = statement_getStateFunction();
 		

@@ -12,4 +12,7 @@ public interface StateAccessor<S>
 {
 	@Accessor("field_24740")
 	MapCodec<S> getCodec();
+	
+	@Accessor("field_24740")
+	void setCodec(MapCodec<S> codec);
 }
