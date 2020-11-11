@@ -1,9 +1,9 @@
 plugins {
-	id "fabric-loom" version "0.4-SNAPSHOT"
+	id "fabric-loom" version "0.5-SNAPSHOT"
 	id "eclipse"
 	id "maven-publish"
-	id "com.github.breadmoirai.github-release" version "2.2.9"
-	id "org.ajoberstar.grgit" version "3.1.1"
+	id "com.github.breadmoirai.github-release" version "2.2.12"
+	id "org.ajoberstar.grgit" version "4.1.0"
 	id "com.matthewprenger.cursegradle" version "1.4.0"
 }
 
@@ -87,8 +87,6 @@ dependencies {
 		}
 	}
 	
-	compileOnly "org.jetbrains:annotations:${jetbrains_annotations_version}"
-	
 	if(project.hasProperty("modmenu_version")) {
 		modCompileOnly "io.github.prospector:modmenu:${modmenu_version}", excludeFabric
 		modRuntime "io.github.prospector:modmenu:${modmenu_version}", excludeFabric
@@ -98,13 +96,8 @@ dependencies {
 processResources {
 	inputs.property "version", project.version
 	
-	from(sourceSets.main.resources.srcDirs) {
-		include "fabric.mod.json"
+	filesMatching("fabric.mod.json") {
 		expand "version": project.version
-	}
-	
-	from(sourceSets.main.resources.srcDirs) {
-		exclude "fabric.mod.json"
 	}
 }
 
@@ -186,8 +179,8 @@ githubRelease {
 	targetCommitish { org.ajoberstar.grgit.Grgit.open(dir: ".").branch.current().name }
 	releaseName project.version
 	
-	FilenameFilter filter = { dir, filename -> filename.contains(project.version) && !filename.contains("-dev.jar") }
-	releaseAssets = jar.destinationDir.listFiles filter
+	def filenameFilter = { dir, filename -> filename.contains(project.version) && !filename.contains("-dev.jar") }
+	releaseAssets = jar.destinationDirectory.files().filter(filenameFilter).files
 }
 
 if(project.hasProperty("fabric_version")) {
