@@ -10,9 +10,9 @@ import net.minecraft.state.State;
 @Mixin(State.class)
 public interface StateAccessor<S>
 {
-	@Accessor("field_24740")
+	@Accessor
 	MapCodec<S> getCodec();
 	
-	@Accessor("field_24740")
+	@Accessor
 	void setCodec(MapCodec<S> codec);
 }
