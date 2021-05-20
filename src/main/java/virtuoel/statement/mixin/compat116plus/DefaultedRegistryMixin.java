@@ -12,6 +12,7 @@ import com.mojang.serialization.Lifecycle;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.DefaultedRegistry;
 import net.minecraft.util.registry.RegistryKey;
+import virtuoel.statement.util.RegistryKeyExtensions;
 
 @Mixin(DefaultedRegistry.class)
 public abstract class DefaultedRegistryMixin<T>
@@ -23,7 +24,7 @@ public abstract class DefaultedRegistryMixin<T>
 	{
 		if (defaultId.equals(registryKey.getValue()))
 		{
-			((RegistryKeyAccessor) registryKey).setValue(defaultId);
+			((RegistryKeyExtensions) registryKey).statement_setValue(defaultId);
 		}
 	}
 }

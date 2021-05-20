@@ -12,7 +12,7 @@
 		"compat116.RedstoneWireBlockMixin",
 		"compat116plus.AbstractBlockStateMixin",
 		"compat116plus.DefaultedRegistryMixin",
-		"compat116plus.RegistryKeyAccessor",
+		"compat116plus.RegistryKeyMixin",
 		"compat116plus.StateAccessor",
 		"compat116plus.StateManagerMixin",
 		"compat116plus.StateMixin",

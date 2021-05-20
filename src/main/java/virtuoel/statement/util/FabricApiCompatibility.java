@@ -13,10 +13,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.registry.RegistryIdRemapCallback;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.argument.BlockPosArgumentType;
@@ -24,12 +24,13 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
@@ -130,11 +131,11 @@ public class FabricApiCompatibility
 			);
 	}
 	
-	private static int executeValidation(final CommandContext<ServerCommandSource> context, final boolean networkingLoaded, final Identifier packetId, final PlayerEntity player, final int rate, final int initialId) throws CommandSyntaxException
+	private static int executeValidation(final CommandContext<ServerCommandSource> context, final boolean networkingLoaded, final Identifier packetId, final ServerPlayerEntity player, final int rate, final int initialId) throws CommandSyntaxException
 	{
 		if (networkingLoaded)
 		{
-			if (ServerSidePacketRegistry.INSTANCE.canPlayerReceive(player, packetId))
+			if (ServerPlayNetworking.canSend(player, packetId))
 			{
 				final PlayerEntity executor = context.getSource().getPlayer();
 				final PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer()).writeUuid(executor.getUuid()).writeVarInt(rate);
@@ -146,7 +147,7 @@ public class FabricApiCompatibility
 				
 				context.getSource().sendFeedback(new LiteralText("Running state validation..."), false);
 				
-				ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, packetId, buffer);
+				ServerPlayNetworking.send(player, packetId, buffer);
 				
 				return 1;
 			}
@@ -169,12 +170,10 @@ public class FabricApiCompatibility
 		setupServerStateValidation(Statement.FLUID_STATE_VALIDATION_PACKET, Fluid.STATE_IDS, FabricApiCompatibility::fromFluidState);
 	}
 	
-	public static <S> void setupServerStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, CompoundTag> stateToNbtFunction)
+	public static <S> void setupServerStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, NbtCompound> stateToNbtFunction)
 	{
-		ServerSidePacketRegistry.INSTANCE.register(packetId, (ctx, buf) ->
+		ServerPlayNetworking.registerGlobalReceiver(packetId, (server, player, handler, buf, responseSender) ->
 		{
-			final PlayerEntity player = ctx.getPlayer();
-			
 			final UUID uuid = buf.readUuid();
 			
 			final int idQuantity = buf.readVarInt();
@@ -193,7 +192,7 @@ public class FabricApiCompatibility
 				snbts[i] = buf.readString(32767);
 			}
 			
-			ctx.getTaskQueue().execute(() ->
+			server.execute(() ->
 			{
 				final PlayerEntity executor = player.getEntityWorld().getPlayerByUuid(uuid);
 				
@@ -208,7 +207,7 @@ public class FabricApiCompatibility
 						
 						try
 						{
-							final CompoundTag sentData = StringNbtReader.parse(snbts[i]);
+							final NbtCompound sentData = StringNbtReader.parse(snbts[i]);
 							final String sentName = sentData.getString("Name");
 							
 							final StringBuilder sentStringBuilder = new StringBuilder();
@@ -217,7 +216,7 @@ public class FabricApiCompatibility
 							if (sentData.contains("Properties", 10))
 							{
 								sentStringBuilder.append('[');
-								final CompoundTag properties = sentData.getCompound("Properties");
+								final NbtCompound properties = sentData.getCompound("Properties");
 								sentStringBuilder.append(properties.getKeys().stream().map(key ->
 								{
 									return key + "=" + properties.getString(key);
@@ -227,7 +226,7 @@ public class FabricApiCompatibility
 							
 							if (state != null)
 							{
-								final CompoundTag ownData = stateToNbtFunction.apply(state);
+								final NbtCompound ownData = stateToNbtFunction.apply(state);
 								
 								final int total = stateIdList.size();
 								final float percent = ((float) (ids[i] + 1) / total) * 100;
@@ -246,7 +245,7 @@ public class FabricApiCompatibility
 									if (ownData.contains("Properties", 10))
 									{
 										ownStringBuilder.append('[');
-										final CompoundTag properties = ownData.getCompound("Properties");
+										final NbtCompound properties = ownData.getCompound("Properties");
 										ownStringBuilder.append(properties.getKeys().stream().map(key ->
 										{
 											return key + "=" + properties.getString(key);
@@ -285,7 +284,7 @@ public class FabricApiCompatibility
 					
 					if (!done && idsFound)
 					{
-						if (ServerSidePacketRegistry.INSTANCE.canPlayerReceive(player, packetId))
+						if (ServerPlayNetworking.canSend(player, packetId))
 						{
 							final PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer()).writeUuid(uuid).writeVarInt(idQuantity);
 							
@@ -294,7 +293,7 @@ public class FabricApiCompatibility
 								buffer.writeVarInt(ids[i] + idQuantity);
 							}
 							
-							ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, packetId, buffer);
+							ServerPlayNetworking.send(player, packetId, buffer);
 						}
 						else
 						{
@@ -312,11 +311,11 @@ public class FabricApiCompatibility
 		setupClientStateValidation(Statement.FLUID_STATE_VALIDATION_PACKET, Fluid.STATE_IDS, FabricApiCompatibility::fromFluidState);
 	}
 	
-	public static <S> void setupClientStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, CompoundTag> stateToNbtFunction)
+	public static <S> void setupClientStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, NbtCompound> stateToNbtFunction)
 	{
-		ClientSidePacketRegistry.INSTANCE.register(packetId, (ctx, buf) ->
+		ClientPlayNetworking.registerGlobalReceiver(packetId, (client, handler, buf, responseSender) ->
 		{
-			final PlayerEntity player = ctx.getPlayer();
+			final PlayerEntity player = client.player;
 			
 			final UUID uuid = buf.readUuid();
 			final int idQuantity = buf.readVarInt();
@@ -333,7 +332,7 @@ public class FabricApiCompatibility
 				ids[i] = buf.readVarInt();
 			}
 			
-			ctx.getTaskQueue().execute(() ->
+			client.execute(() ->
 			{
 				if (!player.isSneaking())
 				{
@@ -347,26 +346,26 @@ public class FabricApiCompatibility
 						buffer.writeVarInt(ids[i]).writeString(snbt);
 					}
 					
-					ClientSidePacketRegistry.INSTANCE.sendToServer(packetId, buffer);
+					ClientPlayNetworking.send(packetId, buffer);
 				}
 			});
 		});
 	}
 	
-	public static CompoundTag fromFluidState(final FluidState state)
+	public static NbtCompound fromFluidState(final FluidState state)
 	{
 		return fromState(Registry.FLUID, FluidState::getFluid, state);
 	}
 	
-	public static <S extends State<?, S>, E> CompoundTag fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
+	public static <S extends State<?, S>, E> NbtCompound fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
 	{
-		final CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putString("Name", registry.getId(entryFunction.apply(state)).toString());
+		final NbtCompound NbtCompound = new NbtCompound();
+		NbtCompound.putString("Name", registry.getId(entryFunction.apply(state)).toString());
 		final ImmutableMap<Property<?>, Comparable<?>> entries = state.getEntries();
 		
 		if (!entries.isEmpty())
 		{
-			final CompoundTag properties = new CompoundTag();
+			final NbtCompound properties = new NbtCompound();
 			
 			for (final Entry<Property<?>, Comparable<?>> entry : entries.entrySet())
 			{
@@ -377,10 +376,10 @@ public class FabricApiCompatibility
 				properties.putString(property.getName(), valueName);
 			}
 			
-			compoundTag.put("Properties", properties);
+			NbtCompound.put("Properties", properties);
 		}
 		
-		return compoundTag;
+		return NbtCompound;
 	}
 	
 	public static void setupIdRemapCallbacks()
