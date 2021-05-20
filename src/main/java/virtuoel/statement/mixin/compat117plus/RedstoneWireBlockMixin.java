@@ -22,14 +22,14 @@ import net.minecraft.world.BlockView;
 public class RedstoneWireBlockMixin
 {
 	@Shadow @Final @Mutable
-	private static Map<BlockState, VoxelShape> field_24416;
+	private static Map<BlockState, VoxelShape> SHAPES;
 	
 	@Inject(at = @At("RETURN"), method = "getOutlineShape", cancellable = true)
 	private void onGetOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context, CallbackInfoReturnable<VoxelShape> info)
 	{
 		if (info.getReturnValue() == null)
 		{
-			final VoxelShape shape = field_24416.get(
+			final VoxelShape shape = SHAPES.get(
 				state.getBlock().getDefaultState()
 					.with(Properties.POWER, 0)
 					.with(Properties.NORTH_WIRE_CONNECTION, state.get(Properties.NORTH_WIRE_CONNECTION))
@@ -38,7 +38,7 @@ public class RedstoneWireBlockMixin
 					.with(Properties.WEST_WIRE_CONNECTION, state.get(Properties.WEST_WIRE_CONNECTION))
 			);
 			
-			field_24416.put(state, shape);
+			SHAPES.put(state, shape);
 			
 			info.setReturnValue(shape);
 		}
