@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
@@ -24,11 +25,12 @@ import virtuoel.statement.util.HydrogenCompatibility;
 import virtuoel.statement.util.StatementStateExtensions;
 
 @Mixin(State.class)
-public abstract class StateMixin<O, S> implements StatementStateExtensions
+public abstract class StateMixin<O, S> implements StatementStateExtensions<S>
 {
 	@Shadow @Final @Mutable protected O owner;
 	@Shadow @Final @Mutable private ImmutableMap<Property<?>, Comparable<?>> entries;
 	@Shadow private Table<Property<?>, Comparable<?>, S> withTable;
+	@Shadow @Final @Mutable MapCodec<S> codec;
 	
 	@Unique String getMissingOwner = "";
 	
@@ -143,5 +145,17 @@ public abstract class StateMixin<O, S> implements StatementStateExtensions
 	public void statement_setEntries(ImmutableMap<Property<?>, Comparable<?>> entries)
 	{
 		this.entries = HydrogenCompatibility.INSTANCE.wrapEntries(entries);
+	}
+	
+	@Override
+	public MapCodec<S> statement_getCodec()
+	{
+		return this.codec;
+	}
+	
+	@Override
+	public void statement_setCodec(MapCodec<S> codec)
+	{
+		this.codec = codec;
 	}
 }

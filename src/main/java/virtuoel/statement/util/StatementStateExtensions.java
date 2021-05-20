@@ -3,10 +3,11 @@ package virtuoel.statement.util;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.state.property.Property;
 
-public interface StatementStateExtensions
+public interface StatementStateExtensions<S>
 {
 	default <V extends Comparable<V>> boolean statement_addEntry(final Property<V> property, final V value)
 	{
@@ -27,4 +28,8 @@ public interface StatementStateExtensions
 	{
 		
 	}
+	
+	MapCodec<S> statement_getCodec();
+	
+	void statement_setCodec(MapCodec<S> codec);
 }

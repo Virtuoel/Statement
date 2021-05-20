@@ -29,6 +29,7 @@ import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import virtuoel.statement.api.RefreshableStateManager;
+import virtuoel.statement.util.StatementStateExtensions;
 
 @Mixin(StateManager.class)
 public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableStateManager<O, S>
@@ -56,8 +57,8 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		this.decoder = () -> function.apply(owner);
 		
 		@SuppressWarnings("unchecked")
-		final StateAccessor<S> s = ((StateAccessor<S>) states.get(0));
-		mapCodec = s.getCodec();
+		final StatementStateExtensions<S> s = ((StatementStateExtensions<S>) states.get(0));
+		mapCodec = s.statement_getCodec();
 		statement_stateFunction = (o, m) -> (S) statement_factory.create(o, m, mapCodec);
 	}
 	
@@ -88,8 +89,8 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		for (final S state : states)
 		{
 			@SuppressWarnings("unchecked")
-			final StateAccessor<S> s = ((StateAccessor<S>) state);
-			s.setCodec(this.mapCodec);
+			final StatementStateExtensions<S> s = ((StatementStateExtensions<S>) state);
+			s.statement_setCodec(this.mapCodec);
 		}
 	}
 	
