@@ -34,13 +34,13 @@ public abstract class StateManagerBuilderMixin
 			LOGGER.catching(e);
 		}
 	}
-	
+	/*
 	@ModifyConstant(method = "validate", constant = @Constant(stringValue = " with <= 1 possible values"))
 	private String validateExceptionMessageProxy(String orig)
 	{
 		return " with no possible values";
 	}
-	
+	*/
 	@ModifyConstant(method = "validate", constant = @Constant(ordinal = 0, intValue = 1))
 	private int validateSizeProxy(int orig)
 	{
