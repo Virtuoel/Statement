@@ -6,11 +6,11 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableMap;
 
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraftforge.fml.ModList;
 
 public class HydrogenCompatibility
 {
-	private static final boolean HYDROGEN_LOADED = FabricLoader.getInstance().isModLoaded("hydrogen");
+	private static final boolean HYDROGEN_LOADED = ModList.get().isLoaded("hydrogen");
 	
 	public static final HydrogenCompatibility INSTANCE = new HydrogenCompatibility();
 	

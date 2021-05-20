@@ -20,8 +20,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.Fluid;
@@ -33,11 +31,13 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.IdList;
 import net.minecraft.util.registry.DefaultedRegistry;
 import net.minecraft.util.registry.Registry;
+import net.minecraftforge.fml.common.Mod;
 import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.StatementConfig;
-import virtuoel.statement.util.FabricApiCompatibility;
+import virtuoel.statement.network.StatementPacketHandler;
 
-public class Statement implements ModInitializer, StatementApi
+@Mod(Statement.MOD_ID)
+public class Statement implements StatementApi
 {
 	public static final String MOD_ID = StatementApi.MOD_ID;
 	
@@ -46,29 +46,10 @@ public class Statement implements ModInitializer, StatementApi
 	public Statement()
 	{
 		StatementConfig.DATA.getClass();
-	}
-	
-	@Override
-	public void onInitialize()
-	{
-		final boolean fabricCommandsLoaded = FabricLoader.getInstance().isModLoaded("fabric-command-api-v1");
-		final boolean fabricNetworkingLoaded = FabricLoader.getInstance().isModLoaded("fabric-networking-v0");
-		final boolean fabricRegistrySyncLoaded = FabricLoader.getInstance().isModLoaded("fabric-registry-sync-v0");
 		
-		if (fabricCommandsLoaded)
-		{
-			FabricApiCompatibility.setupCommands(fabricNetworkingLoaded);
-		}
+		StatementApi.ENTRYPOINTS.add(this);
 		
-		if (fabricNetworkingLoaded)
-		{
-			FabricApiCompatibility.setupServerNetworking();
-		}
-		
-		if (fabricRegistrySyncLoaded)
-		{
-			FabricApiCompatibility.setupIdRemapCallbacks();
-		}
+		StatementPacketHandler.init();
 	}
 	
 	public static Identifier id(String name)

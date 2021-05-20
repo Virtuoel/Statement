@@ -3,6 +3,7 @@ package virtuoel.statement.util;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -10,8 +11,6 @@ import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import net.fabricmc.loader.api.FabricLoader;
 
 public abstract class ConfigHandler<S> implements Supplier<S>
 {
@@ -25,7 +24,7 @@ public abstract class ConfigHandler<S> implements Supplier<S>
 	{
 		this.namespace = namespace;
 		this.logger = LogManager.getLogger(namespace);
-		this.configFile = FabricLoader.getInstance().getConfigDir().resolve(namespace).resolve(path).normalize();
+		this.configFile = Paths.get("./config/").resolve(namespace).resolve(path).normalize();
 		this.defaultConfig = defaultConfig;
 	}
 	
@@ -54,7 +53,7 @@ public abstract class ConfigHandler<S> implements Supplier<S>
 				}
 				catch (Exception e)
 				{
-					final Path configBackup = FabricLoader.getInstance().getConfigDir().resolve(namespace).resolve(configFile.getFileName().toString() + ".bak").normalize();
+					final Path configBackup = Paths.get("./config/").resolve(namespace).resolve(configFile.getFileName().toString() + ".bak").normalize();
 					logger.warn("Failed to read config for {}. A backup is being made at \"{}\". Resetting to default config.", namespace, configBackup.toString());
 					logger.catching(e);
 					

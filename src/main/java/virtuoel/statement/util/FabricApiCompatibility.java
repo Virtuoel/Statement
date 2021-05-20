@@ -1,7 +1,6 @@
 package virtuoel.statement.util;
 
 import java.util.Map.Entry;
-import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -12,22 +11,13 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.registry.RegistryIdRemapCallback;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -40,33 +30,34 @@ import net.minecraft.util.collection.IdList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.BlockView;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import virtuoel.statement.Statement;
-import virtuoel.statement.api.StateRefresher;
 
+@EventBusSubscriber(modid = Statement.MOD_ID)
 public class FabricApiCompatibility
 {
-	public static void setupCommands(final boolean networkingLoaded)
+	@SubscribeEvent
+	public static void onRegisterCommands(RegisterCommandsEvent event)
 	{
-		CommandRegistrationCallback.EVENT.register((commandDispatcher, dedicated) ->
-		{
-			commandDispatcher.register(
-				CommandManager.literal("statement")
-				.requires(commandSource ->
-				{
-					return commandSource.hasPermissionLevel(2);
-				})
-				.then(
-					CommandManager.literal("validate")
-					.then(stateValidationArgument("block_state", Statement.BLOCK_STATE_VALIDATION_PACKET, networkingLoaded))
-					.then(stateValidationArgument("fluid_state", Statement.FLUID_STATE_VALIDATION_PACKET, networkingLoaded))
-				)
-				.then(
-					CommandManager.literal("get_id")
-					.then(idGetterArgument("block_state", Block.STATE_IDS, BlockView::getBlockState, Registry.BLOCK, BlockState::getBlock))
-					.then(idGetterArgument("fluid_state", Fluid.STATE_IDS, BlockView::getFluidState, Registry.FLUID, FluidState::getFluid))
-				)
-			);
-		});
+		event.getDispatcher().register(
+			CommandManager.literal("statement")
+			.requires(commandSource ->
+			{
+				return commandSource.hasPermissionLevel(2);
+			})
+			.then(
+				CommandManager.literal("validate")
+				.then(stateValidationArgument("block_state", Statement.BLOCK_STATE_VALIDATION_PACKET, true))
+				.then(stateValidationArgument("fluid_state", Statement.FLUID_STATE_VALIDATION_PACKET, true))
+			)
+			.then(
+				CommandManager.literal("get_id")
+				.then(idGetterArgument("block_state", Block.STATE_IDS, BlockView::getBlockState, Registry.BLOCK, BlockState::getBlock))
+				.then(idGetterArgument("fluid_state", Fluid.STATE_IDS, BlockView::getFluidState, Registry.FLUID, FluidState::getFluid))
+			)
+		);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -132,10 +123,10 @@ public class FabricApiCompatibility
 	}
 	
 	private static int executeValidation(final CommandContext<ServerCommandSource> context, final boolean networkingLoaded, final Identifier packetId, final ServerPlayerEntity player, final int rate, final int initialId) throws CommandSyntaxException
-	{
+	{/*
 		if (networkingLoaded)
 		{
-			if (ServerPlayNetworking.canSend(player, packetId))
+			if (StatementPacketHandler.INSTANCE.isRemotePresent(player.networkHandler.connection))
 			{
 				final PlayerEntity executor = context.getSource().getPlayer();
 				final PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer()).writeUuid(executor.getUuid()).writeVarInt(rate);
@@ -146,8 +137,7 @@ public class FabricApiCompatibility
 				}
 				
 				context.getSource().sendFeedback(new LiteralText("Running state validation..."), false);
-				
-				ServerPlayNetworking.send(player, packetId, buffer);
+				player.networkHandler.sendPacket(StatementPacketHandler.INSTANCE.toVanillaPacket(new StateValidationPacket(player, rate, initialId), NetworkDirection.PLAY_TO_CLIENT));
 				
 				return 1;
 			}
@@ -161,16 +151,17 @@ public class FabricApiCompatibility
 		{
 			context.getSource().sendFeedback(new LiteralText("Fabric Networking not found on server."), false);
 			return 0;
-		}
+		}*/
+		return 1;
 	}
-	
+	/*
 	public static void setupServerNetworking()
 	{
 		setupServerStateValidation(Statement.BLOCK_STATE_VALIDATION_PACKET, Block.STATE_IDS, NbtHelper::fromBlockState);
 		setupServerStateValidation(Statement.FLUID_STATE_VALIDATION_PACKET, Fluid.STATE_IDS, FabricApiCompatibility::fromFluidState);
 	}
 	
-	public static <S> void setupServerStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, NbtCompound> stateToNbtFunction)
+	public static <S> void setupServerStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, CompoundTag> stateToNbtFunction)
 	{
 		ServerPlayNetworking.registerGlobalReceiver(packetId, (server, player, handler, buf, responseSender) ->
 		{
@@ -207,7 +198,7 @@ public class FabricApiCompatibility
 						
 						try
 						{
-							final NbtCompound sentData = StringNbtReader.parse(snbts[i]);
+							final CompoundTag sentData = StringNbtReader.parse(snbts[i]);
 							final String sentName = sentData.getString("Name");
 							
 							final StringBuilder sentStringBuilder = new StringBuilder();
@@ -216,7 +207,7 @@ public class FabricApiCompatibility
 							if (sentData.contains("Properties", 10))
 							{
 								sentStringBuilder.append('[');
-								final NbtCompound properties = sentData.getCompound("Properties");
+								final CompoundTag properties = sentData.getCompound("Properties");
 								sentStringBuilder.append(properties.getKeys().stream().map(key ->
 								{
 									return key + "=" + properties.getString(key);
@@ -226,7 +217,7 @@ public class FabricApiCompatibility
 							
 							if (state != null)
 							{
-								final NbtCompound ownData = stateToNbtFunction.apply(state);
+								final CompoundTag ownData = stateToNbtFunction.apply(state);
 								
 								final int total = stateIdList.size();
 								final float percent = ((float) (ids[i] + 1) / total) * 100;
@@ -245,7 +236,7 @@ public class FabricApiCompatibility
 									if (ownData.contains("Properties", 10))
 									{
 										ownStringBuilder.append('[');
-										final NbtCompound properties = ownData.getCompound("Properties");
+										final CompoundTag properties = ownData.getCompound("Properties");
 										ownStringBuilder.append(properties.getKeys().stream().map(key ->
 										{
 											return key + "=" + properties.getString(key);
@@ -311,7 +302,7 @@ public class FabricApiCompatibility
 		setupClientStateValidation(Statement.FLUID_STATE_VALIDATION_PACKET, Fluid.STATE_IDS, FabricApiCompatibility::fromFluidState);
 	}
 	
-	public static <S> void setupClientStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, NbtCompound> stateToNbtFunction)
+	public static <S> void setupClientStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, CompoundTag> stateToNbtFunction)
 	{
 		ClientPlayNetworking.registerGlobalReceiver(packetId, (client, handler, buf, responseSender) ->
 		{
@@ -351,21 +342,21 @@ public class FabricApiCompatibility
 			});
 		});
 	}
-	
-	public static NbtCompound fromFluidState(final FluidState state)
+	*/
+	public static CompoundTag fromFluidState(final FluidState state)
 	{
 		return fromState(Registry.FLUID, FluidState::getFluid, state);
 	}
 	
-	public static <S extends State<?, S>, E> NbtCompound fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
+	public static <S extends State<?, S>, E> CompoundTag fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
 	{
-		final NbtCompound NbtCompound = new NbtCompound();
-		NbtCompound.putString("Name", registry.getId(entryFunction.apply(state)).toString());
+		final CompoundTag CompoundTag = new CompoundTag();
+		CompoundTag.putString("Name", registry.getId(entryFunction.apply(state)).toString());
 		final ImmutableMap<Property<?>, Comparable<?>> entries = state.getEntries();
 		
 		if (!entries.isEmpty())
 		{
-			final NbtCompound properties = new NbtCompound();
+			final CompoundTag properties = new CompoundTag();
 			
 			for (final Entry<Property<?>, Comparable<?>> entry : entries.entrySet())
 			{
@@ -376,15 +367,9 @@ public class FabricApiCompatibility
 				properties.putString(property.getName(), valueName);
 			}
 			
-			NbtCompound.put("Properties", properties);
+			CompoundTag.put("Properties", properties);
 		}
 		
-		return NbtCompound;
-	}
-	
-	public static void setupIdRemapCallbacks()
-	{
-		RegistryIdRemapCallback.event(Registry.BLOCK).register(s -> StateRefresher.INSTANCE.reorderBlockStates());
-		RegistryIdRemapCallback.event(Registry.FLUID).register(s -> StateRefresher.INSTANCE.reorderFluidStates());
+		return CompoundTag;
 	}
 }

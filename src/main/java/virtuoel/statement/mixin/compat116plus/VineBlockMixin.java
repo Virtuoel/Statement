@@ -26,14 +26,14 @@ import net.minecraft.world.BlockView;
 @Mixin(VineBlock.class)
 public class VineBlockMixin
 {
-	@Shadow @Final @Mutable private Map<BlockState, VoxelShape> shapesByState;
+	@Shadow @Final @Mutable private Map<BlockState, VoxelShape> field_26659;
 	
 	@Inject(at = @At("RETURN"), method = "<init>")
 	private void onConstruct(Block.Settings settings, CallbackInfo info)
 	{
-		if (shapesByState instanceof ImmutableMap)
+		if (field_26659 instanceof ImmutableMap)
 		{
-			shapesByState = new LinkedHashMap<>(shapesByState);
+			field_26659 = new LinkedHashMap<>(field_26659);
 		}
 	}
 	
@@ -42,7 +42,7 @@ public class VineBlockMixin
 	{
 		if (info.getReturnValue() == null)
 		{
-			final VoxelShape shape = shapesByState.get(
+			final VoxelShape shape = field_26659.get(
 				state.getBlock().getDefaultState()
 					.with(Properties.UP, state.get(Properties.UP))
 					.with(Properties.NORTH, state.get(Properties.NORTH))
@@ -51,7 +51,7 @@ public class VineBlockMixin
 					.with(Properties.WEST, state.get(Properties.WEST))
 			);
 			
-			shapesByState.put(state, shape);
+			field_26659.put(state, shape);
 			
 			info.setReturnValue(shape);
 		}

@@ -11,7 +11,7 @@ public class StatementConfig
 	public static final Supplier<JsonObject> HANDLER =
 		new JsonConfigHandler(
 			StatementApi.MOD_ID,
-			StatementApi.MOD_ID + "/config.json",
+			"config.json",
 			StatementConfig::createDefaultConfig
 		);
 	
