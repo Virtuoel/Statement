@@ -93,8 +93,8 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		}
 	}
 	
-	@Inject(at = @At("HEAD"), cancellable = true, remap = false, method = "method_30039")
-	private static <S extends State<?, S>, T extends Comparable<T>> void onSetPartial(Property<T> p, Supplier<S> supplier, CallbackInfoReturnable<Property.Value<T>> info)
+	@Inject(at = @At("HEAD"), cancellable = true, method = "method_30039", require = 0)
+	private static <S extends State<?, S>, T extends Comparable<T>> void int_onSetPartial(Property<T> p, Supplier<S> supplier, CallbackInfoReturnable<Property.Value<T>> info)
 	{
 		if (!supplier.get().contains(p))
 		{
@@ -102,8 +102,8 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		}
 	}
 	
-	@Inject(at = @At("HEAD"), cancellable = true, remap = false, method = "method_30038")
-	private static <S extends State<?, S>, T extends Comparable<T>> void onXmapTo(Property<T> p, Pair<S, Property.Value<T>> pair, CallbackInfoReturnable<S> info)
+	@Inject(at = @At("HEAD"), cancellable = true, method = "method_30038", require = 0)
+	private static <S extends State<?, S>, T extends Comparable<T>> void int_onXmapTo(Property<T> p, Pair<S, Property.Value<T>> pair, CallbackInfoReturnable<S> info)
 	{
 		if (pair.getSecond() == null)
 		{
@@ -111,8 +111,35 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		}
 	}
 	
-	@Inject(at = @At("HEAD"), cancellable = true, remap = false, method = "method_30037")
-	private static <S extends State<?, S>, T extends Comparable<T>> void onXmapFrom(Property<T> p, S s, CallbackInfoReturnable<Pair<S, Property.Value<T>>> info)
+	@Inject(at = @At("HEAD"), cancellable = true, method = "method_30037", require = 0)
+	private static <S extends State<?, S>, T extends Comparable<T>> void int_onXmapFrom(Property<T> p, S s, CallbackInfoReturnable<Pair<S, Property.Value<T>>> info)
+	{
+		if (!s.contains(p))
+		{
+			info.setReturnValue(Pair.of(s, null));
+		}
+	}
+	
+	@Inject(at = @At("HEAD"), cancellable = true, method = "func_241486_a_", require = 0)
+	private static <S extends State<?, S>, T extends Comparable<T>> void srg_onSetPartial(Property<T> p, Supplier<S> supplier, CallbackInfoReturnable<Property.Value<T>> info)
+	{
+		if (!supplier.get().contains(p))
+		{
+			info.setReturnValue(null);
+		}
+	}
+	
+	@Inject(at = @At("HEAD"), cancellable = true, method = "func_241485_a_", require = 0)
+	private static <S extends State<?, S>, T extends Comparable<T>> void srg_onXmapTo(Property<T> p, Pair<S, Property.Value<T>> pair, CallbackInfoReturnable<S> info)
+	{
+		if (pair.getSecond() == null)
+		{
+			info.setReturnValue(pair.getFirst());
+		}
+	}
+	
+	@Inject(at = @At("HEAD"), cancellable = true, method = "func_241484_a_", require = 0)
+	private static <S extends State<?, S>, T extends Comparable<T>> void srg_onXmapFrom(Property<T> p, S s, CallbackInfoReturnable<Pair<S, Property.Value<T>>> info)
 	{
 		if (!s.contains(p))
 		{
