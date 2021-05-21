@@ -1,6 +1,8 @@
 package virtuoel.statement.mixin.sync;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -14,7 +16,7 @@ import virtuoel.statement.Statement;
 @Mixin(WorldEventS2CPacket.class)
 public class WorldEventS2CPacketMixin
 {
-	@Shadow int data;
+	@Shadow @Final @Mutable int data;
 	
 	@Inject(at = @At("RETURN"), method = "<init>(ILnet/minecraft/util/math/BlockPos;IZ)V")
 	private void onConstruct(int eventId, BlockPos pos, int data, boolean global, CallbackInfo info)
