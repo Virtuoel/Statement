@@ -50,11 +50,9 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		
 		if (ret == null)
 		{
-			final StateManager<?, ?> self = (StateManager<?, ?>) (Object) this;
-			
-			for (final Object state : self.getStates())
+			for (final State<O, S> state : states)
 			{
-				((StatementStateExtensions) state).statement_addEntry(property, defaultValue);
+				StatementStateExtensions.statement_cast(state).statement_addEntry(property, defaultValue);
 			}
 		}
 		
@@ -68,11 +66,9 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		
 		if (ret != null)
 		{
-			final StateManager<?, ?> self = (StateManager<?, ?>) (Object) this;
-			
-			for (final Object state : self.getStates())
+			for (final State<O, S> state : states)
 			{
-				((StatementStateExtensions) state).statement_removeEntry(ret);
+				StatementStateExtensions.statement_cast(state).statement_removeEntry(ret);
 			}
 		}
 		

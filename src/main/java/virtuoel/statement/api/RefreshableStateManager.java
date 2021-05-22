@@ -112,7 +112,7 @@ public interface RefreshableStateManager<O, S extends State<O, S>> extends Mutab
 			{
 				FoamFixCompatibility.INSTANCE.setStateOwner(propertyContainer, mapper);
 				
-				((StatementStateExtensions) propertyContainer).statement_createWithTable(stateMap);
+				StatementStateExtensions.statement_cast(propertyContainer).statement_createWithTable(stateMap);
 			});
 			
 			statement_setStateList(ImmutableList.copyOf(currentStates));
