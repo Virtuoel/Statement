@@ -5,6 +5,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.MapCodec;
 
+import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
 
 public interface StatementStateExtensions<S>
@@ -32,4 +33,10 @@ public interface StatementStateExtensions<S>
 	MapCodec<S> statement_getCodec();
 	
 	void statement_setCodec(MapCodec<S> codec);
+	
+	@SuppressWarnings("unchecked")
+	public static <S> StatementStateExtensions<S> statement_cast(State<?, S> state)
+	{
+		return (StatementStateExtensions<S>) state;
+	}
 }
