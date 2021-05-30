@@ -29,6 +29,8 @@ public class StatementConfig
 		
 		config.addProperty("enableIdSyncApi", true);
 		
+		config.addProperty("forceParallelMode", false);
+		
 		return config;
 	}
 }

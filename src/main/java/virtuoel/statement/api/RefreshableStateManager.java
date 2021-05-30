@@ -96,7 +96,7 @@ public interface RefreshableStateManager<O, S extends State<O, S>> extends Mutab
 			}
 			else
 			{
-				currentState = states.parallelStream().filter(state -> state.getEntries().equals(propertyValueMap)).findFirst().orElse(null);
+				currentState = (StateRefresher.INSTANCE.isParallel() ? states.parallelStream() : states.stream()).filter(state -> state.getEntries().equals(propertyValueMap)).findFirst().orElse(null);
 			}
 			
 			if (currentState != null)
@@ -106,9 +106,10 @@ public interface RefreshableStateManager<O, S extends State<O, S>> extends Mutab
 			}
 		});
 		
+		final Stream<S> stateStream = (StateRefresher.INSTANCE.isParallel() ? currentStates.parallelStream() : currentStates.stream());
 		if (!addedStates.isEmpty())
 		{
-			currentStates.parallelStream().forEach(propertyContainer ->
+			stateStream.forEach(propertyContainer ->
 			{
 				FoamFixCompatibility.INSTANCE.setStateOwner(propertyContainer, mapper);
 				
@@ -119,7 +120,7 @@ public interface RefreshableStateManager<O, S extends State<O, S>> extends Mutab
 		}
 		else if (FoamFixCompatibility.INSTANCE.isEnabled())
 		{
-			currentStates.parallelStream().forEach(propertyContainer ->
+			stateStream.forEach(propertyContainer ->
 			{
 				FoamFixCompatibility.INSTANCE.setStateOwner(propertyContainer, mapper);
 			});
