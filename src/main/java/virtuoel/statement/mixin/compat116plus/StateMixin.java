@@ -34,54 +34,43 @@ public abstract class StateMixin<O, S> implements StatementStateExtensions<S>
 	
 	@Unique String getMissingOwner = "";
 	
-	@Inject(at = @At("HEAD"), method = "get", cancellable = true)
+	@Inject(method = "get", cancellable = true, at = @At(value = "INVOKE", target = "Ljava/lang/IllegalArgumentException;<init>(Ljava/lang/String;)V"))
 	private <T extends Comparable<T>> void onGet(Property<T> property, CallbackInfoReturnable<T> info)
 	{
-		final Comparable<?> currentValue = this.entries.get(property);
+		final String ownerString = this.owner.toString();
 		
-		if (currentValue == null)
+		if (!getMissingOwner.equals(ownerString))
 		{
-			final String ownerString = this.owner.toString();
-			if (!getMissingOwner.equals(ownerString))
-			{
-				Statement.LOGGER.info("Cannot get property {} as it does not exist in {}", property, this.owner);
-				getMissingOwner = ownerString;
-			}
-			
-			info.setReturnValue(cachedFallbacks.containsKey(property) ? property.getType().cast(cachedFallbacks.get(property)) : property.getValues().iterator().next());
+			Statement.LOGGER.info("Cannot get property {} as it does not exist in {}", property, this.owner);
+			getMissingOwner = ownerString;
 		}
+		
+		info.setReturnValue(cachedFallbacks.containsKey(property) ? property.getType().cast(cachedFallbacks.get(property)) : property.getValues().iterator().next());
 	}
 	
 	@Unique String withMissingOwner = "";
 	@Unique String withDisallowedOwner = "";
 	
-	@Inject(at = @At("HEAD"), method = "with", cancellable = true)
+	@Inject(method = "with", cancellable = true, at = @At(value = "INVOKE", target = "Ljava/lang/IllegalArgumentException;<init>(Ljava/lang/String;)V"))
 	private <T extends Comparable<T>, V extends T> void onWith(Property<T> property, V value, CallbackInfoReturnable<Object> info)
 	{
-		final Comparable<?> currentValue = this.entries.get(property);
+		final String ownerString = this.owner.toString();
 		
-		if (currentValue == null)
+		if (this.entries.get(property) == null)
 		{
-			final String ownerString = this.owner.toString();
 			if (!withMissingOwner.equals(ownerString))
 			{
 				Statement.LOGGER.info("Cannot set property {} as it does not exist in {}", property, this.owner);
 				withMissingOwner = ownerString;
 			}
-			
-			info.setReturnValue(this);
 		}
-		else if (currentValue != value && withTable.get(property, value) == null)
+		else if (!withDisallowedOwner.equals(ownerString))
 		{
-			final String ownerString = this.owner.toString();
-			if (!withDisallowedOwner.equals(ownerString))
-			{
-				Statement.LOGGER.info("Cannot set property {} to {} on {}, it is not an allowed value", property, value, this.owner);
-				withDisallowedOwner = ownerString;
-			}
-			
-			info.setReturnValue(this);
+			Statement.LOGGER.info("Cannot set property {} to {} on {}, it is not an allowed value", property, value, this.owner);
+			withDisallowedOwner = ownerString;
 		}
+		
+		info.setReturnValue(this);
 	}
 	
 	@Inject(at = @At("HEAD"), method = "createWithTable")
