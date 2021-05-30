@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -18,6 +19,10 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
@@ -27,6 +32,7 @@ import virtuoel.statement.api.ClearableIdList;
 import virtuoel.statement.api.RefreshableStateManager;
 import virtuoel.statement.api.StateRefresher;
 import virtuoel.statement.api.StatementApi;
+import virtuoel.statement.api.StatementConfig;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
 import virtuoel.statement.api.property.MutableProperty;
 
@@ -55,7 +61,7 @@ public class StateRefresherImpl implements StateRefresher
 		
 		return states;
 	}
-	
+
 	@Override
 	public <O, S extends State<O, S>, V extends Comparable<V>> Collection<S> removeProperty(final Supplier<StateManager<O, S>> stateManagerGetter, final Supplier<S> defaultStateGetter, final Property<V> property)
 	{
@@ -222,5 +228,25 @@ public class StateRefresherImpl implements StateRefresher
 		((ClearableIdList) stateIdList).statement_clear();
 		initialStates.forEach(stateIdList::add);
 		deferredStates.forEach(stateIdList::add);
+	}
+	
+	private Boolean parallel = null;
+	
+	@Override
+	public boolean isParallel()
+	{
+		if (parallel == null)
+		{
+			final boolean forceParallelMode = Optional.ofNullable(StatementConfig.DATA.get("forceParallelMode"))
+				.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsJsonPrimitive)
+				.filter(JsonPrimitive::isBoolean).map(JsonPrimitive::getAsBoolean)
+				.orElse(true);
+			
+			final boolean ferriteCoreLoaded = FabricLoader.getInstance().isModLoaded("ferritecore");
+			
+			parallel = forceParallelMode || !ferriteCoreLoaded;
+		}
+		
+		return parallel;
 	}
 }

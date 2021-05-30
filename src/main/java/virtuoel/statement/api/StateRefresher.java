@@ -88,4 +88,9 @@ public interface StateRefresher
 	{
 		
 	}
+	
+	default boolean isParallel()
+	{
+		return false;
+	}
 }
