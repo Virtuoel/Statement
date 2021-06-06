@@ -22,7 +22,7 @@ import virtuoel.statement.Statement;
 import virtuoel.statement.util.StatementStateExtensions;
 
 @Mixin(targets = "net.minecraft.class_2679", remap = false)
-public abstract class AbstractStateMixin<O, S> implements StatementStateExtensions
+public abstract class AbstractStateMixin<O, S> implements StatementStateExtensions<S>
 {
 	@Shadow(remap = false) @Final @Mutable protected O field_12287;
 	@Shadow(remap = false) @Final @Mutable private ImmutableMap<Property<?>, Comparable<?>> field_12285;
