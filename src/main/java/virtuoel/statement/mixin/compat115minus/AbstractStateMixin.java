@@ -19,6 +19,7 @@ import com.google.common.collect.Table;
 
 import net.minecraft.state.property.Property;
 import virtuoel.statement.Statement;
+import virtuoel.statement.util.HydrogenCompatibility;
 import virtuoel.statement.util.StatementStateExtensions;
 
 @Mixin(targets = "net.minecraft.class_2679", remap = false)
@@ -28,53 +29,45 @@ public abstract class AbstractStateMixin<O, S> implements StatementStateExtensio
 	@Shadow(remap = false) @Final @Mutable private ImmutableMap<Property<?>, Comparable<?>> field_12285;
 	@Shadow(remap = false) private Table<Property<?>, Comparable<?>, S> field_12288;
 	
-	@Unique boolean loggedGetMissing = false;
+	@Unique String getMissingOwner = "";
 	
-	@Inject(at = @At("HEAD"), method = "method_11654", cancellable = true, remap = false)
+	@Inject(method = "method_11654", cancellable = true, at = @At(value = "INVOKE", target = "Ljava/lang/IllegalArgumentException;<init>(Ljava/lang/String;)V"), remap = false)
 	private <T extends Comparable<T>> void onGet(Property<T> property, CallbackInfoReturnable<T> info)
 	{
-		final Comparable<?> currentValue = this.field_12285.get(property);
+		final String ownerString = this.field_12287.toString();
 		
-		if (currentValue == null)
+		if (!getMissingOwner.equals(ownerString))
 		{
-			if (!loggedGetMissing)
-			{
-				Statement.LOGGER.info("Cannot get property {} as it does not exist in {}", property, this.field_12287);
-				loggedGetMissing = true;
-			}
-			
-			info.setReturnValue(cachedFallbacks.containsKey(property) ? property.getType().cast(cachedFallbacks.get(property)) : property.getValues().iterator().next());
+			Statement.LOGGER.info("Cannot get property {} as it does not exist in {}", property, this.field_12287);
+			getMissingOwner = ownerString;
 		}
+		
+		info.setReturnValue(cachedFallbacks.containsKey(property) ? property.getType().cast(cachedFallbacks.get(property)) : property.getValues().iterator().next());
 	}
 	
-	@Unique boolean loggedWithMissing = false;
-	@Unique boolean loggedWithDisallowed = false;
+	@Unique String withMissingOwner = "";
+	@Unique String withDisallowedOwner = "";
 	
-	@Inject(at = @At("HEAD"), method = "method_11657", cancellable = true, remap = false)
+	@Inject(method = "method_11657", cancellable = true, at = @At(value = "INVOKE", target = "Ljava/lang/IllegalArgumentException;<init>(Ljava/lang/String;)V"), remap = false)
 	private <T extends Comparable<T>, V extends T> void onWith(Property<T> property, V value, CallbackInfoReturnable<Object> info)
 	{
-		final Comparable<?> currentValue = this.field_12285.get(property);
+		final String ownerString = this.field_12287.toString();
 		
-		if (currentValue == null)
+		if (this.field_12285.get(property) == null)
 		{
-			if (!loggedWithMissing)
+			if (!withMissingOwner.equals(ownerString))
 			{
 				Statement.LOGGER.info("Cannot set property {} as it does not exist in {}", property, this.field_12287);
-				loggedWithMissing = true;
+				withMissingOwner = ownerString;
 			}
-			
-			info.setReturnValue(this);
 		}
-		else if (currentValue != value && field_12288.get(property, value) == null)
+		else if (!withDisallowedOwner.equals(ownerString))
 		{
-			if (!loggedWithDisallowed)
-			{
-				Statement.LOGGER.info("Cannot set property {} to {} on {}, it is not an allowed value", property, value, this.field_12287);
-				loggedWithDisallowed = true;
-			}
-			
-			info.setReturnValue(this);
+			Statement.LOGGER.info("Cannot set property {} to {} on {}, it is not an allowed value", property, value, this.field_12287);
+			withDisallowedOwner = ownerString;
 		}
+		
+		info.setReturnValue(this);
 	}
 	
 	@Inject(at = @At("HEAD"), method = "method_11571", remap = false)
@@ -97,7 +90,7 @@ public abstract class AbstractStateMixin<O, S> implements StatementStateExtensio
 	{
 		if (!field_12285.containsKey(property))
 		{
-			field_12285 = ImmutableMap.<Property<?>, Comparable<?>>builder().putAll(field_12285).put(property, value).build();
+			statement_setEntries(ImmutableMap.<Property<?>, Comparable<?>>builder().putAll(field_12285).put(property, value).build());
 			
 			return true;
 		}
@@ -126,11 +119,17 @@ public abstract class AbstractStateMixin<O, S> implements StatementStateExtensio
 			
 			cachedFallbacks.put(property, field_12285.get(property));
 			
-			field_12285 = builder.build();
+			statement_setEntries(builder.build());
 			
 			return true;
 		}
 		
 		return false;
+	}
+	
+	@Override
+	public void statement_setEntries(ImmutableMap<Property<?>, Comparable<?>> entries)
+	{
+		this.field_12285 = HydrogenCompatibility.INSTANCE.wrapEntries(entries);
 	}
 }
