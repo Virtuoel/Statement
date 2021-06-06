@@ -57,8 +57,8 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		this.decoder = () -> function.apply(owner);
 		
 		@SuppressWarnings("unchecked")
-		final StatementStateExtensions<S> s = ((StatementStateExtensions<S>) states.get(0));
-		mapCodec = s.statement_getCodec();
+		final MapCodec<S> c = (MapCodec<S>) ((StatementStateExtensions<S>) states.get(0)).statement_getCodec();
+		mapCodec = c;
 		statement_stateFunction = (o, m) -> (S) statement_factory.create(o, m, mapCodec);
 	}
 	
@@ -86,10 +86,10 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		
 		this.mapCodec = (MapCodec<S>) mapCodec;
 		
+		StatementStateExtensions<S> s;
 		for (final S state : states)
 		{
-			@SuppressWarnings("unchecked")
-			final StatementStateExtensions<S> s = ((StatementStateExtensions<S>) state);
+			s = StatementStateExtensions.statement_cast(state);
 			s.statement_setCodec(this.mapCodec);
 		}
 	}

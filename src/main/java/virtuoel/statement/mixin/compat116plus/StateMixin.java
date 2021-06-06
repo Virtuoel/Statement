@@ -137,14 +137,15 @@ public abstract class StateMixin<O, S> implements StatementStateExtensions<S>
 	}
 	
 	@Override
-	public MapCodec<S> statement_getCodec()
+	public Object statement_getCodec()
 	{
 		return this.codec;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public void statement_setCodec(MapCodec<S> codec)
+	public void statement_setCodec(Object codec)
 	{
-		this.codec = codec;
+		this.codec = (MapCodec<S>) codec;
 	}
 }
