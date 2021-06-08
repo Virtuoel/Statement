@@ -25,6 +25,7 @@
 		"compat116plus.StateMixin",
 		"compat116plus.VineBlockMixin",
 		"compat116plus.WallBlockMixin",
+		"compat117plus.BigDripleafBlockMixin",
 		"compat117plus.RedstoneWireBlockMixin",
 		"sync.ArrayPaletteMixin",
 		"sync.BiMapPaletteMixin",
