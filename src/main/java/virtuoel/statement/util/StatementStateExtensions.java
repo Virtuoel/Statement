@@ -39,6 +39,11 @@ public interface StatementStateExtensions<S>
 		
 	}
 	
+	default ImmutableMap<Property<?>, Comparable<?>> statement_getEntries()
+	{
+		return ImmutableMap.of();
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static <S> StatementStateExtensions<S> statement_cast(State<?, S> state)
 	{

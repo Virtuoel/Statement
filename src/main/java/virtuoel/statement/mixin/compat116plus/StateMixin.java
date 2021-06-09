@@ -88,6 +88,15 @@ public abstract class StateMixin<O, S> implements StatementStateExtensions<S>
 		createWithTable(states);
 	}
 	
+	@Shadow
+	abstract ImmutableMap<Property<?>, Comparable<?>> getEntries();
+	
+	@Override
+	public ImmutableMap<Property<?>, Comparable<?>> statement_getEntries()
+	{
+		return getEntries();
+	}
+	
 	@Override
 	public <V extends Comparable<V>> boolean statement_addEntry(final Property<V> property, final V value)
 	{

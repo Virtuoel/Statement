@@ -120,7 +120,7 @@ public class StateRefresherImpl implements StateRefresher
 		
 		for (final O entry : registry)
 		{
-			if (defaultStateGetter.apply(entry).getEntries().containsKey(property))
+			if (((StatementStateExtensions<?>) defaultStateGetter.apply(entry)).statement_getEntries().containsKey(property))
 			{
 				@SuppressWarnings("unchecked")
 				final RefreshableStateManager<O, S> manager = (RefreshableStateManager<O, S>) stateManagerGetter.apply(entry);

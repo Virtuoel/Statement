@@ -85,6 +85,15 @@ public abstract class AbstractStateMixin<O, S> implements StatementStateExtensio
 		method_11571(states);
 	}
 	
+	@Shadow(remap = false)
+	abstract ImmutableMap<Property<?>, Comparable<?>> method_11656();
+	
+	@Override
+	public ImmutableMap<Property<?>, Comparable<?>> statement_getEntries()
+	{
+		return method_11656();
+	}
+	
 	@Override
 	public <V extends Comparable<V>> boolean statement_addEntry(final Property<V> property, final V value)
 	{
