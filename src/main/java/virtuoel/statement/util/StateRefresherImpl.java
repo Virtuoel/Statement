@@ -52,7 +52,9 @@ public class StateRefresherImpl implements StateRefresher
 		
 		manager.statement_addProperty(property, defaultValue);
 		
-		final List<V> nonDefaultValues = property.getValues().stream().filter(v -> v != defaultValue).collect(Collectors.toList());
+		@SuppressWarnings("unchecked")
+		final StatementPropertyExtensions<V> p = (StatementPropertyExtensions<V>) property;
+		final List<V> nonDefaultValues = p.statement_getValues().stream().filter(v -> v != defaultValue).collect(Collectors.toList());
 		
 		final Collection<S> states = manager.statement_reconstructStateList(Collections.singletonMap(property, nonDefaultValues));
 		
@@ -73,7 +75,7 @@ public class StateRefresherImpl implements StateRefresher
 		@SuppressWarnings("unchecked")
 		final RefreshableStateManager<O, S> manager = ((RefreshableStateManager<O, S>) stateManager);
 		
-		final Property<?> named = stateManager.getProperty(property.getName());
+		final Property<?> named = stateManager.getProperty(((StatementPropertyExtensions<?>) property).statement_getName());
 		
 		if (named != null)
 		{
@@ -161,7 +163,9 @@ public class StateRefresherImpl implements StateRefresher
 			{
 				addedValueMap.put(property, addedValues);
 				
-				final Collection<V> values = mutableProperty.asProperty().getValues();
+				@SuppressWarnings("unchecked")
+				final StatementPropertyExtensions<V> p = (StatementPropertyExtensions<V>) mutableProperty;
+				final Collection<V> values = p.statement_getValues();
 				values.addAll(addedValues);
 				values.removeAll(removedValues);
 				
