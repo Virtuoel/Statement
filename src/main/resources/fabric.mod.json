@@ -19,7 +19,7 @@
 	"environment": "*",
 	"depends":
 	{
-		"minecraft": ">=1.16.0-0"
+		"minecraft": ">=1.14.0-0 <1.16.0-0"
 	},
 	"custom":
 	{
