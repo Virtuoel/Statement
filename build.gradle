@@ -99,11 +99,11 @@ dependencies {
 		}
 		
 		if(project.hasProperty("statement_compat_version")) {
-			modApi("virtuoel:StatementMinecraftCompatibility:${statement_compat_version}", excludeFabric)
+			modApi("virtuoel:StatementVanillaCompatibility:${statement_compat_version}", excludeFabric)
 		}
 		
 		if(project.hasProperty("include_statement_compat_version")) {
-			include("virtuoel:StatementMinecraftCompatibility:${include_statement_compat_version}", excludeFabric)
+			include("virtuoel:StatementVanillaCompatibility:${include_statement_compat_version}", excludeFabric)
 		}
 		
 		if(project.hasProperty("statement_compat_tag")) {
