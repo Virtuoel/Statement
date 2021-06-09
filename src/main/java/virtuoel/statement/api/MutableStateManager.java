@@ -33,7 +33,7 @@ public interface MutableStateManager
 	{
 		final Map<String, Property<?>> properties = statement_getProperties();
 		
-		final String name = ((StatementPropertyExtensions) property).statement_getName();
+		final String name = ((StatementPropertyExtensions<?>) property).statement_getName();
 		final Property<?> ret = properties.get(name);
 		
 		if (ret != property)
@@ -91,7 +91,7 @@ public interface MutableStateManager
 	
 	default boolean statement_removeProperty(final Property<?> property)
 	{
-		final String name = ((StatementPropertyExtensions) property).statement_getName();
+		final String name = ((StatementPropertyExtensions<?>) property).statement_getName();
 		return statement_removeProperty(name) != null;
 	}
 }
