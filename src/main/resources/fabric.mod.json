@@ -1,9 +1,9 @@
 {
 	"schemaVersion": 1,
-	"id": "statement",
-	"name": "Statement",
+	"id": "statement_vanilla_compatibility",
+	"name": "Statement Vanilla Compatibility Module",
 	"version": "${version}",
-	"description": "Library to assist with adding properties to existing block states.",
+	"description": "Module to allow Statement to work in particular Minecraft Versions",
 	"authors":
 	[
 		"Virtuoel"
@@ -15,36 +15,18 @@
 		"sources": "https://github.com/Virtuoel/Statement"
 	},
 	"license": "MIT",
-	"icon": "assets/statement/icon.png",
+	"icon": "assets/statement_vanilla_compatibility/icon.png",
 	"environment": "*",
 	"depends":
 	{
-		"fabricloader": ">=0.8.0"
+		"minecraft": ">=1.16.0-0"
 	},
-	"entrypoints":
-	{
-		"main":
-		[
-			"virtuoel.statement.Statement"
-		],
-		"client":
-		[
-			"virtuoel.statement.StatementClient"
-		],
-		"statement":
-		[
-			"virtuoel.statement.Statement"
-		]
-	},
-	"mixins":
-	[
-		"statement.mixins.json"
-	],
 	"custom":
 	{
 		"modmenu:api": true,
 		"modmenu":
 		{
+			"parent": "statement",
 			"badges":
 			[
 				"library"
