@@ -22,11 +22,13 @@ import org.apache.logging.log4j.Logger;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.Block;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.collection.IdList;
+import net.minecraft.util.registry.Registry;
+import net.minecraftforge.fml.ModList;
 import virtuoel.statement.Statement;
 import virtuoel.statement.api.ClearableIdList;
 import virtuoel.statement.api.RefreshableStateManager;
@@ -50,13 +52,16 @@ public class StateRefresherImpl implements StateRefresher
 		
 		manager.statement_addProperty(property, defaultValue);
 		
-		final List<V> nonDefaultValues = property.getValues().stream().filter(v -> v != defaultValue).collect(Collectors.toList());
+		@SuppressWarnings("unchecked")
+		final StatementPropertyExtensions<V> p = (StatementPropertyExtensions<V>) property;
+		final List<V> nonDefaultValues = p.statement_getValues().stream().filter(v -> v != defaultValue).collect(Collectors.toList());
 		
 		final Collection<S> states = manager.statement_reconstructStateList(Collections.singletonMap(property, nonDefaultValues));
 		
 		for (final S s : states)
 		{
 			idList.add(s);
+			((StatementBlockStateExtensions) s).statement_initShapeCache();
 		}
 		
 		return states;
@@ -70,7 +75,7 @@ public class StateRefresherImpl implements StateRefresher
 		@SuppressWarnings("unchecked")
 		final RefreshableStateManager<O, S> manager = ((RefreshableStateManager<O, S>) stateManager);
 		
-		final Property<?> named = stateManager.getProperty(property.getName());
+		final Property<?> named = stateManager.getProperty(((StatementPropertyExtensions<?>) property).statement_getName());
 		
 		if (named != null)
 		{
@@ -95,6 +100,16 @@ public class StateRefresherImpl implements StateRefresher
 	}
 	
 	@Override
+	public <V extends Comparable<V>> void refreshBlockStates(Property<V> property, Collection<V> addedValues, Collection<V> removedValues)
+	{
+		refreshStates(
+			Registry.BLOCK, Block.STATE_IDS,
+			property, addedValues, removedValues,
+			Block::getDefaultState, Block::getStateManager, s -> ((StatementBlockStateExtensions) s).statement_initShapeCache()
+		);
+	}
+	
+	@Override
 	public <O, V extends Comparable<V>, S extends State<O, S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, Property<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateManager<O, S>> stateManagerGetter, final Consumer<S> newStateConsumer)
 	{
 		Statement.invalidateCustomStateData(stateIdList);
@@ -105,7 +120,7 @@ public class StateRefresherImpl implements StateRefresher
 		
 		for (final O entry : registry)
 		{
-			if (defaultStateGetter.apply(entry).getEntries().containsKey(property))
+			if (((StatementStateExtensions<?>) defaultStateGetter.apply(entry)).statement_getEntries().containsKey(property))
 			{
 				@SuppressWarnings("unchecked")
 				final RefreshableStateManager<O, S> manager = (RefreshableStateManager<O, S>) stateManagerGetter.apply(entry);
@@ -148,7 +163,9 @@ public class StateRefresherImpl implements StateRefresher
 			{
 				addedValueMap.put(property, addedValues);
 				
-				final Collection<V> values = mutableProperty.asProperty().getValues();
+				@SuppressWarnings("unchecked")
+				final StatementPropertyExtensions<V> p = (StatementPropertyExtensions<V>) mutableProperty;
+				final Collection<V> values = p.statement_getValues();
 				values.addAll(addedValues);
 				values.removeAll(removedValues);
 				
@@ -242,7 +259,7 @@ public class StateRefresherImpl implements StateRefresher
 				.filter(JsonPrimitive::isBoolean).map(JsonPrimitive::getAsBoolean)
 				.orElse(true);
 			
-			final boolean ferriteCoreLoaded = FabricLoader.getInstance().isModLoaded("ferritecore");
+			final boolean ferriteCoreLoaded = ModList.get().isLoaded("ferritecore");
 			
 			parallel = forceParallelMode || !ferriteCoreLoaded;
 		}

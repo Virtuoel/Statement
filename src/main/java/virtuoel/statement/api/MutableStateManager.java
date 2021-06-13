@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.ImmutableSortedMap;
 
 import net.minecraft.state.property.Property;
+import virtuoel.statement.util.StatementPropertyExtensions;
 
 public interface MutableStateManager
 {
@@ -32,12 +33,13 @@ public interface MutableStateManager
 	{
 		final Map<String, Property<?>> properties = statement_getProperties();
 		
-		final Property<?> ret = properties.get(property.getName());
+		final String name = ((StatementPropertyExtensions<?>) property).statement_getName();
+		final Property<?> ret = properties.get(name);
 		
 		if (ret != property)
 		{
 			final ImmutableSortedMap.Builder<String, Property<?>> builder = ImmutableSortedMap.<String, Property<?>>naturalOrder();
-			builder.put(property.getName(), property);
+			builder.put(name, property);
 			
 			if (ret != null)
 			{
@@ -89,6 +91,7 @@ public interface MutableStateManager
 	
 	default boolean statement_removeProperty(final Property<?> property)
 	{
-		return statement_removeProperty(property.getName()) != null;
+		final String name = ((StatementPropertyExtensions<?>) property).statement_getName();
+		return statement_removeProperty(name) != null;
 	}
 }

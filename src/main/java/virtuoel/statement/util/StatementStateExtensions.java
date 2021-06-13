@@ -3,7 +3,6 @@ package virtuoel.statement.util;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.serialization.MapCodec;
 
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
@@ -30,9 +29,20 @@ public interface StatementStateExtensions<S>
 		
 	}
 	
-	MapCodec<S> statement_getCodec();
+	default Object statement_getCodec()
+	{
+		return null;
+	}
 	
-	void statement_setCodec(MapCodec<S> codec);
+	default void statement_setCodec(Object codec)
+	{
+		
+	}
+	
+	default ImmutableMap<Property<?>, Comparable<?>> statement_getEntries()
+	{
+		return ImmutableMap.of();
+	}
 	
 	@SuppressWarnings("unchecked")
 	public static <S> StatementStateExtensions<S> statement_cast(State<?, S> state)

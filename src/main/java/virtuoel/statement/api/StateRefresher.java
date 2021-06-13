@@ -53,11 +53,7 @@ public interface StateRefresher
 	
 	default <V extends Comparable<V>> void refreshBlockStates(final Property<V> property, final Collection<V> addedValues, final Collection<V> removedValues)
 	{
-		refreshStates(
-			Registry.BLOCK, Block.STATE_IDS,
-			property, addedValues, removedValues,
-			Block::getDefaultState, Block::getStateManager, b -> {}
-		);
+		
 	}
 	
 	default <V extends Comparable<V>> void refreshFluidStates(final Property<V> property, final Collection<V> addedValues, final Collection<V> removedValues)

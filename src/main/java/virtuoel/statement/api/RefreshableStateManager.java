@@ -20,6 +20,7 @@ import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
+import virtuoel.statement.util.StatementPropertyExtensions;
 import virtuoel.statement.util.StatementStateExtensions;
 
 public interface RefreshableStateManager<O, S extends State<O, S>> extends MutableStateManager
@@ -59,7 +60,9 @@ public interface RefreshableStateManager<O, S extends State<O, S>> extends Mutab
 		{
 			tableStream = tableStream.flatMap((propertyList) ->
 			{
-				return entry.getValues().stream().map((val) ->
+				@SuppressWarnings("unchecked")
+				final StatementPropertyExtensions<Comparable<?>> p = ((StatementPropertyExtensions<Comparable<?>>) entry);
+				return p.statement_getValues().stream().map((val) ->
 				{
 					final List<Pair<Property<?>, Comparable<?>>> list = new ArrayList<>(propertyList);
 					list.add(Pair.of(entry, val));
@@ -96,7 +99,7 @@ public interface RefreshableStateManager<O, S extends State<O, S>> extends Mutab
 			}
 			else
 			{
-				currentState = (StateRefresher.INSTANCE.isParallel() ? states.parallelStream() : states.stream()).filter(state -> state.getEntries().equals(propertyValueMap)).findFirst().orElse(null);
+				currentState = (StateRefresher.INSTANCE.isParallel() ? states.parallelStream() : states.stream()).filter(state -> ((StatementStateExtensions<?>) state).statement_getEntries().equals(propertyValueMap)).findFirst().orElse(null);
 			}
 			
 			if (currentState != null)
