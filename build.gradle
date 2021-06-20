@@ -186,7 +186,7 @@ githubRelease {
 		repo project.github_repository
 	}
 	
-	tagName project.mod_version
+	tagName "${project.mod_version}-compat-${project.metadata_minecraft_versions}"
 	
 	if(project.hasProperty("github_branch")) {
 		targetCommitish project.github_branch
