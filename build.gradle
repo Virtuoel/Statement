@@ -107,11 +107,11 @@ dependencies {
 		}
 		
 		if(project.hasProperty("statement_compat_tag")) {
-			modApi("com.github.Virtuoel:Statement:${statement_compat_tag}", excludeFabric)
+			modApi("com.github.Virtuoel:StatementVanillaCompatibility:${statement_compat_tag}", excludeFabric)
 		}
 		
 		if(project.hasProperty("include_statement_compat_tag")) {
-			include("com.github.Virtuoel:Statement:${include_statement_compat_tag}", excludeFabric)
+			include("com.github.Virtuoel:StatementVanillaCompatibility:${include_statement_compat_tag}", excludeFabric)
 		}
 	}
 }
