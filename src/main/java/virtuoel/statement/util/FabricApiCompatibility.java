@@ -17,7 +17,7 @@ import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -161,7 +161,7 @@ public class FabricApiCompatibility
 		setupServerStateValidation(Statement.FLUID_STATE_VALIDATION_PACKET, Fluid.STATE_IDS, FabricApiCompatibility::fromFluidState);
 	}
 	
-	public static <S> void setupServerStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, CompoundTag> stateToNbtFunction)
+	public static <S> void setupServerStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, NbtCompound> stateToNbtFunction)
 	{
 		ServerPlayNetworking.registerGlobalReceiver(packetId, (server, player, handler, buf, responseSender) ->
 		{
@@ -198,7 +198,7 @@ public class FabricApiCompatibility
 						
 						try
 						{
-							final CompoundTag sentData = StringNbtReader.parse(snbts[i]);
+							final NbtCompound sentData = StringNbtReader.parse(snbts[i]);
 							final String sentName = sentData.getString("Name");
 							
 							final StringBuilder sentStringBuilder = new StringBuilder();
@@ -207,7 +207,7 @@ public class FabricApiCompatibility
 							if (sentData.contains("Properties", 10))
 							{
 								sentStringBuilder.append('[');
-								final CompoundTag properties = sentData.getCompound("Properties");
+								final NbtCompound properties = sentData.getCompound("Properties");
 								sentStringBuilder.append(properties.getKeys().stream().map(key ->
 								{
 									return key + "=" + properties.getString(key);
@@ -217,7 +217,7 @@ public class FabricApiCompatibility
 							
 							if (state != null)
 							{
-								final CompoundTag ownData = stateToNbtFunction.apply(state);
+								final NbtCompound ownData = stateToNbtFunction.apply(state);
 								
 								final int total = stateIdList.size();
 								final float percent = ((float) (ids[i] + 1) / total) * 100;
@@ -236,7 +236,7 @@ public class FabricApiCompatibility
 									if (ownData.contains("Properties", 10))
 									{
 										ownStringBuilder.append('[');
-										final CompoundTag properties = ownData.getCompound("Properties");
+										final NbtCompound properties = ownData.getCompound("Properties");
 										ownStringBuilder.append(properties.getKeys().stream().map(key ->
 										{
 											return key + "=" + properties.getString(key);
@@ -302,7 +302,7 @@ public class FabricApiCompatibility
 		setupClientStateValidation(Statement.FLUID_STATE_VALIDATION_PACKET, Fluid.STATE_IDS, FabricApiCompatibility::fromFluidState);
 	}
 	
-	public static <S> void setupClientStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, CompoundTag> stateToNbtFunction)
+	public static <S> void setupClientStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, NbtCompound> stateToNbtFunction)
 	{
 		ClientPlayNetworking.registerGlobalReceiver(packetId, (client, handler, buf, responseSender) ->
 		{
@@ -343,20 +343,20 @@ public class FabricApiCompatibility
 		});
 	}
 	*/
-	public static CompoundTag fromFluidState(final FluidState state)
+	public static NbtCompound fromFluidState(final FluidState state)
 	{
 		return fromState(Registry.FLUID, FluidState::getFluid, state);
 	}
 	
-	public static <S extends State<?, S>, E> CompoundTag fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
+	public static <S extends State<?, S>, E> NbtCompound fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
 	{
-		final CompoundTag CompoundTag = new CompoundTag();
-		CompoundTag.putString("Name", registry.getId(entryFunction.apply(state)).toString());
+		final NbtCompound compound = new NbtCompound();
+		compound.putString("Name", registry.getId(entryFunction.apply(state)).toString());
 		final ImmutableMap<Property<?>, Comparable<?>> entries = state.getEntries();
 		
 		if (!entries.isEmpty())
 		{
-			final CompoundTag properties = new CompoundTag();
+			final NbtCompound properties = new NbtCompound();
 			
 			for (final Entry<Property<?>, Comparable<?>> entry : entries.entrySet())
 			{
@@ -367,9 +367,9 @@ public class FabricApiCompatibility
 				properties.putString(property.getName(), valueName);
 			}
 			
-			CompoundTag.put("Properties", properties);
+			compound.put("Properties", properties);
 		}
 		
-		return CompoundTag;
+		return compound;
 	}
 }
