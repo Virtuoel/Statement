@@ -358,8 +358,8 @@ public class FabricApiCompatibility
 	
 	public static <S extends State<?, S>, E> NbtCompound fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
 	{
-		final NbtCompound NbtCompound = new NbtCompound();
-		NbtCompound.putString("Name", registry.getId(entryFunction.apply(state)).toString());
+		final NbtCompound compound = new NbtCompound();
+		compound.putString("Name", registry.getId(entryFunction.apply(state)).toString());
 		final ImmutableMap<Property<?>, Comparable<?>> entries = state.getEntries();
 		
 		if (!entries.isEmpty())
@@ -375,10 +375,10 @@ public class FabricApiCompatibility
 				properties.putString(property.getName(), valueName);
 			}
 			
-			NbtCompound.put("Properties", properties);
+			compound.put("Properties", properties);
 		}
 		
-		return NbtCompound;
+		return compound;
 	}
 	
 	public static void setupIdRemapCallbacks()
