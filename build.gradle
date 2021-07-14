@@ -231,7 +231,7 @@ githubRelease {
 	}
 	
 	if(project.hasProperty("loader_version")) {
-		tagName project.mod_version
+		tagName "${project.mod_version}-${project.metadata_minecraft_versions}"
 	}
 	
 	if(project.hasProperty("github_branch")) {
