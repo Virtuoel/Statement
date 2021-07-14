@@ -1,4 +1,4 @@
-package virtuoel.statement.util;
+package virtuoel.statement.util.config;
 
 import java.io.IOException;
 import java.io.StringReader;

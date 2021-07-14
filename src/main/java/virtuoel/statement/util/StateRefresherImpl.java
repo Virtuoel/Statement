@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -18,9 +17,6 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 
 import net.minecraft.block.Block;
 import net.minecraft.state.State;
@@ -254,10 +250,7 @@ public class StateRefresherImpl implements StateRefresher
 	{
 		if (parallel == null)
 		{
-			final boolean forceParallelMode = Optional.ofNullable(StatementConfig.DATA.get("forceParallelMode"))
-				.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsJsonPrimitive)
-				.filter(JsonPrimitive::isBoolean).map(JsonPrimitive::getAsBoolean)
-				.orElse(true);
+			final boolean forceParallelMode = StatementConfig.COMMON.forceParallelMode.get();
 			
 			final boolean ferriteCoreLoaded = ModList.get().isLoaded("ferritecore");
 			

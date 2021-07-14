@@ -1,10 +1,12 @@
-package virtuoel.statement.util;
+package virtuoel.statement.util.config;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -19,6 +21,7 @@ public abstract class ConfigHandler<S> implements Supplier<S>
 	private final Path configFile;
 	protected final Supplier<S> defaultConfig;
 	private S cachedConfig = null;
+	private Collection<Runnable> invalidationListeners = new ArrayList<>();
 	
 	public ConfigHandler(String namespace, String path, Supplier<S> defaultConfig)
 	{
@@ -31,6 +34,26 @@ public abstract class ConfigHandler<S> implements Supplier<S>
 	public String getNamespace()
 	{
 		return namespace;
+	}
+	
+	public void onConfigChanged()
+	{
+		if (cachedConfig != null)
+		{
+			save();
+			
+			cachedConfig = null;
+			
+			for (final Runnable listener : invalidationListeners)
+			{
+				listener.run();
+			}
+		}
+	}
+	
+	public void addInvalidationListener(Runnable listener)
+	{
+		invalidationListeners.add(listener);
 	}
 	
 	@Override

@@ -35,6 +35,8 @@ import net.minecraftforge.fml.common.Mod;
 import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.StatementConfig;
 import virtuoel.statement.network.StatementPacketHandler;
+import virtuoel.statement.util.config.InvalidatableLazySupplier;
+import virtuoel.statement.util.config.JsonConfigHandler;
 
 @Mod(Statement.MOD_ID)
 public class Statement implements StatementApi
@@ -45,7 +47,6 @@ public class Statement implements StatementApi
 	
 	public Statement()
 	{
-		StatementConfig.DATA.getClass();
 		
 		StatementApi.ENTRYPOINTS.add(this);
 		
@@ -60,26 +61,22 @@ public class Statement implements StatementApi
 	public static final Identifier BLOCK_STATE_VALIDATION_PACKET = id("block_state_validation");
 	public static final Identifier FLUID_STATE_VALIDATION_PACKET = id("fluid_state_validation");
 	
-	private static final InvalidatableLazySupplier<Set<BlockState>> BLOCK_STATE_DEFERRAL_DATA = new InvalidatableLazySupplier<>(() ->
+	public static Supplier<Set<BlockState>> createBlockStateDeferralConfig(final JsonConfigHandler config)
 	{
-		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customBlockStateDeferral"))
+		return InvalidatableLazySupplier.of(() -> loadStateDeferralData(config, "customBlockStateDeferral", Registry.BLOCK, Block::getStateManager));
+	}
+	
+	public static Supplier<Set<FluidState>> createFluidStateDeferralConfig(final JsonConfigHandler config)
+	{
+		return InvalidatableLazySupplier.of(() -> loadStateDeferralData(config, "customFluidStateDeferral", Registry.FLUID, Fluid::getStateManager));
+	}
+	
+	private static <O, S extends State<O, S>> Set<S> loadStateDeferralData(final JsonConfigHandler config, final String member, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
+	{
+		final JsonObject data = Optional.ofNullable(config.get().get(member))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
 			.orElseGet(JsonObject::new);
 		
-		return loadStateDeferralData(data, Registry.BLOCK, Block::getStateManager);
-	});
-	
-	private static final InvalidatableLazySupplier<Set<FluidState>> FLUID_STATE_DEFERRAL_DATA = new InvalidatableLazySupplier<>(() ->
-	{
-		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customFluidStateDeferral"))
-			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
-			.orElseGet(JsonObject::new);
-		
-		return loadStateDeferralData(data, Registry.FLUID, Fluid::getStateManager);
-	});
-	
-	private static <O, S extends State<O, S>> Set<S> loadStateDeferralData(final JsonObject data, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
-	{
 		final Set<S> deferralData = new HashSet<>();
 		
 		for (final Entry<String, JsonElement> e : data.entrySet())
@@ -128,12 +125,7 @@ public class Statement implements StatementApi
 	
 	public static <S> boolean shouldStateBeDeferred(final IdList<S> idList, final S state)
 	{
-		final boolean enableStateDeferralApi = Optional.ofNullable(StatementConfig.DATA.get("enableStateDeferralApi"))
-			.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsJsonPrimitive)
-			.filter(JsonPrimitive::isBoolean).map(JsonPrimitive::getAsBoolean)
-			.orElse(true);
-		
-		if (enableStateDeferralApi)
+		if (StatementConfig.COMMON.enableStateDeferralApi.get())
 		{
 			for (final StatementApi api : StatementApi.ENTRYPOINTS)
 			{
@@ -145,11 +137,11 @@ public class Statement implements StatementApi
 		}
 		else if (idList == Block.STATE_IDS)
 		{
-			return BLOCK_STATE_DEFERRAL_DATA.get().contains(state);
+			return StatementConfig.COMMON.customBlockStateDeferral.get().contains(state);
 		}
 		else if (idList == Fluid.STATE_IDS)
 		{
-			return FLUID_STATE_DEFERRAL_DATA.get().contains(state);
+			return StatementConfig.COMMON.customFluidStateDeferral.get().contains(state);
 		}
 		
 		return false;
@@ -160,11 +152,11 @@ public class Statement implements StatementApi
 	{
 		if (idList == Block.STATE_IDS)
 		{
-			return BLOCK_STATE_DEFERRAL_DATA.get().contains(state);
+			return StatementConfig.COMMON.customBlockStateDeferral.get().contains(state);
 		}
 		else if (idList == Fluid.STATE_IDS)
 		{
-			return FLUID_STATE_DEFERRAL_DATA.get().contains(state);
+			return StatementConfig.COMMON.customFluidStateDeferral.get().contains(state);
 		}
 		
 		return StatementApi.super.shouldDeferState(idList, state);
@@ -199,12 +191,7 @@ public class Statement implements StatementApi
 	{
 		if (state != null)
 		{
-			final boolean enableIdSyncApi = Optional.ofNullable(StatementConfig.DATA.get("enableIdSyncApi"))
-				.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsJsonPrimitive)
-				.filter(JsonPrimitive::isBoolean).map(JsonPrimitive::getAsBoolean)
-				.orElse(true);
-			
-			if (enableIdSyncApi)
+			if (StatementConfig.COMMON.enableIdSyncApi.get())
 			{
 				OptionalInt syncedId;
 				
@@ -220,37 +207,33 @@ public class Statement implements StatementApi
 			}
 			else if (idList == Block.STATE_IDS)
 			{
-				return BLOCK_STATE_SYNC_DATA.get().getOrDefault(state, OptionalInt.empty());
+				return StatementConfig.COMMON.customBlockStateSync.get().getOrDefault(state, OptionalInt.empty());
 			}
 			else if (idList == Fluid.STATE_IDS)
 			{
-				return FLUID_STATE_SYNC_DATA.get().getOrDefault(state, OptionalInt.empty());
+				return StatementConfig.COMMON.customFluidStateSync.get().getOrDefault(state, OptionalInt.empty());
 			}
 		}
 		
 		return OptionalInt.empty();
 	}
 	
-	private static final InvalidatableLazySupplier<Map<BlockState, OptionalInt>> BLOCK_STATE_SYNC_DATA = new InvalidatableLazySupplier<>(() ->
+	public static Supplier<Map<BlockState, OptionalInt>> createBlockStateSyncConfig(final JsonConfigHandler config)
 	{
-		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customBlockStateSync"))
+		return InvalidatableLazySupplier.of(() -> loadStateSyncData(config, "customBlockStateSync", Block.STATE_IDS, Registry.BLOCK, Block::getStateManager, Block::getDefaultState));
+	}
+	
+	public static Supplier<Map<FluidState, OptionalInt>> createFluidStateSyncConfig(final JsonConfigHandler config)
+	{
+		return InvalidatableLazySupplier.of(() -> loadStateSyncData(config, "customFluidStateSync", Fluid.STATE_IDS, Registry.FLUID, Fluid::getStateManager, Fluid::getDefaultState));
+	}
+	
+	private static <O, S extends State<O, S>> Map<S, OptionalInt> loadStateSyncData(final JsonConfigHandler config, final String member, final IdList<S> idList, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc, final Function<O, S> defaultStateFunc)
+	{
+		final JsonObject data = Optional.ofNullable(config.get().get(member))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
 			.orElseGet(JsonObject::new);
 		
-		return loadStateSyncData(data, Block.STATE_IDS, Registry.BLOCK, Block::getStateManager, Block::getDefaultState);
-	});
-	
-	private static final InvalidatableLazySupplier<Map<FluidState, OptionalInt>> FLUID_STATE_SYNC_DATA = new InvalidatableLazySupplier<>(() ->
-	{
-		final JsonObject data = Optional.ofNullable(StatementConfig.DATA.get("customFluidStateSync"))
-			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
-			.orElseGet(JsonObject::new);
-		
-		return loadStateSyncData(data, Fluid.STATE_IDS, Registry.FLUID, Fluid::getStateManager, Fluid::getDefaultState);
-	});
-	
-	private static <O, S extends State<O, S>> Map<S, OptionalInt> loadStateSyncData(final JsonObject data, final IdList<S> idList, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc, final Function<O, S> defaultStateFunc)
-	{
 		final Map<S, OptionalInt> syncData = new HashMap<>();
 		
 		for (final Entry<String, JsonElement> e : data.entrySet())
@@ -370,11 +353,11 @@ public class Statement implements StatementApi
 	{
 		if (idList == Block.STATE_IDS)
 		{
-			return BLOCK_STATE_SYNC_DATA.get().getOrDefault(state, OptionalInt.empty());
+			return StatementConfig.COMMON.customBlockStateSync.get().getOrDefault(state, OptionalInt.empty());
 		}
 		else if (idList == Fluid.STATE_IDS)
 		{
-			return FLUID_STATE_SYNC_DATA.get().getOrDefault(state, OptionalInt.empty());
+			return StatementConfig.COMMON.customFluidStateSync.get().getOrDefault(state, OptionalInt.empty());
 		}
 		
 		return StatementApi.super.getSyncedId(idList, state);
@@ -384,35 +367,13 @@ public class Statement implements StatementApi
 	{
 		if (idList == Block.STATE_IDS)
 		{
-			BLOCK_STATE_DEFERRAL_DATA.invalidate();
-			BLOCK_STATE_SYNC_DATA.invalidate();
+			InvalidatableLazySupplier.of(StatementConfig.COMMON.customBlockStateDeferral).invalidate();
+			InvalidatableLazySupplier.of(StatementConfig.COMMON.customBlockStateSync).invalidate();
 		}
 		else if (idList == Fluid.STATE_IDS)
 		{
-			FLUID_STATE_DEFERRAL_DATA.invalidate();
-			FLUID_STATE_SYNC_DATA.invalidate();
-		}
-	}
-	
-	public static class InvalidatableLazySupplier<T> implements Supplier<T>
-	{
-		private Supplier<T> delegate;
-		private T value;
-		
-		public InvalidatableLazySupplier(Supplier<T> delegate)
-		{
-			this.delegate = delegate;
-		}
-		
-		@Override
-		public T get()
-		{
-			return this.value == null ? this.value = delegate.get() : this.value;
-		}
-		
-		public void invalidate()
-		{
-			value = null;
+			InvalidatableLazySupplier.of(StatementConfig.COMMON.customFluidStateDeferral).invalidate();
+			InvalidatableLazySupplier.of(StatementConfig.COMMON.customFluidStateSync).invalidate();
 		}
 	}
 }
