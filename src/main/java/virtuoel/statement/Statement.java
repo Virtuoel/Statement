@@ -47,6 +47,7 @@ public class Statement implements StatementApi
 	
 	public Statement()
 	{
+		StatementConfig.BUILDER.config.get();
 		
 		StatementApi.ENTRYPOINTS.add(this);
 		
