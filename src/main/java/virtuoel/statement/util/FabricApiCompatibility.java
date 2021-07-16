@@ -18,6 +18,7 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.registry.RegistryIdRemapCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -314,7 +315,7 @@ public class FabricApiCompatibility
 	{
 		ClientPlayNetworking.registerGlobalReceiver(packetId, (client, handler, buf, responseSender) ->
 		{
-			final PlayerEntity player = client.player;
+			final ClientPlayerEntity player = client.player;
 			
 			final UUID uuid = buf.readUuid();
 			final int idQuantity = buf.readVarInt();
