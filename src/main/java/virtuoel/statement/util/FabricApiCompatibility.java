@@ -306,7 +306,7 @@ public class FabricApiCompatibility
 	{
 		ClientPlayNetworking.registerGlobalReceiver(packetId, (client, handler, buf, responseSender) ->
 		{
-			final PlayerEntity player = client.player;
+			final ClientPlayerEntity player = client.player;
 			
 			final UUID uuid = buf.readUuid();
 			final int idQuantity = buf.readVarInt();
