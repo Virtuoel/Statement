@@ -33,6 +33,7 @@
 		"sync.BiMapPaletteMixin",
 		"sync.BlockStateParticleEffectMixin",
 		"sync.ChunkDeltaUpdateS2CPacketMixin",
+		"sync.FallingBlockEntityMixin",
 		"sync.PlayerActionResponseS2CPacketMixin",
 		"sync.WorldEventS2CPacketMixin",
 		"sync.compat115minus.BlockUpdateS2CPacketMixin",
