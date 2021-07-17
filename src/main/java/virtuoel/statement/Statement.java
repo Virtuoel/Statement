@@ -54,7 +54,7 @@ public class Statement implements ModInitializer, StatementApi
 	public void onInitialize()
 	{
 		final boolean fabricCommandsLoaded = FabricLoader.getInstance().isModLoaded("fabric-command-api-v1");
-		final boolean fabricNetworkingLoaded = FabricLoader.getInstance().isModLoaded("fabric-networking-v0");
+		final boolean fabricNetworkingLoaded = FabricLoader.getInstance().isModLoaded("fabric-networking-api-v1");
 		final boolean fabricRegistrySyncLoaded = FabricLoader.getInstance().isModLoaded("fabric-registry-sync-v0");
 		
 		if (fabricCommandsLoaded)
