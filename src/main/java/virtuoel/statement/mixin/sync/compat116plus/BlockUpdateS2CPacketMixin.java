@@ -1,4 +1,4 @@
-package virtuoel.statement.mixin.sync;
+package virtuoel.statement.mixin.sync.compat116plus;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,7 +12,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.BlockView;
 import virtuoel.statement.Statement;
 
 @Mixin(BlockUpdateS2CPacket.class)
@@ -20,9 +19,12 @@ public class BlockUpdateS2CPacketMixin
 {
 	@Shadow @Final @Mutable BlockState state;
 	
-	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)V")
-	private void onConstruct(BlockView world, BlockPos pos, CallbackInfo info)
+	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V")
+	private void onConstruct(BlockPos pos, BlockState state, CallbackInfo info)
 	{
-		state = Block.getStateFromRawId(Statement.getSyncedBlockStateId(state).orElseGet(() -> Block.getRawIdFromState(state)));
+		Statement.getSyncedBlockStateId(state).ifPresent(id ->
+		{
+			this.state = Block.getStateFromRawId(id);
+		});
 	}
 }
