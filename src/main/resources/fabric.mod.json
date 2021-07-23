@@ -19,8 +19,9 @@
 	"environment": "*",
 	"depends":
 	{
-		"fabricloader": ">=0.8.0",
-		"statement_vanilla_compatibility": "*"
+		"fabricloader": ">=0.11.6",
+		"statement_vanilla_compatibility": "*",
+		"kanos_config": "*"
 	},
 	"entrypoints":
 	{
