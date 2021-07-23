@@ -55,7 +55,7 @@
 	"jars":
 	[
 		{
-			"file": "META-INF/jars/StatementVanillaCompatibility-1.0.1-1.14.4-1.15.2.jar"
+			"file": "META-INF/jars/StatementVanillaCompatibility-1.0.1+1.14.4-1.15.2.jar"
 		}
 	]
 }
