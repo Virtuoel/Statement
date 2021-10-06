@@ -21,7 +21,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.Fluid;
@@ -38,6 +37,7 @@ import virtuoel.kanos_config.api.JsonConfigHandler;
 import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.StatementConfig;
 import virtuoel.statement.util.FabricApiCompatibility;
+import virtuoel.statement.util.ModLoaderUtils;
 
 public class Statement implements ModInitializer, StatementApi
 {
@@ -53,9 +53,9 @@ public class Statement implements ModInitializer, StatementApi
 	@Override
 	public void onInitialize()
 	{
-		final boolean fabricCommandsLoaded = FabricLoader.getInstance().isModLoaded("fabric-command-api-v1");
-		final boolean fabricNetworkingLoaded = FabricLoader.getInstance().isModLoaded("fabric-networking-api-v1");
-		final boolean fabricRegistrySyncLoaded = FabricLoader.getInstance().isModLoaded("fabric-registry-sync-v0");
+		final boolean fabricCommandsLoaded = ModLoaderUtils.isModLoaded("fabric-command-api-v1");
+		final boolean fabricNetworkingLoaded = ModLoaderUtils.isModLoaded("fabric-networking-api-v1");
+		final boolean fabricRegistrySyncLoaded = ModLoaderUtils.isModLoaded("fabric-registry-sync-v0");
 		
 		if (fabricCommandsLoaded)
 		{

@@ -8,14 +8,13 @@ import java.util.Optional;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
 import virtuoel.statement.api.compatibility.FoamFixCompatibility;
 
 public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 {
-	private static final boolean FOAMFIX_LOADED = FabricLoader.getInstance().isModLoaded("foamfix");
+	private static final boolean FOAMFIX_LOADED = ModLoaderUtils.isModLoaded("foamfix");
 	
 	private final Optional<Class<?>> orderingClass;
 	private final Optional<Class<?>> factoryClass;

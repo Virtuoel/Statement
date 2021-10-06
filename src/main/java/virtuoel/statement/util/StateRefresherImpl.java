@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
@@ -252,7 +251,7 @@ public class StateRefresherImpl implements StateRefresher
 		{
 			final boolean forceParallelMode = StatementConfig.COMMON.forceParallelMode.get();
 			
-			final boolean ferriteCoreLoaded = FabricLoader.getInstance().isModLoaded("ferritecore");
+			final boolean ferriteCoreLoaded = ModLoaderUtils.isModLoaded("ferritecore");
 			
 			parallel = forceParallelMode || !ferriteCoreLoaded;
 		}
