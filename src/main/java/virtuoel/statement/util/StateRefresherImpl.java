@@ -24,7 +24,6 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.collection.IdList;
 import net.minecraft.util.registry.Registry;
-import net.minecraftforge.fml.ModList;
 import virtuoel.statement.Statement;
 import virtuoel.statement.api.ClearableIdList;
 import virtuoel.statement.api.RefreshableStateManager;
@@ -252,7 +251,7 @@ public class StateRefresherImpl implements StateRefresher
 		{
 			final boolean forceParallelMode = StatementConfig.COMMON.forceParallelMode.get();
 			
-			final boolean ferriteCoreLoaded = ModList.get().isLoaded("ferritecore");
+			final boolean ferriteCoreLoaded = ModLoaderUtils.isModLoaded("ferritecore");
 			
 			parallel = forceParallelMode || !ferriteCoreLoaded;
 		}

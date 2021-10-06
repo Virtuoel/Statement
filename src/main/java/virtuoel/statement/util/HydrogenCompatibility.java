@@ -6,11 +6,9 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableMap;
 
-import net.minecraftforge.fml.ModList;
-
 public class HydrogenCompatibility
 {
-	private static final boolean HYDROGEN_LOADED = ModList.get().isLoaded("hydrogen");
+	private static final boolean HYDROGEN_LOADED = ModLoaderUtils.isModLoaded("hydrogen");
 	
 	public static final HydrogenCompatibility INSTANCE = new HydrogenCompatibility();
 	
