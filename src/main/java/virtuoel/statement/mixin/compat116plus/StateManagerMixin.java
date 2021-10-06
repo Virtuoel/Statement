@@ -96,7 +96,7 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		}
 	}
 	
-	@Redirect(method = "method_30040", remap = false, at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;fieldOf(Ljava/lang/String;)Lcom/mojang/serialization/MapCodec;"))
+	@Redirect(method = "addFieldToMapCodec", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;fieldOf(Ljava/lang/String;)Lcom/mojang/serialization/MapCodec;"))
 	private static <S extends State<?, S>, T extends Comparable<T>> MapCodec<Property.Value<T>> fieldOfProxy(Codec<Property.Value<T>> c, String string, MapCodec<S> mapCodec, Supplier<S> supplier, String noop, Property<T> arg)
 	{
 		return c.optionalFieldOf(string, arg.createValue(arg.getValues().iterator().next()));
