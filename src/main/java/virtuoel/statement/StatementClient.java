@@ -9,7 +9,7 @@ public class StatementClient implements ClientModInitializer
 	@Override
 	public void onInitializeClient()
 	{
-		final boolean fabricNetworkingLoaded = ModLoaderUtils.isModLoaded("fabric-networking-v0");
+		final boolean fabricNetworkingLoaded = ModLoaderUtils.isModLoaded("fabric-networking-api-v1");
 		
 		if (fabricNetworkingLoaded)
 		{
