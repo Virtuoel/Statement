@@ -5,6 +5,7 @@ import java.util.OptionalInt;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import net.fabricmc.loader.api.FabricLoader;
@@ -21,13 +22,13 @@ public interface StatementApi
 		return false;
 	}
 	
-	@Deprecated
+	@Deprecated @ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
 	default <S> OptionalInt getSyncedId(IdList<S> idList, int id)
 	{
 		return getSyncedId(idList, id, IdList::getRawId, IdList::get, IdList::size);
 	}
 	
-	@Deprecated
+	@Deprecated @ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
 	default <S> OptionalInt getSyncedId(IdList<S> idList, @Nullable S state)
 	{
 		return getSyncedId(idList, state, IdList::getRawId, IdList::get, IdList::size);
