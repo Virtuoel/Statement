@@ -25,22 +25,36 @@ public interface StatementApi
 	@Deprecated @ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
 	default <S> OptionalInt getSyncedId(IdList<S> idList, int id)
 	{
-		return getSyncedId(idList, id, IdList::getRawId, IdList::get, IdList::size);
+		return getSyncedId(idList, idList.get(id));
 	}
 	
 	@Deprecated @ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
 	default <S> OptionalInt getSyncedId(IdList<S> idList, @Nullable S state)
 	{
-		return getSyncedId(idList, state, IdList::getRawId, IdList::get, IdList::size);
+		return OptionalInt.empty();
 	}
 	
 	default <S, L extends Iterable<S>> OptionalInt getSyncedId(L idList, int id, BiFunction<L, S, Integer> idFunc, BiFunction<L, Integer, S> getFunc, Function<L, Integer> sizeFunc)
 	{
+		if (idList instanceof IdList)
+		{
+			@SuppressWarnings("unchecked")
+			final IdList<S> list = (IdList<S>) idList;
+			return getSyncedId(list, id);
+		}
+		
 		return getSyncedId(idList, getFunc.apply(idList, id), idFunc, getFunc, sizeFunc);
 	}
 	
 	default <S, L extends Iterable<S>> OptionalInt getSyncedId(L idList, @Nullable S state, BiFunction<L, S, Integer> idFunc, BiFunction<L, Integer, S> getFunc, Function<L, Integer> sizeFunc)
 	{
+		if (idList instanceof IdList)
+		{
+			@SuppressWarnings("unchecked")
+			final IdList<S> list = (IdList<S>) idList;
+			return getSyncedId(list, state);
+		}
+		
 		return OptionalInt.empty();
 	}
 }
