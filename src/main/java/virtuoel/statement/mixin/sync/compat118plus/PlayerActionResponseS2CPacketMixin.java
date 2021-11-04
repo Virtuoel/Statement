@@ -1,4 +1,4 @@
-package virtuoel.statement.mixin.sync;
+package virtuoel.statement.mixin.sync.compat118plus;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

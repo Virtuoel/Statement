@@ -354,14 +354,14 @@ public class FabricApiCompatibility
 	
 	public static NbtCompound fromFluidState(final FluidState state)
 	{
-		return fromState(Registry.FLUID, FluidState::getFluid, state);
+		return fromState(Registry.FLUID, s -> ((StatementFluidStateExtensions) (Object) s).statement_getFluid(), state);
 	}
 	
 	public static <S extends State<?, S>, E> NbtCompound fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
 	{
 		final NbtCompound compound = new NbtCompound();
 		compound.putString("Name", registry.getId(entryFunction.apply(state)).toString());
-		final ImmutableMap<Property<?>, Comparable<?>> entries = state.getEntries();
+		final ImmutableMap<Property<?>, Comparable<?>> entries = ((StatementStateExtensions<?>) state).statement_getEntries();
 		
 		if (!entries.isEmpty())
 		{
@@ -370,10 +370,10 @@ public class FabricApiCompatibility
 			for (final Entry<Property<?>, Comparable<?>> entry : entries.entrySet())
 			{
 				@SuppressWarnings("rawtypes")
-				final Property property = entry.getKey();
+				final StatementPropertyExtensions property = (StatementPropertyExtensions) entry.getKey();
 				@SuppressWarnings("unchecked")
-				final String valueName = property.name(entry.getValue());
-				properties.putString(property.getName(), valueName);
+				final String valueName = property.statement_name(entry.getValue());
+				properties.putString(property.statement_getName(), valueName);
 			}
 			
 			compound.put("Properties", properties);

@@ -15,6 +15,8 @@ public abstract class PropertyMixin<T extends Comparable<T>> implements Statemen
 	abstract String getName();
 	@Shadow
 	abstract Collection<T> getValues();
+	@Shadow
+	abstract String name(T value);
 	
 	@Override
 	public String statement_getName()
@@ -26,5 +28,11 @@ public abstract class PropertyMixin<T extends Comparable<T>> implements Statemen
 	public Collection<T> statement_getValues()
 	{
 		return getValues();
+	}
+	
+	@Override
+	public String statement_name(T value)
+	{
+		return name(value);
 	}
 }

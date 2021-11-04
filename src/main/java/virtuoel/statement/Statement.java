@@ -391,7 +391,7 @@ public class Statement implements ModInitializer, StatementApi
 			return StatementConfig.COMMON.customFluidStateSync.get().getOrDefault(state, OptionalInt.empty());
 		}
 		
-		return StatementApi.super.getSyncedId(idList, state, idFunc, getFunc, sizeFunc);
+		return OptionalInt.empty();
 	}
 	
 	public static void invalidateCustomStateData(final IdList<?> idList)

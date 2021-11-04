@@ -14,6 +14,8 @@ public interface PropertyMixin<T extends Comparable<T>> extends StatementPropert
 	String method_11899();
 	@Shadow(remap = false)
 	Collection<T> method_11898();
+	@Shadow(remap = false)
+	String method_11901(T value);
 	
 	@Override
 	default String statement_getName()
@@ -25,5 +27,11 @@ public interface PropertyMixin<T extends Comparable<T>> extends StatementPropert
 	default Collection<T> statement_getValues()
 	{
 		return method_11898();
+	}
+	
+	@Override
+	default String statement_name(T value)
+	{
+		return method_11901(value);
 	}
 }
