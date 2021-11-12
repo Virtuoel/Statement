@@ -39,8 +39,12 @@ public interface StatementApi
 		if (idList instanceof IdList)
 		{
 			@SuppressWarnings("unchecked")
-			final IdList<S> list = (IdList<S>) idList;
-			return getSyncedId(list, id);
+			final OptionalInt ret = getSyncedId((IdList<S>) idList, id);
+			
+			if (ret.isPresent())
+			{
+				return ret;
+			}
 		}
 		
 		return getSyncedId(idList, getFunc.apply(idList, id), idFunc, getFunc, sizeFunc);
@@ -51,8 +55,12 @@ public interface StatementApi
 		if (idList instanceof IdList)
 		{
 			@SuppressWarnings("unchecked")
-			final IdList<S> list = (IdList<S>) idList;
-			return getSyncedId(list, state);
+			final OptionalInt ret = getSyncedId((IdList<S>) idList, state);
+			
+			if (ret.isPresent())
+			{
+				return ret;
+			}
 		}
 		
 		return OptionalInt.empty();
