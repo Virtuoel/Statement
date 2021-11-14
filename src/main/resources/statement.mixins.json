@@ -6,7 +6,6 @@
 	"plugin": "virtuoel.statement.mixin.StatementMixinConfigPlugin",
 	"mixins":
 	[
-		"IdListMixin",
 		"StateManagerBuilderMixin",
 		"StateManagerMixin",
 		"compat115minus.AbstractStateMixin",
@@ -28,8 +27,10 @@
 		"compat116plus.VineBlockMixin",
 		"compat116plus.WallBlockMixin",
 		"compat116plus.compat117minus.StateMixin",
+		"compat117minus.IdListMixin",
 		"compat117plus.BigDripleafBlockMixin",
 		"compat117plus.RedstoneWireBlockMixin",
+		"compat118plus.IdListMixin",
 		"sync.BlockStateParticleEffectMixin",
 		"sync.ChunkDeltaUpdateS2CPacketMixin",
 		"sync.FallingBlockEntityMixin",
