@@ -1,7 +1,7 @@
 package virtuoel.statement.network;
 
-import net.minecraftforge.fmllegacy.network.NetworkRegistry;
-import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
 import virtuoel.statement.Statement;
 
 public class StatementPacketHandler
