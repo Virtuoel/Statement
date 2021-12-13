@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -185,10 +186,20 @@ public class Statement implements StatementApi
 	
 	public static <S> OptionalInt getSyncedStateId(final IdList<S> idList, final int id)
 	{
-		return getSyncedStateId(idList, idList.get(id));
+		return getSyncedStateId(idList, id, IdList::getRawId, IdList::get, IdList::size);
 	}
 	
 	public static <S> OptionalInt getSyncedStateId(final IdList<S> idList, @Nullable final S state)
+	{
+		return getSyncedStateId(idList, state, IdList::getRawId, IdList::get, IdList::size);
+	}
+	
+	public static <S, L extends Iterable<S>> OptionalInt getSyncedStateId(final L idList, final int id, BiFunction<L, S, Integer> idFunc, BiFunction<L, Integer, S> getFunc, Function<L, Integer> sizeFunc)
+	{
+		return getSyncedStateId(idList, getFunc.apply(idList, id), idFunc, getFunc, sizeFunc);
+	}
+	
+	public static <S, L extends Iterable<S>> OptionalInt getSyncedStateId(final L idList, @Nullable final S state, BiFunction<L, S, Integer> idFunc, BiFunction<L, Integer, S> getFunc, Function<L, Integer> sizeFunc)
 	{
 		if (state != null)
 		{
@@ -198,7 +209,7 @@ public class Statement implements StatementApi
 				
 				for (final StatementApi api : StatementApi.ENTRYPOINTS)
 				{
-					syncedId = api.getSyncedId(idList, state);
+					syncedId = api.getSyncedId(idList, state, idFunc, getFunc, sizeFunc);
 					
 					if (syncedId.isPresent())
 					{
@@ -350,7 +361,7 @@ public class Statement implements StatementApi
 	}
 	
 	@Override
-	public <S> OptionalInt getSyncedId(IdList<S> idList, @Nullable S state)
+	public <S, L extends Iterable<S>> OptionalInt getSyncedId(L idList, @Nullable S state, BiFunction<L, S, Integer> idFunc, BiFunction<L, Integer, S> getFunc, Function<L, Integer> sizeFunc)
 	{
 		if (idList == Block.STATE_IDS)
 		{
@@ -361,7 +372,7 @@ public class Statement implements StatementApi
 			return StatementConfig.COMMON.customFluidStateSync.get().getOrDefault(state, OptionalInt.empty());
 		}
 		
-		return StatementApi.super.getSyncedId(idList, state);
+		return OptionalInt.empty();
 	}
 	
 	public static void invalidateCustomStateData(final IdList<?> idList)

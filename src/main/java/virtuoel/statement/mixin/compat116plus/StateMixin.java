@@ -3,7 +3,6 @@ package virtuoel.statement.mixin.compat116plus;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Function;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,7 +11,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -73,12 +71,6 @@ public abstract class StateMixin<O, S> implements StatementStateExtensions<S>
 		}
 		
 		info.setReturnValue(this);
-	}
-	
-	@Redirect(method = "method_28497", require = 0, at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/MapCodec;fieldOf(Ljava/lang/String;)Lcom/mojang/serialization/MapCodec;"))
-	private static <O, S> MapCodec<S> fieldOfProxy(MapCodec<S> c, String string, Function<O, S> ownerToStateFunction, O object)
-	{
-		return c.codec().optionalFieldOf(string, ownerToStateFunction.apply(object));
 	}
 	
 	@Inject(at = @At("HEAD"), method = "createWithTable")

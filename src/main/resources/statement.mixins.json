@@ -6,7 +6,6 @@
 	"plugin": "virtuoel.statement.mixin.StatementMixinConfigPlugin",
 	"mixins":
 	[
-		"IdListMixin",
 		"StateManagerBuilderMixin",
 		"StateManagerMixin",
 		"compat115minus.AbstractStateMixin",
@@ -27,17 +26,24 @@
 		"compat116plus.StateMixin",
 		"compat116plus.VineBlockMixin",
 		"compat116plus.WallBlockMixin",
+		"compat116plus.compat117minus.StateMixin",
+		"compat117minus.IdListMixin",
 		"compat117plus.BigDripleafBlockMixin",
 		"compat117plus.RedstoneWireBlockMixin",
-		"sync.ArrayPaletteMixin",
-		"sync.BiMapPaletteMixin",
+		"compat118plus.IdListMixin",
 		"sync.BlockStateParticleEffectMixin",
 		"sync.ChunkDeltaUpdateS2CPacketMixin",
 		"sync.FallingBlockEntityMixin",
-		"sync.PlayerActionResponseS2CPacketMixin",
 		"sync.WorldEventS2CPacketMixin",
+		"sync.compat114.PlayerActionResponseS2CPacketMixin",
 		"sync.compat115minus.BlockUpdateS2CPacketMixin",
-		"sync.compat116plus.BlockUpdateS2CPacketMixin"
+		"sync.compat115plus.compat117minus.PlayerActionResponseS2CPacketMixin",
+		"sync.compat116plus.BlockUpdateS2CPacketMixin",
+		"sync.compat117minus.ArrayPaletteMixin",
+		"sync.compat117minus.BiMapPaletteMixin",
+		"sync.compat118plus.ArrayPaletteMixin",
+		"sync.compat118plus.BiMapPaletteMixin",
+		"sync.compat118plus.PlayerActionResponseS2CPacketMixin"
 	],
 	"client":
 	[

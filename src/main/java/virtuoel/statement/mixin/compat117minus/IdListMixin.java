@@ -1,4 +1,4 @@
-package virtuoel.statement.mixin;
+package virtuoel.statement.mixin.compat117minus;
 
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -11,11 +11,11 @@ import net.minecraft.util.collection.IdList;
 import virtuoel.statement.api.ClearableIdList;
 
 @Mixin(IdList.class)
-public abstract class IdListMixin implements ClearableIdList
+public abstract class IdListMixin<T> implements ClearableIdList
 {
 	@Shadow private int nextId;
-	@Shadow @Final private IdentityHashMap<Object, Integer> idMap;
-	@Shadow @Final private List<Object> list;
+	@Shadow @Final private IdentityHashMap<T, Integer> idMap;
+	@Shadow @Final private List<T> list;
 	
 	@Override
 	public void statement_clear()
