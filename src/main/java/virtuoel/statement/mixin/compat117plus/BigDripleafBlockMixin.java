@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.google.common.collect.ImmutableMap;
 
+import net.minecraft.block.BigDripleafBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
@@ -22,10 +23,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 
-@Mixin(/*BigDripleaf*/Block.class) // TODO FIXME
+@Mixin(BigDripleafBlock.class)
 public class BigDripleafBlockMixin
 {
-	/*
 	@Shadow @Final @Mutable private Map<BlockState, VoxelShape> shapes;
 	
 	@Inject(at = @At("RETURN"), method = "<init>")
@@ -53,5 +53,4 @@ public class BigDripleafBlockMixin
 			info.setReturnValue(shape);
 		}
 	}
-	*/
 }
