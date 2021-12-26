@@ -32,12 +32,12 @@ Supported Versions of `Statement-x.y.z+1.14.4-1.18.1`:
 
 Supported Versions of `Statement-x.y.z+1.16.5-forge`:  
 `1.16.5`
-<!--
+
 Supported Versions of `Statement-x.y.z+1.17.1-forge`:  
-`1.17.1`-->
-<!--
+`1.17.1`
+
 Supported Versions of `Statement-x.y.z+1.18.1-forge`:  
-`1.18.1`-->
+`1.18.1`
 
 </td></table></details>
 
