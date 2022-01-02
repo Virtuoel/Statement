@@ -61,7 +61,7 @@ public class StateRefresherImpl implements StateRefresher
 		
 		return states;
 	}
-
+	
 	@Override
 	public <O, S extends State<O, S>, V extends Comparable<V>> Collection<S> removeProperty(final Supplier<StateManager<O, S>> stateManagerGetter, final Supplier<S> defaultStateGetter, final Property<V> property)
 	{
