@@ -1,6 +1,7 @@
 package virtuoel.statement.mixin.compat116plus;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -18,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
@@ -26,6 +28,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Encoder;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.OptionalFieldCodec;
 
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
@@ -99,7 +102,11 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 	@Redirect(method = "addFieldToMapCodec", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;fieldOf(Ljava/lang/String;)Lcom/mojang/serialization/MapCodec;"))
 	private static <S extends State<?, S>, T extends Comparable<T>> MapCodec<Property.Value<T>> fieldOfProxy(Codec<Property.Value<T>> c, String string, MapCodec<S> mapCodec, Supplier<S> supplier, String noop, Property<T> arg)
 	{
-		return c.optionalFieldOf(string, arg.createValue(arg.getValues().iterator().next()));
+		final Supplier<Property.Value<T>> v = Suppliers.memoize(() -> arg.createValue(supplier.get()));
+		return new OptionalFieldCodec<>(string, c).xmap(
+			o -> o.orElse(v.get()),
+			a -> Objects.equals(a, v.get()) ? Optional.empty() : Optional.of(a)
+		);
 	}
 	
 	@Inject(at = @At("HEAD"), cancellable = true, remap = false, method = "method_30039")
