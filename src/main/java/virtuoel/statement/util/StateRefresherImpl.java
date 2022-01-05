@@ -56,12 +56,12 @@ public class StateRefresherImpl implements StateRefresher
 		for (final S s : states)
 		{
 			idList.add(s);
-			((StatementBlockStateExtensions) s).statement_initShapeCache();
+			((StatementStateExtensions<?>) s).statement_initShapeCache();
 		}
 		
 		return states;
 	}
-
+	
 	@Override
 	public <O, S extends State<O, S>, V extends Comparable<V>> Collection<S> removeProperty(final Supplier<StateManager<O, S>> stateManagerGetter, final Supplier<S> defaultStateGetter, final Property<V> property)
 	{

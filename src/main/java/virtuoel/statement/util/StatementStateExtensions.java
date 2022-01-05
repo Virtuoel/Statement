@@ -44,6 +44,11 @@ public interface StatementStateExtensions<S>
 		return ImmutableMap.of();
 	}
 	
+	default void statement_initShapeCache()
+	{
+		
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static <S> StatementStateExtensions<S> statement_cast(State<?, S> state)
 	{
