@@ -56,12 +56,6 @@ public abstract class AbstractBlockStateMixin implements StatementBlockStateExte
 	abstract Block getBlock();
 	
 	@Override
-	public void statement_initShapeCache()
-	{
-		// NOOP
-	}
-	
-	@Override
 	public Block statement_getBlock()
 	{
 		return getBlock();
