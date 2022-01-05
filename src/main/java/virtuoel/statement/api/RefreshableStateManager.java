@@ -58,16 +58,19 @@ public interface RefreshableStateManager<O, S extends State<O, S>> extends Mutab
 		
 		for (final Property<?> entry : properties)
 		{
+			final Collection<V> deferred = addedValueMap.getOrDefault(entry, new LinkedList<>());
 			tableStream = tableStream.flatMap((propertyList) ->
 			{
 				@SuppressWarnings("unchecked")
 				final StatementPropertyExtensions<Comparable<?>> p = ((StatementPropertyExtensions<Comparable<?>>) entry);
-				return p.statement_getValues().stream().map((val) ->
-				{
-					final List<Pair<Property<?>, Comparable<?>>> list = new ArrayList<>(propertyList);
-					list.add(Pair.of(entry, val));
-					return list;
-				});
+				return p.statement_getValues().stream()
+					.sorted((a, b) -> deferred.contains(a) ? deferred.contains(b) ? 0 : 1 : deferred.contains(b) ? -1 : 0)
+					.map((val) ->
+					{
+						final List<Pair<Property<?>, Comparable<?>>> list = new ArrayList<>(propertyList);
+						list.add(Pair.of(entry, val));
+						return list;
+					});
 			});
 		}
 		
