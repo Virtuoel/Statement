@@ -56,7 +56,7 @@ public class StateRefresherImpl implements StateRefresher
 		for (final S s : states)
 		{
 			idList.add(s);
-			((StatementBlockStateExtensions) s).statement_initShapeCache();
+			((StatementStateExtensions<?>) s).statement_initShapeCache();
 		}
 		
 		return states;
