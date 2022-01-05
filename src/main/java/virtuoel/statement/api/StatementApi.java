@@ -22,34 +22,6 @@ public interface StatementApi
 		return false;
 	}
 	
-	@Deprecated @ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
-	default <S> OptionalInt getSyncedId(IdList<S> idList, int id)
-	{
-		return getSyncedId(idList, idList.get(id));
-	}
-	
-	@Deprecated @ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
-	default <S> OptionalInt getSyncedId(IdList<S> idList, @Nullable S state)
-	{
-		return OptionalInt.empty();
-	}
-	
-	default <S, L extends Iterable<S>> OptionalInt getSyncedId(L idList, int id, BiFunction<L, S, Integer> idFunc, BiFunction<L, Integer, S> getFunc, Function<L, Integer> sizeFunc)
-	{
-		if (idList instanceof IdList)
-		{
-			@SuppressWarnings("unchecked")
-			final OptionalInt ret = getSyncedId((IdList<S>) idList, id);
-			
-			if (ret.isPresent())
-			{
-				return ret;
-			}
-		}
-		
-		return getSyncedId(idList, getFunc.apply(idList, id), idFunc, getFunc, sizeFunc);
-	}
-	
 	default <S, L extends Iterable<S>> OptionalInt getSyncedId(L idList, @Nullable S state, BiFunction<L, S, Integer> idFunc, BiFunction<L, Integer, S> getFunc, Function<L, Integer> sizeFunc)
 	{
 		if (idList instanceof IdList)
@@ -64,5 +36,43 @@ public interface StatementApi
 		}
 		
 		return OptionalInt.empty();
+	}
+	
+	/**
+	 * @see {@link StatementApi#getSyncedId(L, S, BiFunction, BiFunction, Function)}
+	 */
+	@Deprecated @ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
+	default <S> OptionalInt getSyncedId(IdList<S> idList, int id)
+	{
+		return getSyncedId(idList, idList.get(id));
+	}
+	
+	/**
+	 * @see {@link StatementApi#getSyncedId(L, S, BiFunction, BiFunction, Function)}
+	 */
+	@Deprecated @ApiStatus.ScheduledForRemoval(inVersion = "5.0.0")
+	default <S> OptionalInt getSyncedId(IdList<S> idList, @Nullable S state)
+	{
+		return OptionalInt.empty();
+	}
+	
+	/**
+	 * Calls {@link StatementApi#getSyncedId(L, S, BiFunction, BiFunction, Function)} by default.
+	 * You probably will want to override that instead of this.
+	 */
+	default <S, L extends Iterable<S>> OptionalInt getSyncedId(L idList, int id, BiFunction<L, S, Integer> idFunc, BiFunction<L, Integer, S> getFunc, Function<L, Integer> sizeFunc)
+	{
+		if (idList instanceof IdList)
+		{
+			@SuppressWarnings("unchecked")
+			final OptionalInt ret = getSyncedId((IdList<S>) idList, id);
+			
+			if (ret.isPresent())
+			{
+				return ret;
+			}
+		}
+		
+		return getSyncedId(idList, getFunc.apply(idList, id), idFunc, getFunc, sizeFunc);
 	}
 }
