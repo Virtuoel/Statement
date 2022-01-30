@@ -20,7 +20,10 @@ import org.apache.logging.log4j.Logger;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectRBTreeMap;
+import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
+import net.fabricmc.fabric.api.event.registry.RegistryAttributeHolder;
 import net.minecraft.block.Block;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
@@ -104,6 +107,20 @@ public class StateRefresherImpl implements StateRefresher
 			property, addedValues, removedValues,
 			Block::getDefaultState, Block::getStateManager, s -> ((StatementBlockStateExtensions) s).statement_initShapeCache()
 		);
+		
+		RegistryAttributeHolder.get(Registry.BLOCK).addAttribute(RegistryAttribute.MODDED);
+	}
+	
+	@Override
+	public <V extends Comparable<V>> void refreshFluidStates(final Property<V> property, final Collection<V> addedValues, final Collection<V> removedValues)
+	{
+		refreshStates(
+			Registry.FLUID, Fluid.STATE_IDS,
+			property, addedValues, removedValues,
+			Fluid::getDefaultState, Fluid::getStateManager, f -> {}
+		);
+		
+		RegistryAttributeHolder.get(Registry.FLUID).addAttribute(RegistryAttribute.MODDED);
 	}
 	
 	@Override
