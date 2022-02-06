@@ -49,6 +49,10 @@
 	[
 		"client.ClientPlayNetworkHandlerMixin"
 	],
+	"server":
+	[
+		"server.MinecraftDedicatedServerMixin"
+	],
 	"injectors":
 	{
 		"defaultRequire": 1
