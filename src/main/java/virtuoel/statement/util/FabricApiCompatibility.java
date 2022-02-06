@@ -6,6 +6,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.spongepowered.asm.mixin.MixinEnvironment;
+
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -19,6 +21,7 @@ import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.fabricmc.fabric.api.event.registry.RegistryAttributeHolder;
 import net.fabricmc.fabric.api.event.registry.RegistryIdRemapCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.argument.BlockPosArgumentType;
@@ -68,6 +71,26 @@ public class FabricApiCompatibility
 					.then(idGetterArgument("fluid_state", Fluid.STATE_IDS, BlockView::getFluidState, Registry.FLUID, s -> ((StatementFluidStateExtensions) (Object) s).statement_getFluid()))
 				)
 			);
+			
+			if (FabricLoader.getInstance().isDevelopmentEnvironment())
+			{
+				commandDispatcher.register(
+					CommandManager.literal("statement")
+					.requires(commandSource ->
+					{
+						return commandSource.hasPermissionLevel(2);
+					})
+					.then(CommandManager.literal("debug")
+						.then(CommandManager.literal("run_mixin_tests")
+							.executes(s ->
+							{
+								MixinEnvironment.getCurrentEnvironment().audit();
+								return 1;
+							})
+						)
+					)
+				);
+			}
 		});
 	}
 	
