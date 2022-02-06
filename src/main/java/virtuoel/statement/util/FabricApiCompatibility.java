@@ -15,6 +15,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
+import net.fabricmc.fabric.api.event.registry.RegistryAttributeHolder;
 import net.fabricmc.fabric.api.event.registry.RegistryIdRemapCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
@@ -380,6 +382,11 @@ public class FabricApiCompatibility
 		}
 		
 		return compound;
+	}
+	
+	public static void markRegistryAsModded(Registry<?> registry)
+	{
+		RegistryAttributeHolder.get(registry).addAttribute(RegistryAttribute.MODDED);
 	}
 	
 	public static void setupIdRemapCallbacks()

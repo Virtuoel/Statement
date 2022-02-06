@@ -20,8 +20,6 @@ import org.apache.logging.log4j.Logger;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectRBTreeMap;
-import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
-import net.fabricmc.fabric.api.event.registry.RegistryAttributeHolder;
 import net.minecraft.block.Block;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.state.State;
@@ -108,7 +106,7 @@ public class StateRefresherImpl implements StateRefresher
 			Block::getDefaultState, Block::getStateManager, s -> ((StatementBlockStateExtensions) s).statement_initShapeCache()
 		);
 		
-		RegistryAttributeHolder.get(Registry.BLOCK).addAttribute(RegistryAttribute.MODDED);
+		Statement.markRegistryAsModded(Registry.BLOCK);
 	}
 	
 	@Override
@@ -120,7 +118,7 @@ public class StateRefresherImpl implements StateRefresher
 			Fluid::getDefaultState, Fluid::getStateManager, f -> {}
 		);
 		
-		RegistryAttributeHolder.get(Registry.FLUID).addAttribute(RegistryAttribute.MODDED);
+		Statement.markRegistryAsModded(Registry.FLUID);
 	}
 	
 	@Override

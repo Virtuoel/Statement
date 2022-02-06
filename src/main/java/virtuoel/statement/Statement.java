@@ -79,6 +79,16 @@ public class Statement implements ModInitializer, StatementApi
 		return new Identifier(MOD_ID, name);
 	}
 	
+	public static void markRegistryAsModded(Registry<?> registry)
+	{
+		final boolean fabricRegistrySyncLoaded = ModLoaderUtils.isModLoaded("fabric-registry-sync-v0");
+		
+		if (fabricRegistrySyncLoaded)
+		{
+			FabricApiCompatibility.markRegistryAsModded(registry);
+		}
+	}
+	
 	public static final Identifier BLOCK_STATE_VALIDATION_PACKET = id("block_state_validation");
 	public static final Identifier FLUID_STATE_VALIDATION_PACKET = id("fluid_state_validation");
 	
