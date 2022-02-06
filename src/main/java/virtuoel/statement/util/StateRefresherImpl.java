@@ -18,7 +18,10 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectRBTreeMap;
 import net.minecraft.block.Block;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
@@ -102,6 +105,20 @@ public class StateRefresherImpl implements StateRefresher
 			property, addedValues, removedValues,
 			Block::getDefaultState, Block::getStateManager, s -> ((StatementBlockStateExtensions) s).statement_initShapeCache()
 		);
+		
+		Statement.markRegistryAsModded(Registry.BLOCK);
+	}
+	
+	@Override
+	public <V extends Comparable<V>> void refreshFluidStates(final Property<V> property, final Collection<V> addedValues, final Collection<V> removedValues)
+	{
+		refreshStates(
+			Registry.FLUID, Fluid.STATE_IDS,
+			property, addedValues, removedValues,
+			Fluid::getDefaultState, Fluid::getStateManager, f -> {}
+		);
+		
+		Statement.markRegistryAsModded(Registry.FLUID);
 	}
 	
 	@Override
@@ -219,10 +236,29 @@ public class StateRefresherImpl implements StateRefresher
 	@Override
 	public <O, V extends Comparable<V>, S extends State<O, S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateManager<O, S>> stateManagerGetter)
 	{
+		final Iterable<O> entries;
+		
+		if (registry instanceof Registry)
+		{
+			final Registry<O> reg = (Registry<O>) registry;
+			final Int2ObjectMap<O> sortedEntries = new Int2ObjectRBTreeMap<>();
+			
+			for (final O entry : reg)
+			{
+				sortedEntries.put(reg.getRawId(entry), entry);
+			}
+			
+			entries = sortedEntries.values();
+		}
+		else
+		{
+			entries = registry;
+		}
+		
 		final Collection<S> initialStates = new LinkedList<>();
 		final Collection<S> deferredStates = new LinkedList<>();
 		
-		for (final O entry : registry)
+		for (final O entry : entries)
 		{
 			for (final S state : stateManagerGetter.apply(entry).getStates())
 			{

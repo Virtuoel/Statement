@@ -58,11 +58,7 @@ public interface StateRefresher
 	
 	default <V extends Comparable<V>> void refreshFluidStates(final Property<V> property, final Collection<V> addedValues, final Collection<V> removedValues)
 	{
-		refreshStates(
-			Registry.FLUID, Fluid.STATE_IDS,
-			property, addedValues, removedValues,
-			Fluid::getDefaultState, Fluid::getStateManager, f -> {}
-		);
+		
 	}
 	
 	default <O, V extends Comparable<V>, S extends State<O, S>> void refreshStates(final Iterable<O> registry, final IdList<S> stateIdList, Property<V> property, final Collection<V> addedValues, final Collection<V> removedValues, final Function<O, S> defaultStateGetter, final Function<O, StateManager<O, S>> managerGetter, final Consumer<S> newStateConsumer)

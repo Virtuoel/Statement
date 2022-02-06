@@ -60,6 +60,11 @@ public class Statement implements StatementApi
 		return new Identifier(MOD_ID, name);
 	}
 	
+	public static void markRegistryAsModded(Registry<?> registry)
+	{
+		// NOOP
+	}
+	
 	public static final Identifier BLOCK_STATE_VALIDATION_PACKET = id("block_state_validation");
 	public static final Identifier FLUID_STATE_VALIDATION_PACKET = id("fluid_state_validation");
 	
