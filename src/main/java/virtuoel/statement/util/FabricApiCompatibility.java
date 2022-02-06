@@ -5,6 +5,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.spongepowered.asm.mixin.MixinEnvironment;
+
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -33,6 +35,7 @@ import net.minecraft.world.BlockView;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.loading.FMLLoader;
 import virtuoel.statement.Statement;
 
 @EventBusSubscriber(modid = Statement.MOD_ID)
@@ -58,6 +61,26 @@ public class FabricApiCompatibility
 				.then(idGetterArgument("fluid_state", Fluid.STATE_IDS, BlockView::getFluidState, Registry.FLUID, FluidState::getFluid))
 			)
 		);
+		
+		if (!FMLLoader.isProduction())
+		{
+			event.getDispatcher().register(
+				CommandManager.literal("statement")
+				.requires(commandSource ->
+				{
+					return commandSource.hasPermissionLevel(2);
+				})
+				.then(CommandManager.literal("debug")
+					.then(CommandManager.literal("run_mixin_tests")
+						.executes(s ->
+						{
+							MixinEnvironment.getCurrentEnvironment().audit();
+							return 1;
+						})
+					)
+				)
+			);
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
