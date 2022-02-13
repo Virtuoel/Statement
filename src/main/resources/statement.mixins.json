@@ -30,6 +30,8 @@
 		"compat117minus.IdListMixin",
 		"compat117plus.BigDripleafBlockMixin",
 		"compat117plus.RedstoneWireBlockMixin",
+		"compat1181minus.RegistryMixin",
+		"compat1182plus.IndexedIterableMixin",
 		"compat118plus.IdListMixin",
 		"sync.BlockStateParticleEffectMixin",
 		"sync.ChunkDeltaUpdateS2CPacketMixin",

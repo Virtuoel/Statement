@@ -240,12 +240,13 @@ public class StateRefresherImpl implements StateRefresher
 		
 		if (registry instanceof Registry)
 		{
-			final Registry<O> reg = (Registry<O>) registry;
+			@SuppressWarnings("unchecked")
+			final StatementRegistryExtensions<O> reg = (StatementRegistryExtensions<O>) registry;
 			final Int2ObjectMap<O> sortedEntries = new Int2ObjectRBTreeMap<>();
 			
-			for (final O entry : reg)
+			for (final O entry : registry)
 			{
-				sortedEntries.put(reg.getRawId(entry), entry);
+				sortedEntries.put(reg.statement_getRawId(entry), entry);
 			}
 			
 			entries = sortedEntries.values();
