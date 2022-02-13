@@ -60,7 +60,7 @@ public class Statement implements ModInitializer, StatementApi
 		
 		if (fabricCommandsLoaded)
 		{
-			FabricApiCompatibility.setupCommands(fabricNetworkingLoaded);
+			FabricApiCompatibility.setupCommands();
 		}
 		
 		if (fabricNetworkingLoaded)

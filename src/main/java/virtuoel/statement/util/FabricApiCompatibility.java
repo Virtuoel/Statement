@@ -3,12 +3,14 @@ package virtuoel.statement.util;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.function.BiFunction;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -45,14 +47,45 @@ import net.minecraft.util.collection.IdList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.BlockView;
+import virtuoel.kanos_config.api.InvalidatableLazySupplier;
 import virtuoel.statement.Statement;
 import virtuoel.statement.api.StateRefresher;
 
 public class FabricApiCompatibility
 {
-	public static void setupCommands(final boolean networkingLoaded)
+	private static final BooleanSupplier NETWORKING_LOADED = InvalidatableLazySupplier.of(() -> ModLoaderUtils.isModLoaded("fabric-networking-api-v1"))::get;
+	
+	public static void setupCommands()
 	{
-		CommandRegistrationCallback.EVENT.register((commandDispatcher, dedicated) ->
+		CommandRegistrationCallback.EVENT.register(FabricApiCompatibility::register);
+	}
+	
+	public static void register(final CommandDispatcher<ServerCommandSource> commandDispatcher, final boolean dedicated)
+	{
+		register(commandDispatcher);
+	}
+	
+	public static void register(final CommandDispatcher<ServerCommandSource> commandDispatcher)
+	{
+		commandDispatcher.register(
+			CommandManager.literal("statement")
+			.requires(commandSource ->
+			{
+				return commandSource.hasPermissionLevel(2);
+			})
+			.then(
+				CommandManager.literal("validate")
+				.then(stateValidationArgument("block_state", Statement.BLOCK_STATE_VALIDATION_PACKET))
+				.then(stateValidationArgument("fluid_state", Statement.FLUID_STATE_VALIDATION_PACKET))
+			)
+			.then(
+				CommandManager.literal("get_id")
+				.then(idGetterArgument("block_state", Block.STATE_IDS, BlockView::getBlockState, Registry.BLOCK, s -> ((StatementBlockStateExtensions) s).statement_getBlock()))
+				.then(idGetterArgument("fluid_state", Fluid.STATE_IDS, BlockView::getFluidState, Registry.FLUID, s -> ((StatementFluidStateExtensions) (Object) s).statement_getFluid()))
+			)
+		);
+		
+		if (FabricLoader.getInstance().isDevelopmentEnvironment())
 		{
 			commandDispatcher.register(
 				CommandManager.literal("statement")
@@ -60,38 +93,17 @@ public class FabricApiCompatibility
 				{
 					return commandSource.hasPermissionLevel(2);
 				})
-				.then(
-					CommandManager.literal("validate")
-					.then(stateValidationArgument("block_state", Statement.BLOCK_STATE_VALIDATION_PACKET, networkingLoaded))
-					.then(stateValidationArgument("fluid_state", Statement.FLUID_STATE_VALIDATION_PACKET, networkingLoaded))
-				)
-				.then(
-					CommandManager.literal("get_id")
-					.then(idGetterArgument("block_state", Block.STATE_IDS, BlockView::getBlockState, Registry.BLOCK, s -> ((StatementBlockStateExtensions) s).statement_getBlock()))
-					.then(idGetterArgument("fluid_state", Fluid.STATE_IDS, BlockView::getFluidState, Registry.FLUID, s -> ((StatementFluidStateExtensions) (Object) s).statement_getFluid()))
+				.then(CommandManager.literal("debug")
+					.then(CommandManager.literal("run_mixin_tests")
+						.executes(context ->
+						{
+							MixinEnvironment.getCurrentEnvironment().audit();
+							return 1;
+						})
+					)
 				)
 			);
-			
-			if (FabricLoader.getInstance().isDevelopmentEnvironment())
-			{
-				commandDispatcher.register(
-					CommandManager.literal("statement")
-					.requires(commandSource ->
-					{
-						return commandSource.hasPermissionLevel(2);
-					})
-					.then(CommandManager.literal("debug")
-						.then(CommandManager.literal("run_mixin_tests")
-							.executes(s ->
-							{
-								MixinEnvironment.getCurrentEnvironment().audit();
-								return 1;
-							})
-						)
-					)
-				);
-			}
-		});
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -126,39 +138,39 @@ public class FabricApiCompatibility
 			);
 	}
 	
-	private static ArgumentBuilder<ServerCommandSource, ?> stateValidationArgument(final String argumentName, final Identifier packetId, final boolean networkingLoaded)
+	private static ArgumentBuilder<ServerCommandSource, ?> stateValidationArgument(final String argumentName, final Identifier packetId)
 	{
 		return CommandManager.literal(argumentName)
 			.executes(context ->
 			{
-				return executeValidation(context, networkingLoaded, packetId, context.getSource().getPlayer(), 100, 0);
+				return executeValidation(context, packetId, context.getSource().getPlayer(), 100, 0);
 			})
 			.then(
 				CommandManager.argument("player", EntityArgumentType.player())
 				.executes(context ->
 				{
-					return executeValidation(context, networkingLoaded, packetId, EntityArgumentType.getPlayer(context, "player"), 100, 0);
+					return executeValidation(context, packetId, EntityArgumentType.getPlayer(context, "player"), 100, 0);
 				})
 				.then(
 					CommandManager.argument("rate", IntegerArgumentType.integer(1, Block.STATE_IDS.size()))
 					.executes(context ->
 					{
-						return executeValidation(context, networkingLoaded, packetId, EntityArgumentType.getPlayer(context, "player"), IntegerArgumentType.getInteger(context, "rate"), 0);
+						return executeValidation(context, packetId, EntityArgumentType.getPlayer(context, "player"), IntegerArgumentType.getInteger(context, "rate"), 0);
 					})
 					.then(
 						CommandManager.argument("start_id", IntegerArgumentType.integer(0, Block.STATE_IDS.size() - 1))
 						.executes(context ->
 						{
-							return executeValidation(context, networkingLoaded, packetId, EntityArgumentType.getPlayer(context, "player"), IntegerArgumentType.getInteger(context, "rate"), IntegerArgumentType.getInteger(context, "start_id"));
+							return executeValidation(context, packetId, EntityArgumentType.getPlayer(context, "player"), IntegerArgumentType.getInteger(context, "rate"), IntegerArgumentType.getInteger(context, "start_id"));
 						})
 					)
 				)
 			);
 	}
 	
-	private static int executeValidation(final CommandContext<ServerCommandSource> context, final boolean networkingLoaded, final Identifier packetId, final ServerPlayerEntity player, final int rate, final int initialId) throws CommandSyntaxException
+	private static int executeValidation(final CommandContext<ServerCommandSource> context, final Identifier packetId, final ServerPlayerEntity player, final int rate, final int initialId) throws CommandSyntaxException
 	{
-		if (networkingLoaded)
+		if (NETWORKING_LOADED.getAsBoolean())
 		{
 			if (ServerPlayNetworking.canSend(player, packetId))
 			{
