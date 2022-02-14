@@ -1,4 +1,4 @@
-package virtuoel.statement.mixin.compat1181minus;
+package virtuoel.statement.mixin.compat115minus;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
