@@ -421,7 +421,10 @@ public class FabricApiCompatibility
 	
 	public static void markRegistryAsModded(Registry<?> registry)
 	{
-		RegistryAttributeHolder.get(registry).addAttribute(RegistryAttribute.MODDED);
+		if (VersionUtils.MINOR >= 16)
+		{
+			RegistryAttributeHolder.get(registry).addAttribute(RegistryAttribute.MODDED);
+		}
 	}
 	
 	public static void setupIdRemapCallbacks()
