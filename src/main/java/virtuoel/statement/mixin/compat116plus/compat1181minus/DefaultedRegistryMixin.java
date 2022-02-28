@@ -19,7 +19,7 @@ public abstract class DefaultedRegistryMixin<T>
 {
 	@Shadow @Final Identifier defaultId;
 	
-	@Inject(method = "method_10273(ILnet/minecraft/class_5321;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;)Ljava/lang/Object;", at = @At(value = "HEAD"), remap = false)
+	@Inject(method = "set(ILnet/minecraft/util/registry/RegistryKey;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;)Ljava/lang/Object;", at = @At(value = "HEAD"))
 	private <V extends T> void setDefault(int rawId, RegistryKey<T> registryKey, V entry, Lifecycle lifecycle, CallbackInfoReturnable<V> info)
 	{
 		if (defaultId.equals(registryKey.getValue()))
