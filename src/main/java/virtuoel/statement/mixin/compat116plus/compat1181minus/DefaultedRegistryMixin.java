@@ -1,4 +1,4 @@
-package virtuoel.statement.mixin.compat116plus;
+package virtuoel.statement.mixin.compat116plus.compat1181minus;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,7 +19,7 @@ public abstract class DefaultedRegistryMixin<T>
 {
 	@Shadow @Final Identifier defaultId;
 	
-	@Inject(method = "set", at = @At(value = "HEAD"))
+	@Inject(method = "set(ILnet/minecraft/util/registry/RegistryKey;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;)Ljava/lang/Object;", at = @At(value = "HEAD"))
 	private <V extends T> void setDefault(int rawId, RegistryKey<T> registryKey, V entry, Lifecycle lifecycle, CallbackInfoReturnable<V> info)
 	{
 		if (defaultId.equals(registryKey.getValue()))
