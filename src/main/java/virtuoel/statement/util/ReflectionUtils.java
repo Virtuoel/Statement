@@ -18,15 +18,30 @@ public final class ReflectionUtils
 			}
 			catch (SecurityException | NoSuchFieldException e)
 			{
-				
+				return null;
 			}
-			return null;
 		});
 	}
 	
-	public static void setField(final Optional<Class<?>> classObj, final String fieldName, Object object, Object value)
+	@SuppressWarnings("unchecked")
+	public static <T> T getFieldValue(final Optional<Class<?>> classObj, final String fieldName, final Object object, final T defaultValue)
 	{
-		ReflectionUtils.getField(classObj, fieldName).ifPresent(f ->
+		return getField(classObj, fieldName).map(f ->
+		{
+			try
+			{
+				return (T) f.get(object);
+			}
+			catch (IllegalArgumentException | IllegalAccessException e)
+			{
+				return defaultValue;
+			}
+		}).orElse(null);
+	}
+	
+	public static void setField(final Optional<Class<?>> classObj, final String fieldName, final Object object, final Object value)
+	{
+		getField(classObj, fieldName).ifPresent(f ->
 		{
 			try
 			{
@@ -39,7 +54,7 @@ public final class ReflectionUtils
 		});
 	}
 	
-	public static Optional<Method> getMethod(final Optional<Class<?>> classObj, final String methodName, Class<?>... args)
+	public static Optional<Method> getMethod(final Optional<Class<?>> classObj, final String methodName, final Class<?>... args)
 	{
 		return classObj.map(c ->
 		{
@@ -51,9 +66,8 @@ public final class ReflectionUtils
 			}
 			catch (SecurityException | NoSuchMethodException e)
 			{
-				
+				return null;
 			}
-			return null;
 		});
 	}
 	
@@ -82,10 +96,8 @@ public final class ReflectionUtils
 		}
 		catch (ClassNotFoundException e)
 		{
-			
+			return Optional.empty();
 		}
-		
-		return Optional.empty();
 	}
 	
 	private ReflectionUtils()
