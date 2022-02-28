@@ -12,7 +12,7 @@ import virtuoel.statement.util.RegistryKeyExtensions;
 @Mixin(RegistryKey.class)
 public class RegistryKeyMixin implements RegistryKeyExtensions
 {
-	@Shadow	@Final @Mutable
+	@Shadow @Final @Mutable
 	Identifier value;
 	
 	@Override
