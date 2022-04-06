@@ -4,6 +4,7 @@
 	"package": "virtuoel.statement.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"plugin": "virtuoel.statement.mixin.StatementMixinConfigPlugin",
+	"refmap": "Statement-refmap.json",
 	"mixins":
 	[
 		"StateManagerBuilderMixin",
