@@ -1,5 +1,6 @@
 package virtuoel.statement;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -34,7 +35,8 @@ import net.minecraft.util.collection.IdList;
 import net.minecraft.util.registry.DefaultedRegistry;
 import net.minecraft.util.registry.Registry;
 import virtuoel.kanos_config.api.InvalidatableLazySupplier;
-import virtuoel.kanos_config.api.JsonConfigHandler;
+import virtuoel.kanos_config.api.JsonConfigBuilder;
+import virtuoel.kanos_config.api.MutableConfigEntry;
 import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.StatementConfig;
 import virtuoel.statement.util.FabricApiCompatibility;
@@ -92,17 +94,33 @@ public class Statement implements ModInitializer, StatementApi
 	public static final Identifier BLOCK_STATE_VALIDATION_PACKET = id("block_state_validation");
 	public static final Identifier FLUID_STATE_VALIDATION_PACKET = id("fluid_state_validation");
 	
-	public static Supplier<Set<BlockState>> createBlockStateDeferralConfig(final JsonConfigHandler config)
+	public static <S> MutableConfigEntry<Set<S>> createSetConfig(final JsonConfigBuilder builder, final String name, final Function<Supplier<JsonObject>, Supplier<Set<S>>> entryGetterFunction)
+	{
+		return builder.customConfig(
+			name,
+			config -> v ->
+			{
+				if (v.isEmpty())
+				{
+					config.get().add(name, new JsonObject());
+				}
+			},
+			Collections.emptySet(),
+			entryGetterFunction
+		);
+	}
+	
+	public static Supplier<Set<BlockState>> createBlockStateDeferralConfig(final Supplier<JsonObject> config)
 	{
 		return InvalidatableLazySupplier.of(() -> loadStateDeferralData(config, "customBlockStateDeferral", Registry.BLOCK, Block::getStateManager));
 	}
 	
-	public static Supplier<Set<FluidState>> createFluidStateDeferralConfig(final JsonConfigHandler config)
+	public static Supplier<Set<FluidState>> createFluidStateDeferralConfig(final Supplier<JsonObject> config)
 	{
 		return InvalidatableLazySupplier.of(() -> loadStateDeferralData(config, "customFluidStateDeferral", Registry.FLUID, Fluid::getStateManager));
 	}
 	
-	private static <O, S extends State<O, S>> Set<S> loadStateDeferralData(final JsonConfigHandler config, final String member, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
+	private static <O, S extends State<O, S>> Set<S> loadStateDeferralData(final Supplier<JsonObject> config, final String member, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
 	{
 		final JsonObject data = Optional.ofNullable(config.get().get(member))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
@@ -259,17 +277,33 @@ public class Statement implements ModInitializer, StatementApi
 		return OptionalInt.empty();
 	}
 	
-	public static Supplier<Map<BlockState, OptionalInt>> createBlockStateSyncConfig(final JsonConfigHandler config)
+	public static <K, V> MutableConfigEntry<Map<K, V>> createMapConfig(final JsonConfigBuilder builder, final String name, final Function<Supplier<JsonObject>, Supplier<Map<K, V>>> entryGetterFunction)
+	{
+		return builder.customConfig(
+			name,
+			config -> v ->
+			{
+				if (v.isEmpty())
+				{
+					config.get().add(name, new JsonObject());
+				}
+			},
+			Collections.emptyMap(),
+			entryGetterFunction
+		);
+	}
+	
+	public static Supplier<Map<BlockState, OptionalInt>> createBlockStateSyncConfig(final Supplier<JsonObject> config)
 	{
 		return InvalidatableLazySupplier.of(() -> loadStateSyncData(config, "customBlockStateSync", Block.STATE_IDS, Registry.BLOCK, Block::getStateManager, Block::getDefaultState));
 	}
 	
-	public static Supplier<Map<FluidState, OptionalInt>> createFluidStateSyncConfig(final JsonConfigHandler config)
+	public static Supplier<Map<FluidState, OptionalInt>> createFluidStateSyncConfig(final Supplier<JsonObject> config)
 	{
 		return InvalidatableLazySupplier.of(() -> loadStateSyncData(config, "customFluidStateSync", Fluid.STATE_IDS, Registry.FLUID, Fluid::getStateManager, Fluid::getDefaultState));
 	}
 	
-	private static <O, S extends State<O, S>> Map<S, OptionalInt> loadStateSyncData(final JsonConfigHandler config, final String member, final IdList<S> idList, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc, final Function<O, S> defaultStateFunc)
+	private static <O, S extends State<O, S>> Map<S, OptionalInt> loadStateSyncData(final Supplier<JsonObject> config, final String member, final IdList<S> idList, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc, final Function<O, S> defaultStateFunc)
 	{
 		final JsonObject data = Optional.ofNullable(config.get().get(member))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
