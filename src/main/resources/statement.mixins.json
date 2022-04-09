@@ -45,9 +45,9 @@
 		"sync.compat116plus.BlockUpdateS2CPacketMixin",
 		"sync.compat117minus.ArrayPaletteMixin",
 		"sync.compat117minus.BiMapPaletteMixin",
+		"sync.compat118.PlayerActionResponseS2CPacketMixin",
 		"sync.compat118plus.ArrayPaletteMixin",
-		"sync.compat118plus.BiMapPaletteMixin",
-		"sync.compat118plus.PlayerActionResponseS2CPacketMixin"
+		"sync.compat118plus.BiMapPaletteMixin"
 	],
 	"client":
 	[
