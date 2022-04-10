@@ -20,7 +20,7 @@ public class PlayerActionResponseS2CPacketMixin
 {
 	@Shadow(remap = false) @Final @Mutable private BlockState comp_85;
 	
-	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/class_2338;Lnet/minecraft/class_2680;Lnet/minecraft/class_2846$class_2847;Z)V", remap = false)
+	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/class_2338;Lnet/minecraft/class_2680;Lnet/minecraft/class_2846$class_2847;ZLjava/lang/String;)V", remap = false)
 	private void onConstruct(BlockPos pos, BlockState state, PlayerActionC2SPacket.Action action, boolean approved, String reason, CallbackInfo info)
 	{
 		Statement.getSyncedBlockStateId(state).ifPresent(id ->
