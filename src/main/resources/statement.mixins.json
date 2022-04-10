@@ -31,6 +31,7 @@
 		"compat116plus.compat117minus.StateMixin",
 		"compat116plus.compat1181minus.DefaultedRegistryMixin",
 		"compat117minus.IdListMixin",
+		"compat117plus.AbstractLichenBlockMixin",
 		"compat117plus.BigDripleafBlockMixin",
 		"compat117plus.RedstoneWireBlockMixin",
 		"compat1182plus.DefaultedRegistryMixin",
