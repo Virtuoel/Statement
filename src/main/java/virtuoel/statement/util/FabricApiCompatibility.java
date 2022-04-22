@@ -42,6 +42,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.IdList;
 import net.minecraft.util.math.BlockPos;
@@ -132,7 +133,7 @@ public class FabricApiCompatibility
 						stringBuilder.append(']');
 					}
 					
-					context.getSource().sendFeedback(new LiteralText(String.format("%s (%d) @ %d, %d, %d", stringBuilder.toString(), idList.getRawId(state), pos.getX(), pos.getY(), pos.getZ())), false);
+					context.getSource().sendFeedback(literal("%s (%d) @ %d, %d, %d", stringBuilder.toString(), idList.getRawId(state), pos.getX(), pos.getY(), pos.getZ()), false);
 					return 1;
 				})
 			);
@@ -182,7 +183,7 @@ public class FabricApiCompatibility
 					buffer.writeVarInt(initialId + i);
 				}
 				
-				context.getSource().sendFeedback(new LiteralText("Running state validation..."), false);
+				context.getSource().sendFeedback(literal("Running state validation..."), false);
 				
 				ServerPlayNetworking.send(player, packetId, buffer);
 				
@@ -190,13 +191,13 @@ public class FabricApiCompatibility
 			}
 			else
 			{
-				context.getSource().sendFeedback(new LiteralText("Error: Target player cannot receive state validation packet."), false);
+				context.getSource().sendFeedback(literal("Error: Target player cannot receive state validation packet."), false);
 				return 0;
 			}
 		}
 		else
 		{
-			context.getSource().sendFeedback(new LiteralText("Fabric Networking not found on server."), false);
+			context.getSource().sendFeedback(literal("Fabric Networking not found on server."), false);
 			return 0;
 		}
 	}
@@ -270,7 +271,7 @@ public class FabricApiCompatibility
 								
 								if (sentData.equals(ownData))
 								{
-									executor.sendMessage(new LiteralText(String.format("ID %d matched (%d/%d: %.2f%%):\n%s", ids[i], ids[i] + 1, total, percent, sentStringBuilder.toString())), false);
+									executor.sendMessage(literal("ID %d matched (%d/%d: %.2f%%):\n%s", ids[i], ids[i] + 1, total, percent, sentStringBuilder.toString()), false);
 								}
 								else
 								{
@@ -292,11 +293,11 @@ public class FabricApiCompatibility
 									
 									if (sentName.equals(ownName))
 									{
-										executor.sendMessage(new LiteralText(String.format("ID %d partially matched (%d/%d: %.2f%%):\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())), false);
+										executor.sendMessage(literal("ID %d partially matched (%d/%d: %.2f%%):\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString()), false);
 									}
 									else
 									{
-										executor.sendMessage(new LiteralText(String.format("ID %d mismatched (%d/%d: %.2f%%)!\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString())), false);
+										executor.sendMessage(literal("ID %d mismatched (%d/%d: %.2f%%)!\nServer state:\n%s\nClient state:\n%s", ids[i], ids[i] + 1, total, percent, ownStringBuilder.toString(), sentStringBuilder.toString()), false);
 									}
 								}
 								
@@ -304,18 +305,18 @@ public class FabricApiCompatibility
 							}
 							else
 							{
-								executor.sendMessage(new LiteralText(String.format("Received ID %d not found on server.\nClient state:\n%s", ids[i], sentStringBuilder.toString())), false);
+								executor.sendMessage(literal("Received ID %d not found on server.\nClient state:\n%s", ids[i], sentStringBuilder.toString()), false);
 							}
 						}
 						catch (CommandSyntaxException e)
 						{
 							if (state == null)
 							{
-								executor.sendMessage(new LiteralText("Done matching after " + ids[i] + " states."), false);
+								executor.sendMessage(literal("Done matching after " + ids[i] + " states."), false);
 								done = true;
 								break;
 							}
-							executor.sendMessage(new LiteralText("Failed to parse received state from SNBT:\n" + snbts[i]), false);
+							executor.sendMessage(literal("Failed to parse received state from SNBT:\n" + snbts[i]), false);
 						}
 					}
 					
@@ -334,12 +335,24 @@ public class FabricApiCompatibility
 						}
 						else
 						{
-							executor.sendMessage(new LiteralText("Error: Target player cannot receive state validation packet."), false);
+							executor.sendMessage(literal("Error: Target player cannot receive state validation packet."), false);
 						}
 					}
 				}
 			});
 		});
+	}
+	
+	private static final Function<String, Object> LITERAL = LiteralText::new;
+	
+	private static Text literal(final String value, final Object... args)
+	{
+		if (VersionUtils.MINOR < 19)
+		{
+			return (Text) LITERAL.apply(String.format(value, args));
+		}
+		
+		return Text.literal(String.format(value, args));
 	}
 	
 	public static void setupClientNetworking()
