@@ -41,7 +41,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.IdList;
@@ -343,7 +343,7 @@ public class FabricApiCompatibility
 		});
 	}
 	
-	private static final Function<String, Object> LITERAL = LiteralText::new;
+	private static final Function<String, Object> LITERAL = LiteralTextContent::new;
 	
 	private static Text literal(final String value, final Object... args)
 	{
