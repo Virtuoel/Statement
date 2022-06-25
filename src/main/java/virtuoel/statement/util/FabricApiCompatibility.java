@@ -1,5 +1,13 @@
 package virtuoel.statement.util;
 
+import java.lang.invoke.CallSite;
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -18,7 +26,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.fabricmc.fabric.api.event.registry.RegistryAttributeHolder;
 import net.fabricmc.fabric.api.event.registry.RegistryIdRemapCallback;
@@ -56,14 +65,70 @@ public class FabricApiCompatibility
 {
 	private static final BooleanSupplier NETWORKING_LOADED = InvalidatableLazySupplier.of(() -> ModLoaderUtils.isModLoaded("fabric-networking-api-v1"))::get;
 	
-	public static void setupCommands()
+	public static void registerCommands()
 	{
-		CommandRegistrationCallback.EVENT.register(FabricApiCompatibility::register);
+		if (ModLoaderUtils.isModLoaded("fabric-command-api-v2"))
+		{
+			V2ApiClassloading.registerV2ApiCommands();
+		}
+		else if (ModLoaderUtils.isModLoaded("fabric-command-api-v1"))
+		{
+			registerV1ApiCommands();
+		}
 	}
 	
-	public static void register(final CommandDispatcher<ServerCommandSource> commandDispatcher, final boolean dedicated)
+	public static void registerCommands(final CommandDispatcher<ServerCommandSource> dispatcher)
 	{
-		register(commandDispatcher);
+		register(dispatcher);
+	}
+	
+	private static class V2ApiClassloading
+	{
+		private static void registerV2ApiCommands()
+		{
+			CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, dedicated) ->
+			{
+				registerCommands(dispatcher);
+			});
+		}
+	}
+	
+	private static void registerV1ApiCommands()
+	{
+		try
+		{
+			final Lookup lookup = MethodHandles.lookup();
+			
+			final Method staticRegister = FabricApiCompatibility.class.getDeclaredMethod("registerV1ApiCommands", CommandDispatcher.class, boolean.class);
+			final MethodHandle staticRegisterHandle = lookup.unreflect(staticRegister);
+			final MethodType staticRegisterType = staticRegisterHandle.type();
+			
+			final Class<?> callbackClass = Class.forName("net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback");
+			
+			@SuppressWarnings("unchecked")
+			final Event<Object> registerEvent = (Event<Object>) callbackClass.getField("EVENT").get(null);
+			
+			final Method register = callbackClass.getDeclaredMethod("register", CommandDispatcher.class, boolean.class);
+			final MethodType registerType = MethodType.methodType(register.getReturnType(), register.getParameterTypes());
+			
+			final MethodType factoryMethodType = MethodType.methodType(callbackClass);
+			
+			final CallSite lambdaFactory = LambdaMetafactory.metafactory(lookup, "register", factoryMethodType, registerType, staticRegisterHandle, staticRegisterType);
+			final MethodHandle factoryInvoker = lambdaFactory.getTarget();
+			
+			final Object eventLambda = factoryInvoker.asType(factoryMethodType).invokeWithArguments(Collections.emptyList());
+			
+			registerEvent.register(eventLambda);
+		}
+		catch (Throwable e)
+		{
+			Statement.LOGGER.catching(e);
+		}
+	}
+	
+	protected static void registerV1ApiCommands(final CommandDispatcher<ServerCommandSource> dispatcher, final boolean dedicated)
+	{
+		registerCommands(dispatcher);
 	}
 	
 	public static void register(final CommandDispatcher<ServerCommandSource> commandDispatcher)
@@ -144,7 +209,7 @@ public class FabricApiCompatibility
 		return CommandManager.literal(argumentName)
 			.executes(context ->
 			{
-				return executeValidation(context, packetId, context.getSource().getPlayer(), 100, 0);
+				return executeValidation(context, packetId, context.getSource().getPlayerOrThrow(), 100, 0);
 			})
 			.then(
 				CommandManager.argument("player", EntityArgumentType.player())
@@ -175,7 +240,7 @@ public class FabricApiCompatibility
 		{
 			if (ServerPlayNetworking.canSend(player, packetId))
 			{
-				final PlayerEntity executor = context.getSource().getPlayer();
+				final PlayerEntity executor = context.getSource().getPlayerOrThrow();
 				final PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer()).writeUuid(executor.getUuid()).writeVarInt(rate);
 				
 				for (int i = 0; i < rate; i++)

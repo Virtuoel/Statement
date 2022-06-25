@@ -56,13 +56,13 @@ public class Statement implements ModInitializer, StatementApi
 	@Override
 	public void onInitialize()
 	{
-		final boolean fabricCommandsLoaded = ModLoaderUtils.isModLoaded("fabric-command-api-v1");
+		final boolean fabricCommandsLoaded = ModLoaderUtils.isModLoaded("fabric-command-api-v2") || ModLoaderUtils.isModLoaded("fabric-command-api-v1");
 		final boolean fabricNetworkingLoaded = ModLoaderUtils.isModLoaded("fabric-networking-api-v1");
 		final boolean fabricRegistrySyncLoaded = ModLoaderUtils.isModLoaded("fabric-registry-sync-v0");
 		
 		if (fabricCommandsLoaded)
 		{
-			FabricApiCompatibility.setupCommands();
+			FabricApiCompatibility.registerCommands();
 		}
 		
 		if (fabricNetworkingLoaded)
