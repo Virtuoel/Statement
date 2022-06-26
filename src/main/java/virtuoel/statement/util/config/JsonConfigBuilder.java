@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -21,11 +22,13 @@ public class JsonConfigBuilder extends ConfigBuilder<JsonObject, JsonElement, Js
 	}
 	
 	@Override
-	public <T extends Number> Supplier<T> numberConfig(final String member, Function<Number, T> mapper, T defaultValue)
+	public <T extends Number> Supplier<T> numberConfig(final String name, final Function<Number, T> mapper, final T defaultValue)
 	{
 		return customConfig(
-			c -> c.addProperty(member, defaultValue),
-			config -> () -> Optional.ofNullable(config.get().get(member))
+			name,
+			config -> v -> config.get().addProperty(name, v),
+			defaultValue,
+			config -> () -> Optional.ofNullable(config.get().get(name))
 				.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsJsonPrimitive)
 				.filter(JsonPrimitive::isNumber).map(JsonPrimitive::getAsNumber)
 				.map(mapper).orElse(defaultValue)
@@ -33,11 +36,13 @@ public class JsonConfigBuilder extends ConfigBuilder<JsonObject, JsonElement, Js
 	}
 	
 	@Override
-	public Supplier<Boolean> booleanConfig(final String member, final boolean defaultValue)
+	public Supplier<Boolean> booleanConfig(final String name, final boolean defaultValue)
 	{
 		return customConfig(
-			c -> c.addProperty(member, defaultValue),
-			config -> () -> Optional.ofNullable(config.get().get(member))
+			name,
+			config -> v -> config.get().addProperty(name, v),
+			defaultValue,
+			config -> () -> Optional.ofNullable(config.get().get(name))
 				.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsJsonPrimitive)
 				.filter(JsonPrimitive::isBoolean).map(JsonPrimitive::getAsBoolean)
 				.orElse(defaultValue)
@@ -45,28 +50,32 @@ public class JsonConfigBuilder extends ConfigBuilder<JsonObject, JsonElement, Js
 	}
 	
 	@Override
-	public Supplier<String> stringConfig(String member, String defaultValue)
+	public Supplier<String> stringConfig(String name, String defaultValue)
 	{
 		return customConfig(
-			c -> c.addProperty(member, defaultValue),
-			config -> () -> Optional.ofNullable(config.get().get(member))
+			name,
+			config -> v -> config.get().addProperty(name, v),
+			defaultValue,
+			config -> () -> Optional.ofNullable(config.get().get(name))
 				.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString)
 				.orElse(defaultValue)
 		);
 	}
 	
 	@Override
-	public Supplier<List<String>> stringListConfig(final String config)
+	public Supplier<List<String>> stringListConfig(final String name)
 	{
-		return listConfig(config, JsonElement::getAsString);
+		return listConfig(name, JsonElement::getAsString);
 	}
 	
 	@Override
-	public <T> Supplier<List<T>> listConfig(final String member, final Function<JsonElement, T> mapper)
+	public <T> Supplier<List<T>> listConfig(final String name, final Function<JsonElement, T> mapper)
 	{
 		return customConfig(
-			c -> c.add(member, new JsonArray()),
-			config -> () -> Optional.ofNullable(config.get().get(member))
+			name,
+			config -> v -> config.get().add(name, new Gson().toJsonTree(v).getAsJsonArray()),
+			new ArrayList<>(),
+			config -> () -> Optional.ofNullable(config.get().get(name))
 				.filter(JsonElement::isJsonArray).map(JsonElement::getAsJsonArray)
 				.map(JsonArray::spliterator).map(a -> StreamSupport.stream(a, false))
 				.map(s -> s.map(mapper).collect(Collectors.toList()))

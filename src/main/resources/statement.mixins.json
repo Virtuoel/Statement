@@ -4,6 +4,7 @@
 	"package": "virtuoel.statement.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"plugin": "virtuoel.statement.mixin.StatementMixinConfigPlugin",
+	"refmap": "Statement-refmap.json",
 	"mixins":
 	[
 		"StateManagerBuilderMixin",
@@ -30,6 +31,7 @@
 		"compat116plus.compat117minus.StateMixin",
 		"compat116plus.compat1181minus.DefaultedRegistryMixin",
 		"compat117minus.IdListMixin",
+		"compat117plus.AbstractLichenBlockMixin",
 		"compat117plus.BigDripleafBlockMixin",
 		"compat117plus.RedstoneWireBlockMixin",
 		"compat1182plus.DefaultedRegistryMixin",
@@ -44,9 +46,9 @@
 		"sync.compat116plus.BlockUpdateS2CPacketMixin",
 		"sync.compat117minus.ArrayPaletteMixin",
 		"sync.compat117minus.BiMapPaletteMixin",
+		"sync.compat118.PlayerActionResponseS2CPacketMixin",
 		"sync.compat118plus.ArrayPaletteMixin",
-		"sync.compat118plus.BiMapPaletteMixin",
-		"sync.compat118plus.PlayerActionResponseS2CPacketMixin"
+		"sync.compat118plus.BiMapPaletteMixin"
 	],
 	"client":
 	[

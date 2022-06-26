@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 public abstract class ConfigBuilder<R, E, H extends ConfigHandler<R>>
 {
 	protected final String namespace, path;
-	private final Collection<Consumer<R>> defaultValues;
+	private final Collection<Consumer<Supplier<R>>> defaultValues;
 	public final H config;
 	
 	public ConfigBuilder(final String namespace, final String path)
@@ -21,65 +21,101 @@ public abstract class ConfigBuilder<R, E, H extends ConfigHandler<R>>
 		this.config = createConfig();
 	}
 	
-	public final Supplier<Double> doubleConfig(final String config, final double defaultValue)
+	public final Supplier<Double> doubleConfig(final String name, final double defaultValue)
 	{
-		return numberConfig(config, Number::doubleValue, defaultValue);
+		return numberConfig(name, Number::doubleValue, defaultValue);
 	}
 	
-	public final Supplier<Float> floatConfig(final String config, final float defaultValue)
+	public final Supplier<Float> floatConfig(final String name, final float defaultValue)
 	{
-		return numberConfig(config, Number::floatValue, defaultValue);
+		return numberConfig(name, Number::floatValue, defaultValue);
 	}
 	
-	public final Supplier<Long> longConfig(final String config, final long defaultValue)
+	public final Supplier<Long> longConfig(final String name, final long defaultValue)
 	{
-		return numberConfig(config, Number::longValue, defaultValue);
+		return numberConfig(name, Number::longValue, defaultValue);
 	}
 	
-	public final Supplier<Byte> byteConfig(final String config, final byte defaultValue)
+	public final Supplier<Byte> byteConfig(final String name, final byte defaultValue)
 	{
-		return numberConfig(config, Number::byteValue, defaultValue);
+		return numberConfig(name, Number::byteValue, defaultValue);
 	}
 	
-	public final Supplier<Short> shortConfig(final String config, final short defaultValue)
+	public final Supplier<Short> shortConfig(final String name, final short defaultValue)
 	{
-		return numberConfig(config, Number::shortValue, defaultValue);
+		return numberConfig(name, Number::shortValue, defaultValue);
 	}
 	
-	public final Supplier<Integer> intConfig(final String config, final int defaultValue)
+	public final Supplier<Integer> intConfig(final String name, final int defaultValue)
 	{
-		return numberConfig(config, Number::intValue, defaultValue);
+		return numberConfig(name, Number::intValue, defaultValue);
 	}
 	
-	public abstract <T extends Number> Supplier<T> numberConfig(final String member, final Function<Number, T> mapper, final T defaultValue);
+	public abstract <T extends Number> Supplier<T> numberConfig(final String name, final Function<Number, T> mapper, final T defaultValue);
 	
-	public abstract Supplier<Boolean> booleanConfig(final String member, final boolean defaultValue);
+	public abstract Supplier<Boolean> booleanConfig(final String name, final boolean defaultValue);
 	
-	public abstract Supplier<String> stringConfig(final String member, final String defaultValue);
+	public abstract Supplier<String> stringConfig(final String name, final String defaultValue);
 	
-	public abstract Supplier<List<String>> stringListConfig(final String config);
+	public abstract Supplier<List<String>> stringListConfig(final String name);
 	
-	public abstract <T> Supplier<List<T>> listConfig(final String member, final Function<E, T> mapper);
+	public abstract <T> Supplier<List<T>> listConfig(final String name, final Function<E, T> mapper);
 	
-	public final <T> Supplier<T> customConfig(final Consumer<R> defaultValue, final Function<H, Supplier<T>> entryFunction)
+	public final <T> MutableConfigEntry<T> customConfig(final String name, final Function<Supplier<R>, Consumer<T>> entrySetterFunction, final T defaultValue, final Function<Supplier<R>, Supplier<T>> entryGetterFunction)
 	{
-		defaultValues.add(defaultValue);
+		defaultValues.add(r -> entrySetterFunction.apply(r).accept(defaultValue));
 		
-		final InvalidatableLazySupplier<T> entry = InvalidatableLazySupplier.of(entryFunction.apply(config));
+		final InvalidatableLazySupplier<T> entry = InvalidatableLazySupplier.of(entryGetterFunction.apply(config));
 		
 		config.addInvalidationListener(entry::invalidate);
 		
-		return entry;
+		return createConfigEntry(name, defaultValue, entry, v ->
+		{
+			entrySetterFunction.apply(config).accept(v);
+			entry.invalidate();
+		});
 	}
 	
 	protected final R populateDefaults(final R defaultConfig)
 	{
-		for (final Consumer<R> value : defaultValues)
+		final Supplier<R> defaultConfigGetter = () -> defaultConfig;
+		
+		for (final Consumer<Supplier<R>> value : defaultValues)
 		{
-			value.accept(defaultConfig);
+			value.accept(defaultConfigGetter);
 		}
 		
 		return defaultConfig;
+	}
+	
+	public <T> MutableConfigEntry<T> createConfigEntry(final String name, final T defaultValue, final Supplier<T> supplier, final Consumer<T> consumer)
+	{
+		return new MutableConfigEntry<T>()
+		{
+			@Override
+			public T get()
+			{
+				return supplier.get();
+			}
+			
+			@Override
+			public void accept(final T t)
+			{
+				consumer.accept(t);
+			}
+			
+			@Override
+			public T getValue()
+			{
+				return supplier.get();
+			}
+			
+			@Override
+			public void setValue(final T value)
+			{
+				consumer.accept(value);
+			}
+		};
 	}
 	
 	protected abstract H createConfig();

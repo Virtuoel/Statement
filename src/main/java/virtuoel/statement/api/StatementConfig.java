@@ -7,8 +7,6 @@ import java.util.function.Supplier;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import com.google.gson.JsonObject;
-
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.FluidState;
 import virtuoel.statement.Statement;
@@ -42,21 +40,25 @@ public class StatementConfig
 			this.enableIdSyncApi = builder.booleanConfig("enableIdSyncApi", true);
 			this.forceParallelMode = builder.booleanConfig("forceParallelMode", false);
 			
-			this.customBlockStateDeferral = builder.customConfig(
-				c -> c.add("customBlockStateDeferral", new JsonObject()),
+			this.customBlockStateDeferral = Statement.createSetConfig(
+				builder,
+				"customBlockStateDeferral",
 				Statement::createBlockStateDeferralConfig
 			);
-			this.customBlockStateSync = builder.customConfig(
-				c -> c.add("customBlockStateSync", new JsonObject()),
+			this.customBlockStateSync = Statement.createMapConfig(
+				builder,
+				"customBlockStateSync",
 				Statement::createBlockStateSyncConfig
 			);
 			
-			this.customFluidStateDeferral = builder.customConfig(
-				c -> c.add("customFluidStateDeferral", new JsonObject()),
+			this.customFluidStateDeferral = Statement.createSetConfig(
+				builder,
+				"customFluidStateDeferral",
 				Statement::createFluidStateDeferralConfig
 			);
-			this.customFluidStateSync = builder.customConfig(
-				c -> c.add("customFluidStateSync", new JsonObject()),
+			this.customFluidStateSync = Statement.createMapConfig(
+				builder,
+				"customFluidStateSync",
 				Statement::createFluidStateSyncConfig
 			);
 		}
