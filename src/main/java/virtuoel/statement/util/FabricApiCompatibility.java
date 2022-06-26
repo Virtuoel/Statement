@@ -27,7 +27,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.IdList;
@@ -328,7 +327,7 @@ public class FabricApiCompatibility
 	*/
 	private static Text literal(final String value, final Object... args)
 	{
-		return new LiteralText(String.format(value, args));
+		return Text.literal(String.format(value, args));
 	}
 	/*
 	public static void setupClientNetworking()
