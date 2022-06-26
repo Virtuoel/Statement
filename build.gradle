@@ -1,9 +1,9 @@
 plugins {
-	id "dev.architectury.loom" version "0.10.+"
+	id "dev.architectury.loom" version "0.12.+"
 	id "eclipse"
 	id "maven-publish"
 	id "com.github.breadmoirai.github-release" version "2.2.12"
-	id "io.github.juuxel.loom-quiltflower" version "1.6.0"
+	id "io.github.juuxel.loom-quiltflower" version "1.7.2"
 	id "com.matthewprenger.cursegradle" version "1.4.0"
 	id "com.modrinth.minotaur" version "2.+"
 }
@@ -39,6 +39,8 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 def ENV = System.getenv()
+
+TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
 
 group = project.maven_group
 archivesBaseName = project.archives_base_name
@@ -85,7 +87,16 @@ if(project.hasProperty("fabric_version")) {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${minecraft_version}"
-	mappings "net.fabricmc:yarn:${yarn_mappings}:v2"
+	if(!project.yarn_mappings.contains(", ")) {
+		mappings "net.fabricmc:yarn:${yarn_mappings}:v2"
+	}
+	else {
+		mappings loom.layered {
+			project.yarn_mappings.split(", ").each { String mapping ->
+				mappings "net.fabricmc:yarn:${mapping}:v2"
+			}
+		}
+	}
 	
 	if(project.hasProperty("forge_version")) {
 		forge "net.minecraftforge:forge:${forge_version}"
@@ -145,6 +156,10 @@ processResources {
 	filesMatching("fabric.mod.json") {
 		expand "version": project.version
 	}
+	
+	filesMatching("META-INF/mods.toml") {
+		expand "file": [ jarVersion: project.version ]
+	}
 }
 
 def proj = project
@@ -171,6 +186,15 @@ tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
 }
 
+tasks.withType(AbstractArchiveTask) {
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
+}
+
+java {
+	withSourcesJar()
+}
+
 jar {
 	from "LICENSE"
 	manifest
@@ -183,9 +207,7 @@ jar {
 	}
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-	classifier = "sources"
-	from sourceSets.main.allSource
+tasks.named("sourcesJar") {
 	exclude "fabric.mod.json"
 	exclude "META-INF/mods.toml"
 	manifest
@@ -207,13 +229,13 @@ publishing {
 	
 	repositories {
 		mavenLocal()
-		if(project.hasProperty("github_maven_owner")) {
+		if(project.hasProperty("maven_repo") && project.hasProperty("maven_username") && project.hasProperty("maven_password")) {
 			maven {
-				url = "https://maven.pkg.github.com/${github_maven_owner}"
+				url = project.maven_repo
 				
 				credentials {
-					username project.properties.github_username
-					password project.properties.github_packages_token
+					username project.maven_username
+					password project.maven_password
 				}
 			}
 		}
@@ -250,6 +272,11 @@ githubRelease {
 	releaseName project.version
 	
 	releaseAssets = files("${project.buildDir}/libs/${archivesBaseName}-${version}.jar", "${project.buildDir}/libs/${archivesBaseName}-${version}-sources.jar").files
+}
+
+tasks.named("githubRelease") {
+	dependsOn remapJar
+	dependsOn remapSourcesJar
 }
 
 if(project.hasProperty("fabric_api_version")) {
@@ -403,13 +430,18 @@ curseforge {
 			addArtifact(sourcesJar) {
 				displayName = "${archives_base_name} ${project.mod_version} Source Code"
 			}
-			
-			afterEvaluate {
-				uploadTask.dependsOn remapSourcesJar
-			}
 		}
 		options {
 			forgeGradleIntegration = false
+		}
+	}
+}
+
+if(project.hasProperty("curseforge_id")) {
+	afterEvaluate {
+		tasks.named("curseforge${project.curseforge_id}") {
+			dependsOn remapJar
+			dependsOn remapSourcesJar
 		}
 	}
 }
@@ -463,6 +495,10 @@ modrinth {
 		changelog = generateMarkdownChangelog()
 		
 		uploadFile = remapJar
-		additionalFiles = files("${project.buildDir}/libs/${archivesBaseName}-${version}-sources.jar").files
 	}
+}
+
+tasks.named("modrinth") {
+	dependsOn remapJar
+	dependsOn remapSourcesJar
 }

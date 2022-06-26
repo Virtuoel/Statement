@@ -9,7 +9,7 @@ import virtuoel.statement.util.StatementRegistryExtensions;
 @Mixin(Registry.class)
 public abstract class RegistryMixin<T> implements StatementRegistryExtensions<T>
 {
-	@Shadow
+	@Shadow(remap = false)
 	abstract int method_10249(T entry);
 	
 	@Override
