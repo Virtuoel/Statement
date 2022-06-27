@@ -18,7 +18,7 @@ import virtuoel.statement.Statement;
 @Mixin(PlayerActionResponseS2CPacket.class)
 public class PlayerActionResponseS2CPacketMixin
 {
-	@Shadow(remap = false) @Final @Mutable private BlockState state;
+	@Shadow @Final @Mutable private BlockState state;
 	
 	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/network/packet/c2s/play/PlayerActionC2SPacket$Action;ZLjava/lang/String;)V")
 	private void onConstruct(BlockPos pos, BlockState state, PlayerActionC2SPacket.Action action, boolean approved, String reason, CallbackInfo info)
