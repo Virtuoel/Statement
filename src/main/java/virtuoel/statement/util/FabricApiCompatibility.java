@@ -100,17 +100,19 @@ public class FabricApiCompatibility
 					final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
 					final S state = stateFunc.apply(context.getSource().getWorld(), pos);
 					
+					final ImmutableMap<Property<?>, Comparable<?>> entries = ((StatementStateExtensions<?>) state).statement_getEntries();
+					
 					final StringBuilder stringBuilder = new StringBuilder();
 					stringBuilder.append(registry.getId(entryFunction.apply(state)));
 					
-					if (!state.getEntries().isEmpty())
+					if (!entries.isEmpty())
 					{
 						stringBuilder.append('[');
-						stringBuilder.append(state.getEntries().entrySet().stream().map(entry ->
+						stringBuilder.append(entries.entrySet().stream().map(entry ->
 						{
 							@SuppressWarnings("rawtypes")
-							final Property property = entry.getKey();
-							return property.getName() + "=" + property.name(entry.getValue());
+							final StatementPropertyExtensions property = (StatementPropertyExtensions) entry.getKey();
+							return property.statement_getName() + "=" + property.statement_name(entry.getValue());
 						}).collect(Collectors.joining(",")));
 						stringBuilder.append(']');
 					}
