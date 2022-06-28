@@ -97,6 +97,15 @@ public abstract class StateMixin<O, S> implements StatementStateExtensions<S>
 		return getEntries();
 	}
 	
+	@Shadow
+	abstract <T extends Comparable<T>, V extends T> S with(Property<T> property, V value);
+	
+	@Override
+	public <T extends Comparable<T>, V extends T> S statement_with(Property<T> property, V value)
+	{
+		return with(property, value);
+	}
+	
 	@Override
 	public <V extends Comparable<V>> boolean statement_addEntry(final Property<V> property, final V value)
 	{

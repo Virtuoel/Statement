@@ -44,6 +44,11 @@ public interface StatementStateExtensions<S>
 		return ImmutableMap.of();
 	}
 	
+	default <T extends Comparable<T>, V extends T> S statement_with(Property<T> property, V value)
+	{
+		return null;
+	}
+	
 	default void statement_initShapeCache()
 	{
 		

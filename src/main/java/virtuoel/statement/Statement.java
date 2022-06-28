@@ -37,6 +37,8 @@ import net.minecraftforge.fml.common.Mod;
 import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.StatementConfig;
 import virtuoel.statement.network.StatementPacketHandler;
+import virtuoel.statement.util.StatementPropertyExtensions;
+import virtuoel.statement.util.StatementStateExtensions;
 import virtuoel.statement.util.config.InvalidatableLazySupplier;
 import virtuoel.statement.util.config.JsonConfigBuilder;
 import virtuoel.statement.util.config.MutableConfigEntry;
@@ -134,7 +136,7 @@ public class Statement implements StatementApi
 						final Property<?> property = manager.getProperty(p.getKey());
 						if (property != null)
 						{
-							property.parse(p.getValue().getAsString()).ifPresent(val -> predicates.put(property, ((Object) val)::equals));
+							((StatementPropertyExtensions<?>) property).statement_parse(p.getValue().getAsString()).ifPresent(val -> predicates.put(property, ((Object) val)::equals));
 						}
 					}
 					
@@ -358,7 +360,7 @@ public class Statement implements StatementApi
 						final Property<?> property = manager.getProperty(p.getKey());
 						if (property != null)
 						{
-							property.parse(p.getValue().getAsString()).ifPresent(val -> predicates.put(property, ((Object) val)::equals));
+							((StatementPropertyExtensions<?>) property).statement_parse(p.getValue().getAsString()).ifPresent(val -> predicates.put(property, ((Object) val)::equals));
 						}
 					}
 					
@@ -387,11 +389,11 @@ public class Statement implements StatementApi
 			if (property != null)
 			{
 				@SuppressWarnings("rawtypes")
-				final Optional<Comparable> value = property.parse(p.getValue().getAsString());
+				final Optional<Comparable> value = ((StatementPropertyExtensions<Comparable>) property).statement_parse(p.getValue().getAsString());
 				
 				if (value.isPresent())
 				{
-					state = (S) state.with(property, value.get());
+					state = (S) ((StatementStateExtensions<S>) state).statement_with(property, value.get());
 				}
 			}
 		}
