@@ -63,14 +63,21 @@ public interface RefreshableStateManager<O, S extends State<O, S>> extends Mutab
 			{
 				@SuppressWarnings("unchecked")
 				final StatementPropertyExtensions<Comparable<?>> p = ((StatementPropertyExtensions<Comparable<?>>) entry);
-				return p.statement_getValues().stream()
-					.sorted((a, b) -> deferred.contains(a) ? deferred.contains(b) ? 0 : 1 : deferred.contains(b) ? -1 : 0)
-					.map((val) ->
-					{
-						final List<Pair<Property<?>, Comparable<?>>> list = new ArrayList<>(propertyList);
-						list.add(Pair.of(entry, val));
-						return list;
-					});
+				
+				final List<List<Pair<Property<?>, Comparable<?>>>> values = new ArrayList<>();
+				final List<List<Pair<Property<?>, Comparable<?>>>> addedValues = new ArrayList<>();
+				
+				for (final Comparable<?> val : p.statement_getValues())
+				{
+					final List<Pair<Property<?>, Comparable<?>>> list = new ArrayList<>(propertyList);
+					list.add(Pair.of(entry, val));
+					
+					(deferred.contains(val) ? addedValues : values).add(list);
+				}
+				
+				values.addAll(addedValues);
+				
+				return values.stream();
 			});
 		}
 		
@@ -89,12 +96,12 @@ public interface RefreshableStateManager<O, S extends State<O, S>> extends Mutab
 		
 		tableStream.forEach((valueList) ->
 		{
-			final Map<Property<?>, Comparable<?>> propertyValueMap = valueList.stream().collect(ImmutableMap.toImmutableMap(Pair::getLeft, Pair::getRight));
+			final ImmutableMap<Property<?>, Comparable<?>> propertyValueMap = valueList.stream().collect(ImmutableMap.toImmutableMap(Pair::getLeft, Pair::getRight));
 			
 			final S currentState;
 			if (addedValueMap.entrySet().stream().anyMatch(e -> e.getValue().contains(propertyValueMap.get(e.getKey()))))
 			{
-				currentState = function.apply(owner, ImmutableMap.copyOf(propertyValueMap));
+				currentState = function.apply(owner, propertyValueMap);
 				if (currentState != null)
 				{
 					addedStates.add(currentState);
