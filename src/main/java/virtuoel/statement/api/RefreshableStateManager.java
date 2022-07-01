@@ -96,12 +96,12 @@ public interface RefreshableStateManager<O, S extends State<O, S>> extends Mutab
 		
 		tableStream.forEach((valueList) ->
 		{
-			final Map<Property<?>, Comparable<?>> propertyValueMap = valueList.stream().collect(ImmutableMap.toImmutableMap(Pair::getLeft, Pair::getRight));
+			final ImmutableMap<Property<?>, Comparable<?>> propertyValueMap = valueList.stream().collect(ImmutableMap.toImmutableMap(Pair::getLeft, Pair::getRight));
 			
 			final S currentState;
 			if (addedValueMap.entrySet().stream().anyMatch(e -> e.getValue().contains(propertyValueMap.get(e.getKey()))))
 			{
-				currentState = function.apply(owner, ImmutableMap.copyOf(propertyValueMap));
+				currentState = function.apply(owner, propertyValueMap);
 				if (currentState != null)
 				{
 					addedStates.add(currentState);
