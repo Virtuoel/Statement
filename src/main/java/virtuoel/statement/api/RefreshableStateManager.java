@@ -63,14 +63,21 @@ public interface RefreshableStateManager<O, S extends State<O, S>> extends Mutab
 			{
 				@SuppressWarnings("unchecked")
 				final StatementPropertyExtensions<Comparable<?>> p = ((StatementPropertyExtensions<Comparable<?>>) entry);
-				return p.statement_getValues().stream()
-					.sorted((a, b) -> deferred.contains(a) ? deferred.contains(b) ? 0 : 1 : deferred.contains(b) ? -1 : 0)
-					.map((val) ->
-					{
-						final List<Pair<Property<?>, Comparable<?>>> list = new ArrayList<>(propertyList);
-						list.add(Pair.of(entry, val));
-						return list;
-					});
+				
+				final List<List<Pair<Property<?>, Comparable<?>>>> values = new ArrayList<>();
+				final List<List<Pair<Property<?>, Comparable<?>>>> addedValues = new ArrayList<>();
+				
+				for (final Comparable<?> val : p.statement_getValues())
+				{
+					final List<Pair<Property<?>, Comparable<?>>> list = new ArrayList<>(propertyList);
+					list.add(Pair.of(entry, val));
+					
+					(deferred.contains(val) ? addedValues : values).add(list);
+				}
+				
+				values.addAll(addedValues);
+				
+				return values.stream();
 			});
 		}
 		
