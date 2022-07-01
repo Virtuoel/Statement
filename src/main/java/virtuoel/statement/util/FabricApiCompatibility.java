@@ -335,49 +335,52 @@ public class FabricApiCompatibility
 	/*
 	public static void setupClientNetworking()
 	{
-		setupClientStateValidation(Statement.BLOCK_STATE_VALIDATION_PACKET, Block.STATE_IDS, NbtHelper::fromBlockState);
-		setupClientStateValidation(Statement.FLUID_STATE_VALIDATION_PACKET, Fluid.STATE_IDS, FabricApiCompatibility::fromFluidState);
+		Client.setupClientStateValidation(Statement.BLOCK_STATE_VALIDATION_PACKET, Block.STATE_IDS, NbtHelper::fromBlockState);
+		Client.setupClientStateValidation(Statement.FLUID_STATE_VALIDATION_PACKET, Fluid.STATE_IDS, FabricApiCompatibility::fromFluidState);
 	}
 	
-	public static <S> void setupClientStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, NbtCompound> stateToNbtFunction)
+	private static class Client
 	{
-		ClientPlayNetworking.registerGlobalReceiver(packetId, (client, handler, buf, responseSender) ->
+		public static <S> void setupClientStateValidation(final Identifier packetId, final IdList<S> stateIdList, final Function<S, NbtCompound> stateToNbtFunction)
 		{
-			final ClientPlayerEntity player = client.player;
-			
-			final UUID uuid = buf.readUuid();
-			final int idQuantity = buf.readVarInt();
-			
-			if (idQuantity == 0)
+			ClientPlayNetworking.registerGlobalReceiver(packetId, (client, handler, buf, responseSender) ->
 			{
-				return;
-			}
-			
-			final int[] ids = new int[idQuantity];
-			
-			for (int i = 0; i < idQuantity; i++)
-			{
-				ids[i] = buf.readVarInt();
-			}
-			
-			client.execute(() ->
-			{
-				if (!player.isSneaking())
+				final ClientPlayerEntity player = client.player;
+				
+				final UUID uuid = buf.readUuid();
+				final int idQuantity = buf.readVarInt();
+				
+				if (idQuantity == 0)
 				{
-					final PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer()).writeUuid(uuid).writeVarInt(idQuantity);
-					
-					for (int i = 0; i < idQuantity; i++)
-					{
-						final S state = stateIdList.get(ids[i]);
-						final String snbt = state == null ? "No state found on client for ID " + ids[i] : stateToNbtFunction.apply(state).toString();
-						
-						buffer.writeVarInt(ids[i]).writeString(snbt);
-					}
-					
-					ClientPlayNetworking.send(packetId, buffer);
+					return;
 				}
+				
+				final int[] ids = new int[idQuantity];
+				
+				for (int i = 0; i < idQuantity; i++)
+				{
+					ids[i] = buf.readVarInt();
+				}
+				
+				client.execute(() ->
+				{
+					if (!player.isSneaking())
+					{
+						final PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer()).writeUuid(uuid).writeVarInt(idQuantity);
+						
+						for (int i = 0; i < idQuantity; i++)
+						{
+							final S state = stateIdList.get(ids[i]);
+							final String snbt = state == null ? "No state found on client for ID " + ids[i] : stateToNbtFunction.apply(state).toString();
+							
+							buffer.writeVarInt(ids[i]).writeString(snbt);
+						}
+						
+						ClientPlayNetworking.send(packetId, buffer);
+					}
+				});
 			});
-		});
+		}
 	}
 	*/
 	public static NbtCompound fromFluidState(final FluidState state)
