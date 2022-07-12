@@ -18,6 +18,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
@@ -100,9 +101,9 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 	@Redirect(method = "addFieldToMapCodec", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;fieldOf(Ljava/lang/String;)Lcom/mojang/serialization/MapCodec;"))
 	private static <S extends State<?, S>, T extends Comparable<T>> MapCodec<Property.Value<T>> fieldOfProxy(Codec<Property.Value<T>> c, String string, MapCodec<S> mapCodec, Supplier<S> supplier, String noop, Property<T> arg)
 	{
-		final Property.Value<T> v = arg.createValue(arg.getValues().iterator().next());
+		final Supplier<Property.Value<T>> v = Suppliers.memoize(() -> arg.createValue(supplier.get()));
 		return new OptionalFieldCodec<>(string, c).xmap(
-			o -> o.orElse(v),
+			o -> o.orElse(v.get()),
 			Optional::of
 		);
 	}
