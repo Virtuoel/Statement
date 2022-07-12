@@ -2,7 +2,6 @@ package virtuoel.statement.mixin.compat116plus;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -19,7 +18,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
@@ -102,10 +100,10 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 	@Redirect(method = "method_30040", require = 0, at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;fieldOf(Ljava/lang/String;)Lcom/mojang/serialization/MapCodec;"))
 	private static <S extends State<?, S>, T extends Comparable<T>> MapCodec<Property.Value<T>> fieldOfProxy(Codec<Property.Value<T>> c, String string, MapCodec<S> mapCodec, Supplier<S> supplier, String noop, Property<T> arg)
 	{
-		final Supplier<Property.Value<T>> v = Suppliers.memoize(() -> arg.createValue(supplier.get()));
+		final Property.Value<T> v = arg.createValue(arg.getValues().iterator().next());
 		return new OptionalFieldCodec<>(string, c).xmap(
-			o -> o.orElse(v.get()),
-			a -> Objects.equals(a, v.get()) ? Optional.empty() : Optional.of(a)
+			o -> o.orElse(v),
+			Optional::of
 		);
 	}
 	
