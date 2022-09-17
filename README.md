@@ -1,6 +1,6 @@
 
 # Statement
-Library mod for the Fabric and Forge mod loaders that allows mod developers to modify blockstates of existing blocks.  
+Library mod for the Fabric, Forge, and Quilt mod loaders that allows mod developers to modify blockstates of existing blocks.  
 
 # Information for Players
 <details open>
@@ -25,8 +25,8 @@ Library mod for the Fabric and Forge mod loaders that allows mod developers to m
 <summary>Show/Hide Supported Minecraft Versions</summary><table width=100%><td>
 
 ### Fabric Versions
-Supported Versions of `Statement-x.y.z+1.14.4-1.19.1`:  
-`1.14.4`, `1.15.2`, `1.16.5`, `1.17.1`, `1.18.2`, `1.19.1`
+Supported Versions of `Statement-x.y.z+1.14.4-1.19.2`:  
+`1.14.4`, `1.15.2`, `1.16.5`, `1.17.1`, `1.18.2`, `1.19`, `1.19.2`
 
 ### Forge Versions
 
@@ -39,8 +39,11 @@ Supported Versions of `Statement-x.y.z+1.17.1-forge`:
 Supported Versions of `Statement-x.y.z+1.18.2-forge`:  
 `1.18.2`
 
-Supported Versions of `Statement-x.y.z+1.19.1-forge`:  
-`1.19.1`
+Supported Versions of `Statement-x.y.z+1.19-forge`:  
+`1.19`
+
+Supported Versions of `Statement-x.y.z+1.19.2-forge`:  
+`1.19.2`
 
 </td></table></details>
 
@@ -103,7 +106,7 @@ modApi("com.github.Virtuoel:Statement:${statement_version}", {
 #### Developing for Forge with ForgeGradle
 
 ```groovy
-api fg.deobf("com.github.Virtuoel:Statement:${statement_version}")
+implementation fg.deobf("com.github.Virtuoel:Statement:${statement_version}")
 ```
 
 #### Developing for Forge with Architectury Loom
