@@ -3,7 +3,7 @@
 	"id": "statement",
 	"name": "Statement (Forge Version)",
 	"version": "0.0.0+forge",
-	"description": "Forge version of Statement, but you are playing on a Fabric instance! Did you download the wrong mod .jar?",
+	"description": "Forge version of Statement, but you are playing on a Fabric/Quilt instance! Did you download the wrong mod .jar?",
 	"authors":
 	[
 		"Virtuoel"

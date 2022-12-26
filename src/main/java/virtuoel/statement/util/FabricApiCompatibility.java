@@ -15,7 +15,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.fluid.Fluid;
@@ -64,8 +63,8 @@ public class FabricApiCompatibility
 			)
 			.then(
 				CommandManager.literal("get_id")
-				.then(idGetterArgument("block_state", Block.STATE_IDS, BlockView::getBlockState, Registry.BLOCK, s -> ((StatementBlockStateExtensions) s).statement_getBlock()))
-				.then(idGetterArgument("fluid_state", Fluid.STATE_IDS, BlockView::getFluidState, Registry.FLUID, s -> ((StatementFluidStateExtensions) (Object) s).statement_getFluid()))
+				.then(idGetterArgument("block_state", Block.STATE_IDS, BlockView::getBlockState, RegistryUtils.BLOCK_REGISTRY, s -> ((StatementBlockStateExtensions) s).statement_getBlock()))
+				.then(idGetterArgument("fluid_state", Fluid.STATE_IDS, BlockView::getFluidState, RegistryUtils.FLUID_REGISTRY, s -> ((StatementFluidStateExtensions) (Object) s).statement_getFluid()))
 			)
 		);
 		
@@ -104,7 +103,7 @@ public class FabricApiCompatibility
 					final ImmutableMap<Property<?>, Comparable<?>> entries = ((StatementStateExtensions<?>) state).statement_getEntries();
 					
 					final StringBuilder stringBuilder = new StringBuilder();
-					stringBuilder.append(registry.getId(entryFunction.apply(state)));
+					stringBuilder.append(RegistryUtils.getId(registry, entryFunction.apply(state)));
 					
 					if (!entries.isEmpty())
 					{
@@ -385,13 +384,13 @@ public class FabricApiCompatibility
 	*/
 	public static NbtCompound fromFluidState(final FluidState state)
 	{
-		return fromState(Registry.FLUID, s -> ((StatementFluidStateExtensions) (Object) s).statement_getFluid(), state);
+		return fromState(RegistryUtils.FLUID_REGISTRY, s -> ((StatementFluidStateExtensions) (Object) s).statement_getFluid(), state);
 	}
 	
 	public static <S extends State<?, S>, E> NbtCompound fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
 	{
 		final NbtCompound compound = new NbtCompound();
-		compound.putString("Name", registry.getId(entryFunction.apply(state)).toString());
+		compound.putString("Name", RegistryUtils.getId(registry, entryFunction.apply(state)).toString());
 		final ImmutableMap<Property<?>, Comparable<?>> entries = ((StatementStateExtensions<?>) state).statement_getEntries();
 		
 		if (!entries.isEmpty())
