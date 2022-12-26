@@ -98,7 +98,7 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		}
 	}
 	
-	@Redirect(method = "method_30040", require = 0, at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;fieldOf(Ljava/lang/String;)Lcom/mojang/serialization/MapCodec;"))
+	@Redirect(method = "method_30040", require = 0, expect = 0, at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;fieldOf(Ljava/lang/String;)Lcom/mojang/serialization/MapCodec;"))
 	private static <S extends State<?, S>, T extends Comparable<T>> MapCodec<Property.Value<T>> fieldOfProxy(Codec<Property.Value<T>> c, String string, MapCodec<S> mapCodec, Supplier<S> supplier, String noop, Property<T> arg)
 	{
 		final Supplier<Property.Value<T>> v = Suppliers.memoize(() -> arg.createValue(supplier.get()));
@@ -108,7 +108,7 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		);
 	}
 	
-	@Inject(at = @At("HEAD"), cancellable = true, method = "method_30039", require = 0)
+	@Inject(at = @At("HEAD"), cancellable = true, method = "method_30039", require = 0, expect = 0)
 	private static <S extends State<?, S>, T extends Comparable<T>> void int_onSetPartial(Property<T> p, Supplier<S> supplier, CallbackInfoReturnable<Property.Value<T>> info)
 	{
 		if (!supplier.get().contains(p))
@@ -117,7 +117,7 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		}
 	}
 	
-	@Inject(at = @At("HEAD"), cancellable = true, method = "method_30038", require = 0)
+	@Inject(at = @At("HEAD"), cancellable = true, method = "method_30038", require = 0, expect = 0)
 	private static <S extends State<?, S>, T extends Comparable<T>> void int_onXmapTo(Property<T> p, Pair<S, Property.Value<T>> pair, CallbackInfoReturnable<S> info)
 	{
 		if (pair.getSecond() == null)
@@ -126,7 +126,7 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		}
 	}
 	
-	@Inject(at = @At("HEAD"), cancellable = true, method = "method_30037", require = 0)
+	@Inject(at = @At("HEAD"), cancellable = true, method = "method_30037", require = 0, expect = 0)
 	private static <S extends State<?, S>, T extends Comparable<T>> void int_onXmapFrom(Property<T> p, S s, CallbackInfoReturnable<Pair<S, Property.Value<T>>> info)
 	{
 		if (!s.contains(p))
@@ -135,7 +135,7 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		}
 	}
 	
-	@Inject(at = @At("HEAD"), cancellable = true, method = "func_241486_a_", require = 0)
+	@Inject(at = @At("HEAD"), cancellable = true, method = "func_241486_a_", require = 0, expect = 0)
 	private static <S extends State<?, S>, T extends Comparable<T>> void srg_onSetPartial(Property<T> p, Supplier<S> supplier, CallbackInfoReturnable<Property.Value<T>> info)
 	{
 		if (!supplier.get().contains(p))
@@ -144,7 +144,7 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		}
 	}
 	
-	@Inject(at = @At("HEAD"), cancellable = true, method = "func_241485_a_", require = 0)
+	@Inject(at = @At("HEAD"), cancellable = true, method = "func_241485_a_", require = 0, expect = 0)
 	private static <S extends State<?, S>, T extends Comparable<T>> void srg_onXmapTo(Property<T> p, Pair<S, Property.Value<T>> pair, CallbackInfoReturnable<S> info)
 	{
 		if (pair.getSecond() == null)
@@ -153,7 +153,7 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 		}
 	}
 	
-	@Inject(at = @At("HEAD"), cancellable = true, method = "func_241484_a_", require = 0)
+	@Inject(at = @At("HEAD"), cancellable = true, method = "func_241484_a_", require = 0, expect = 0)
 	private static <S extends State<?, S>, T extends Comparable<T>> void srg_onXmapFrom(Property<T> p, S s, CallbackInfoReturnable<Pair<S, Property.Value<T>>> info)
 	{
 		if (!s.contains(p))
