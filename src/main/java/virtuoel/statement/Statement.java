@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonArray;
@@ -27,13 +28,12 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.registry.Registry;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.IdList;
-import net.minecraft.util.registry.DefaultedRegistry;
-import net.minecraft.util.registry.Registry;
 import virtuoel.kanos_config.api.InvalidatableLazySupplier;
 import virtuoel.kanos_config.api.JsonConfigBuilder;
 import virtuoel.kanos_config.api.MutableConfigEntry;
@@ -41,9 +41,11 @@ import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.StatementConfig;
 import virtuoel.statement.util.FabricApiCompatibility;
 import virtuoel.statement.util.ModLoaderUtils;
+import virtuoel.statement.util.RegistryUtils;
 import virtuoel.statement.util.StatementPropertyExtensions;
 import virtuoel.statement.util.StatementStateExtensions;
 
+@ApiStatus.Internal
 public class Statement implements ModInitializer, StatementApi
 {
 	public static final String MOD_ID = StatementApi.MOD_ID;
@@ -114,15 +116,15 @@ public class Statement implements ModInitializer, StatementApi
 	
 	public static Supplier<Set<BlockState>> createBlockStateDeferralConfig(final Supplier<JsonObject> config)
 	{
-		return InvalidatableLazySupplier.of(() -> loadStateDeferralData(config, "customBlockStateDeferral", Registry.BLOCK, Block::getStateManager));
+		return InvalidatableLazySupplier.of(() -> loadStateDeferralData(config, "customBlockStateDeferral", RegistryUtils.BLOCK_REGISTRY, Block::getStateManager));
 	}
 	
 	public static Supplier<Set<FluidState>> createFluidStateDeferralConfig(final Supplier<JsonObject> config)
 	{
-		return InvalidatableLazySupplier.of(() -> loadStateDeferralData(config, "customFluidStateDeferral", Registry.FLUID, Fluid::getStateManager));
+		return InvalidatableLazySupplier.of(() -> loadStateDeferralData(config, "customFluidStateDeferral", RegistryUtils.FLUID_REGISTRY, Fluid::getStateManager));
 	}
 	
-	private static <O, S extends State<O, S>> Set<S> loadStateDeferralData(final Supplier<JsonObject> config, final String member, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
+	private static <O, S extends State<O, S>> Set<S> loadStateDeferralData(final Supplier<JsonObject> config, final String member, final Registry<O> registry, final Function<O, StateManager<O, S>> managerFunc)
 	{
 		final JsonObject data = Optional.ofNullable(config.get().get(member))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
@@ -132,7 +134,7 @@ public class Statement implements ModInitializer, StatementApi
 		
 		for (final Entry<String, JsonElement> e : data.entrySet())
 		{
-			registry.getOrEmpty(new Identifier(e.getKey())).ifPresent(block ->
+			RegistryUtils.getOrEmpty(registry, new Identifier(e.getKey())).ifPresent(block ->
 			{
 				final JsonArray states = Optional.ofNullable(e.getValue())
 					.filter(JsonElement::isJsonArray).map(JsonElement::getAsJsonArray)
@@ -297,15 +299,15 @@ public class Statement implements ModInitializer, StatementApi
 	
 	public static Supplier<Map<BlockState, OptionalInt>> createBlockStateSyncConfig(final Supplier<JsonObject> config)
 	{
-		return InvalidatableLazySupplier.of(() -> loadStateSyncData(config, "customBlockStateSync", Block.STATE_IDS, Registry.BLOCK, Block::getStateManager, Block::getDefaultState));
+		return InvalidatableLazySupplier.of(() -> loadStateSyncData(config, "customBlockStateSync", Block.STATE_IDS, RegistryUtils.BLOCK_REGISTRY, Block::getStateManager, Block::getDefaultState));
 	}
 	
 	public static Supplier<Map<FluidState, OptionalInt>> createFluidStateSyncConfig(final Supplier<JsonObject> config)
 	{
-		return InvalidatableLazySupplier.of(() -> loadStateSyncData(config, "customFluidStateSync", Fluid.STATE_IDS, Registry.FLUID, Fluid::getStateManager, Fluid::getDefaultState));
+		return InvalidatableLazySupplier.of(() -> loadStateSyncData(config, "customFluidStateSync", Fluid.STATE_IDS, RegistryUtils.FLUID_REGISTRY, Fluid::getStateManager, Fluid::getDefaultState));
 	}
 	
-	private static <O, S extends State<O, S>> Map<S, OptionalInt> loadStateSyncData(final Supplier<JsonObject> config, final String member, final IdList<S> idList, final DefaultedRegistry<O> registry, final Function<O, StateManager<O, S>> managerFunc, final Function<O, S> defaultStateFunc)
+	private static <O, S extends State<O, S>> Map<S, OptionalInt> loadStateSyncData(final Supplier<JsonObject> config, final String member, final IdList<S> idList, final Registry<O> registry, final Function<O, StateManager<O, S>> managerFunc, final Function<O, S> defaultStateFunc)
 	{
 		final JsonObject data = Optional.ofNullable(config.get().get(member))
 			.filter(JsonElement::isJsonObject).map(JsonElement::getAsJsonObject)
@@ -313,9 +315,11 @@ public class Statement implements ModInitializer, StatementApi
 		
 		final Map<S, OptionalInt> syncData = new HashMap<>();
 		
+		final Function<Identifier, Optional<O>> getOrEmpty = id -> RegistryUtils.getOrEmpty(registry, id);
+		
 		for (final Entry<String, JsonElement> e : data.entrySet())
 		{
-			registry.getOrEmpty(new Identifier(e.getKey())).ifPresent(block ->
+			getOrEmpty.apply(new Identifier(e.getKey())).ifPresent(block ->
 			{
 				final JsonArray states = Optional.ofNullable(e.getValue())
 					.filter(JsonElement::isJsonArray).map(JsonElement::getAsJsonArray)
@@ -352,7 +356,7 @@ public class Statement implements ModInitializer, StatementApi
 					
 					if (syncedBlockId.isPresent())
 					{
-						S syncedState = syncedBlockId.map(registry::getOrEmpty)
+						S syncedState = syncedBlockId.map(getOrEmpty)
 							.orElseGet(Optional::empty)
 							.map(defaultStateFunc)
 							.orElse(null);

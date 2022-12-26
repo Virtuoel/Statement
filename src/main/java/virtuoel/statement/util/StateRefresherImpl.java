@@ -22,11 +22,11 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectRBTreeMap;
 import net.minecraft.block.Block;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.registry.Registry;
 import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.collection.IdList;
-import net.minecraft.util.registry.Registry;
 import virtuoel.statement.Statement;
 import virtuoel.statement.api.ClearableIdList;
 import virtuoel.statement.api.RefreshableStateManager;
@@ -101,24 +101,24 @@ public class StateRefresherImpl implements StateRefresher
 	public <V extends Comparable<V>> void refreshBlockStates(Property<V> property, Collection<V> addedValues, Collection<V> removedValues)
 	{
 		refreshStates(
-			Registry.BLOCK, Block.STATE_IDS,
+			RegistryUtils.BLOCK_REGISTRY, Block.STATE_IDS,
 			property, addedValues, removedValues,
 			Block::getDefaultState, Block::getStateManager, s -> ((StatementBlockStateExtensions) s).statement_initShapeCache()
 		);
 		
-		Statement.markRegistryAsModded(Registry.BLOCK);
+		Statement.markRegistryAsModded(RegistryUtils.BLOCK_REGISTRY);
 	}
 	
 	@Override
 	public <V extends Comparable<V>> void refreshFluidStates(final Property<V> property, final Collection<V> addedValues, final Collection<V> removedValues)
 	{
 		refreshStates(
-			Registry.FLUID, Fluid.STATE_IDS,
+			RegistryUtils.FLUID_REGISTRY, Fluid.STATE_IDS,
 			property, addedValues, removedValues,
 			Fluid::getDefaultState, Fluid::getStateManager, f -> {}
 		);
 		
-		Statement.markRegistryAsModded(Registry.FLUID);
+		Statement.markRegistryAsModded(RegistryUtils.FLUID_REGISTRY);
 	}
 	
 	@Override
@@ -240,13 +240,11 @@ public class StateRefresherImpl implements StateRefresher
 		
 		if (registry instanceof Registry)
 		{
-			@SuppressWarnings("unchecked")
-			final StatementRegistryExtensions<O> reg = (StatementRegistryExtensions<O>) registry;
 			final Int2ObjectMap<O> sortedEntries = new Int2ObjectRBTreeMap<>();
 			
 			for (final O entry : registry)
 			{
-				sortedEntries.put(reg.statement_getRawId(entry), entry);
+				sortedEntries.put(RegistryUtils.getRawId((Registry<O>) registry, entry), entry);
 			}
 			
 			entries = sortedEntries.values();

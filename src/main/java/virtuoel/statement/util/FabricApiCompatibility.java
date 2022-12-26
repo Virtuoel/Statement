@@ -44,6 +44,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registry;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -55,7 +56,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.IdList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.BlockView;
 import virtuoel.kanos_config.api.InvalidatableLazySupplier;
 import virtuoel.statement.Statement;
@@ -146,8 +146,8 @@ public class FabricApiCompatibility
 			)
 			.then(
 				CommandManager.literal("get_id")
-				.then(idGetterArgument("block_state", Block.STATE_IDS, BlockView::getBlockState, Registry.BLOCK, s -> ((StatementBlockStateExtensions) s).statement_getBlock()))
-				.then(idGetterArgument("fluid_state", Fluid.STATE_IDS, BlockView::getFluidState, Registry.FLUID, s -> ((StatementFluidStateExtensions) (Object) s).statement_getFluid()))
+				.then(idGetterArgument("block_state", Block.STATE_IDS, BlockView::getBlockState, RegistryUtils.BLOCK_REGISTRY, s -> ((StatementBlockStateExtensions) s).statement_getBlock()))
+				.then(idGetterArgument("fluid_state", Fluid.STATE_IDS, BlockView::getFluidState, RegistryUtils.FLUID_REGISTRY, s -> ((StatementFluidStateExtensions) (Object) s).statement_getFluid()))
 			)
 		);
 		
@@ -186,7 +186,7 @@ public class FabricApiCompatibility
 					final ImmutableMap<Property<?>, Comparable<?>> entries = ((StatementStateExtensions<?>) state).statement_getEntries();
 					
 					final StringBuilder stringBuilder = new StringBuilder();
-					stringBuilder.append(registry.getId(entryFunction.apply(state)));
+					stringBuilder.append(RegistryUtils.getId(registry, entryFunction.apply(state)));
 					
 					if (!entries.isEmpty())
 					{
@@ -474,13 +474,13 @@ public class FabricApiCompatibility
 	
 	public static NbtCompound fromFluidState(final FluidState state)
 	{
-		return fromState(Registry.FLUID, s -> ((StatementFluidStateExtensions) (Object) s).statement_getFluid(), state);
+		return fromState(RegistryUtils.FLUID_REGISTRY, s -> ((StatementFluidStateExtensions) (Object) s).statement_getFluid(), state);
 	}
 	
 	public static <S extends State<?, S>, E> NbtCompound fromState(final Registry<E> registry, final Function<S, E> entryFunction, final S state)
 	{
 		final NbtCompound compound = new NbtCompound();
-		compound.putString("Name", registry.getId(entryFunction.apply(state)).toString());
+		compound.putString("Name", RegistryUtils.getId(registry, entryFunction.apply(state)).toString());
 		final ImmutableMap<Property<?>, Comparable<?>> entries = ((StatementStateExtensions<?>) state).statement_getEntries();
 		
 		if (!entries.isEmpty())
@@ -512,7 +512,7 @@ public class FabricApiCompatibility
 	
 	public static void setupIdRemapCallbacks()
 	{
-		RegistryIdRemapCallback.event(Registry.BLOCK).register(s -> StateRefresher.INSTANCE.reorderBlockStates());
-		RegistryIdRemapCallback.event(Registry.FLUID).register(s -> StateRefresher.INSTANCE.reorderFluidStates());
+		RegistryIdRemapCallback.event(RegistryUtils.BLOCK_REGISTRY).register(s -> StateRefresher.INSTANCE.reorderBlockStates());
+		RegistryIdRemapCallback.event(RegistryUtils.FLUID_REGISTRY).register(s -> StateRefresher.INSTANCE.reorderFluidStates());
 	}
 }
