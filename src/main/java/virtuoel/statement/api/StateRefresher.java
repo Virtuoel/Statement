@@ -14,7 +14,7 @@ import net.minecraft.state.State;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.collection.IdList;
-import net.minecraft.util.registry.Registry;
+import virtuoel.statement.util.RegistryUtils;
 import virtuoel.statement.util.StateRefresherImpl;
 
 public interface StateRefresher
@@ -68,12 +68,12 @@ public interface StateRefresher
 	
 	default void reorderBlockStates()
 	{
-		reorderStates(Registry.BLOCK, Block.STATE_IDS, Block::getStateManager);
+		reorderStates(RegistryUtils.BLOCK_REGISTRY, Block.STATE_IDS, Block::getStateManager);
 	}
 	
 	default void reorderFluidStates()
 	{
-		reorderStates(Registry.FLUID, Fluid.STATE_IDS, Fluid::getStateManager);
+		reorderStates(RegistryUtils.FLUID_REGISTRY, Fluid.STATE_IDS, Fluid::getStateManager);
 	}
 	
 	default <O, V extends Comparable<V>, S extends State<O, S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateManager<O, S>> managerGetter)
