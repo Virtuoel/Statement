@@ -2,8 +2,8 @@ package virtuoel.statement.api.property;
 
 import java.util.Optional;
 
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import virtuoel.statement.util.RegistryUtils;
 
 public class RegistryEntryProperty<T> extends IdentifierProperty

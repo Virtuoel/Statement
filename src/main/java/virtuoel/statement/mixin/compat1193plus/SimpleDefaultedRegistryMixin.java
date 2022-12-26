@@ -9,16 +9,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.mojang.serialization.Lifecycle;
 
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.SimpleDefaultedRegistry;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.DefaultedRegistry;
-import net.minecraft.util.registry.RegistryKey;
 import virtuoel.statement.util.RegistryKeyExtensions;
 
-@Mixin(DefaultedRegistry.class)
+@Mixin(SimpleDefaultedRegistry.class)
 public abstract class SimpleDefaultedRegistryMixin<T>
 {
 	@Shadow @Final Identifier defaultId;
-	/* // TODO 1.19.3
+	
 	@Inject(method = "set(ILnet/minecraft/registry/RegistryKey;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;)Lnet/minecraft/registry/entry/RegistryEntry$Reference;", at = @At(value = "HEAD"))
 	private void setDefault(int rawId, RegistryKey<T> registryKey, T entry, Lifecycle lifecycle, CallbackInfoReturnable<RegistryEntry.Reference<T>> info)
 	{
@@ -27,5 +28,4 @@ public abstract class SimpleDefaultedRegistryMixin<T>
 			((RegistryKeyExtensions) registryKey).statement_setValue(defaultId);
 		}
 	}
-	*/
 }

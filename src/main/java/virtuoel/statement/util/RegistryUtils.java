@@ -5,9 +5,10 @@ import java.util.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
+import net.minecraft.registry.DefaultedRegistry;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.DefaultedRegistry;
-import net.minecraft.util.registry.Registry;
 
 public class RegistryUtils
 {
@@ -17,9 +18,9 @@ public class RegistryUtils
 	
 	static
 	{
-		BLOCK_REGISTRY = Registry.BLOCK;
-		ITEM_REGISTRY = Registry.ITEM;
-		FLUID_REGISTRY = Registry.FLUID;
+		BLOCK_REGISTRY = Registries.BLOCK;
+		ITEM_REGISTRY = Registries.ITEM;
+		FLUID_REGISTRY = Registries.FLUID;
 	}
 	
 	public static <V> V get(Registry<V> registry, Identifier id)

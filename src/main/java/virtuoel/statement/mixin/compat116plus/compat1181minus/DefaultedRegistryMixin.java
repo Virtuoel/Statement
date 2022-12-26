@@ -9,12 +9,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.mojang.serialization.Lifecycle;
 
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.SimpleDefaultedRegistry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.DefaultedRegistry;
-import net.minecraft.util.registry.RegistryKey;
 import virtuoel.statement.util.RegistryKeyExtensions;
 
-@Mixin(DefaultedRegistry.class)
+@Mixin(SimpleDefaultedRegistry.class)
 public abstract class DefaultedRegistryMixin<T>
 {
 	@Shadow @Final Identifier defaultId;
