@@ -3,8 +3,8 @@ package virtuoel.statement.api.property;
 import java.util.Optional;
 
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.DefaultedRegistry;
 import net.minecraft.util.registry.Registry;
+import virtuoel.statement.util.RegistryUtils;
 
 public class RegistryEntryProperty<T> extends IdentifierProperty
 {
@@ -17,14 +17,11 @@ public class RegistryEntryProperty<T> extends IdentifierProperty
 		
 		this.registry = registry;
 		
-		if (this.registry instanceof DefaultedRegistry)
+		this.defaultId = RegistryUtils.getDefaultId(this.registry);
+		
+		if (this.defaultId != null)
 		{
-			this.defaultId = ((DefaultedRegistry<T>) this.registry).getDefaultId();
 			getValues().add(this.defaultId);
-		}
-		else
-		{
-			this.defaultId = null;
 		}
 	}
 	
@@ -36,6 +33,9 @@ public class RegistryEntryProperty<T> extends IdentifierProperty
 	@Override
 	public Optional<Identifier> parse(final String valueName)
 	{
-		return Optional.ofNullable(super.parse(valueName).flatMap(registry::getOrEmpty).map(registry::getId).orElse(defaultId));
+		return Optional.ofNullable(super.parse(valueName)
+			.flatMap(id -> RegistryUtils.getOrEmpty(registry, id))
+			.map(e -> RegistryUtils.getId(registry, e))
+			.orElse(defaultId));
 	}
 }
