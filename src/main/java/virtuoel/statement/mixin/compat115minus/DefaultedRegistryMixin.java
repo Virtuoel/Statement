@@ -6,10 +6,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import net.minecraft.registry.DefaultedRegistry;
+import net.minecraft.registry.SimpleDefaultedRegistry;
 import net.minecraft.util.Identifier;
 
-@Mixin(DefaultedRegistry.class)
+@Mixin(SimpleDefaultedRegistry.class)
 public abstract class DefaultedRegistryMixin
 {
 	@Shadow @Final Identifier defaultId;
