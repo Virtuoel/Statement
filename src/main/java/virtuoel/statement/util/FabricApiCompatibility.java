@@ -34,14 +34,26 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.BlockView;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.loading.FMLLoader;
 import virtuoel.statement.Statement;
+import virtuoel.statement.api.StateRefresher;
 
 @EventBusSubscriber(modid = Statement.MOD_ID)
 public class FabricApiCompatibility
 {
+	@SubscribeEvent
+	public static void onServerStarting(final ServerStartingEvent event)
+	{
+		if (event.getServer().isDedicated())
+		{
+			StateRefresher.INSTANCE.reorderBlockStates();
+			StateRefresher.INSTANCE.reorderFluidStates();
+		}
+	}
+	
 	@SubscribeEvent
 	public static void onRegisterCommands(RegisterCommandsEvent event)
 	{
