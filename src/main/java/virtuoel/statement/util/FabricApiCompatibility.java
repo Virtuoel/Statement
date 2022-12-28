@@ -37,11 +37,23 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fmlserverevents.FMLServerStartingEvent;
 import virtuoel.statement.Statement;
+import virtuoel.statement.api.StateRefresher;
 
 @EventBusSubscriber(modid = Statement.MOD_ID)
 public class FabricApiCompatibility
 {
+	@SubscribeEvent
+	public static void onServerStarting(final FMLServerStartingEvent event)
+	{
+		if (event.getServer().isDedicated())
+		{
+			StateRefresher.INSTANCE.reorderBlockStates();
+			StateRefresher.INSTANCE.reorderFluidStates();
+		}
+	}
+	
 	@SubscribeEvent
 	public static void onRegisterCommands(RegisterCommandsEvent event)
 	{
