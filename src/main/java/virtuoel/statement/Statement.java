@@ -13,10 +13,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.logging.ILogger;
+import org.spongepowered.asm.service.MixinService;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -50,7 +50,7 @@ public class Statement implements ModInitializer, StatementApi
 {
 	public static final String MOD_ID = StatementApi.MOD_ID;
 	
-	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+	public static final ILogger LOGGER = MixinService.getService().getLogger(MOD_ID);
 	
 	public Statement()
 	{
