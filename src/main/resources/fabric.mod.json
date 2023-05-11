@@ -44,6 +44,10 @@
 	],
 	"custom":
 	{
+		"quilt_registry":
+		{
+			"disable_state_validation": true
+		},
 		"modmenu:api": true,
 		"modmenu":
 		{
