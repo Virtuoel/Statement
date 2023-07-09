@@ -129,7 +129,7 @@ public class FabricApiCompatibility
 						stringBuilder.append(']');
 					}
 					
-					context.getSource().sendFeedback(literal("%s (%d) @ %d, %d, %d", stringBuilder.toString(), idList.getRawId(state), pos.getX(), pos.getY(), pos.getZ()), false);
+					CommandUtils.sendFeedback(context.getSource(), () -> literal("%s (%d) @ %d, %d, %d", stringBuilder.toString(), idList.getRawId(state), pos.getX(), pos.getY(), pos.getZ()), false);
 					return 1;
 				})
 			);
@@ -179,20 +179,20 @@ public class FabricApiCompatibility
 					buffer.writeVarInt(initialId + i);
 				}
 				
-				context.getSource().sendFeedback(literal("Running state validation..."), false);
+				CommandUtils.sendFeedback(context.getSource(), () -> literal("Running state validation..."), false);
 				player.networkHandler.sendPacket(StatementPacketHandler.INSTANCE.toVanillaPacket(new StateValidationPacket(player, rate, initialId), NetworkDirection.PLAY_TO_CLIENT));
 				
 				return 1;
 			}
 			else
 			{
-				context.getSource().sendFeedback(literal("Error: Target player cannot receive state validation packet."), false);
+				CommandUtils.sendFeedback(context.getSource(), () -> literal("Error: Target player cannot receive state validation packet."), false);
 				return 0;
 			}
 		}
 		else
 		{
-			context.getSource().sendFeedback(literal("Fabric Networking not found on server."), false);
+			CommandUtils.sendFeedback(context.getSource(), () -> literal("Fabric Networking not found on server."), false);
 			return 0;
 		}*/
 		return 1;
