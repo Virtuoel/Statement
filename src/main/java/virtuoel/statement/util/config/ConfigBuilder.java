@@ -1,5 +1,6 @@
 package virtuoel.statement.util.config;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -9,11 +10,12 @@ import java.util.function.Supplier;
 
 public abstract class ConfigBuilder<R, E, H extends ConfigHandler<R>>
 {
-	protected final String namespace, path;
+	protected final String namespace;
+	protected final Path path;
 	private final Collection<Consumer<Supplier<R>>> defaultValues;
 	public final H config;
 	
-	public ConfigBuilder(final String namespace, final String path)
+	public ConfigBuilder(final String namespace, final Path path)
 	{
 		this.namespace = namespace;
 		this.path = path;
@@ -76,17 +78,27 @@ public abstract class ConfigBuilder<R, E, H extends ConfigHandler<R>>
 		});
 	}
 	
-	protected final R populateDefaults(final R defaultConfig)
+	protected final Supplier<R> populateDefaults(final Supplier<R> defaultConfigFactory)
 	{
-		final Supplier<R> defaultConfigGetter = () -> defaultConfig;
-		
-		for (final Consumer<Supplier<R>> value : defaultValues)
-		{
-			value.accept(defaultConfigGetter);
-		}
-		
-		return defaultConfig;
+		return populateDefaults(defaultConfigFactory, defaultValues);
 	}
+	
+	protected static <R> Supplier<R> populateDefaults(final Supplier<R> defaultConfigFactory, final Collection<Consumer<Supplier<R>>> defaultValues)
+	{
+		return () ->
+		{
+			final Supplier<R> defaultConfigGetter = InvalidatableLazySupplier.of(defaultConfigFactory);
+			
+			for (final Consumer<Supplier<R>> value : defaultValues)
+			{
+				value.accept(defaultConfigGetter);
+			}
+			
+			return defaultConfigGetter.get();
+		};
+	}
+	
+	protected abstract H createConfig();
 	
 	public <T> MutableConfigEntry<T> createConfigEntry(final String name, final T defaultValue, final Supplier<T> supplier, final Consumer<T> consumer)
 	{
@@ -117,6 +129,4 @@ public abstract class ConfigBuilder<R, E, H extends ConfigHandler<R>>
 			}
 		};
 	}
-	
-	protected abstract H createConfig();
 }

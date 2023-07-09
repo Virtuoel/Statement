@@ -3,6 +3,7 @@ package virtuoel.statement.util.config;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -18,7 +19,7 @@ import com.google.gson.stream.JsonWriter;
 
 public class JsonConfigHandler extends ConfigHandler<JsonObject>
 {
-	public JsonConfigHandler(String namespace, String path, Supplier<JsonObject> defaultConfig)
+	public JsonConfigHandler(String namespace, Path path, Supplier<JsonObject> defaultConfig)
 	{
 		super(namespace, path, defaultConfig);
 	}
@@ -30,21 +31,14 @@ public class JsonConfigHandler extends ConfigHandler<JsonObject>
 	}
 	
 	@Override
-	public Iterable<? extends CharSequence> writeConfig(JsonObject configData)
+	public Iterable<? extends CharSequence> writeConfig(JsonObject configData) throws IOException
 	{
-		try
-		{
-			final StringWriter stringWriter = new StringWriter();
-			final JsonWriter jsonWriter = new JsonWriter(stringWriter);
-			jsonWriter.setIndent("\t");
-			Streams.write(configData, jsonWriter);
-			stringWriter.write('\n');
-			return Arrays.asList(stringWriter.toString().split("\n"));
-		}
-		catch (IOException e)
-		{
-			throw new AssertionError(e);
-		}
+		final StringWriter stringWriter = new StringWriter();
+		final JsonWriter jsonWriter = new JsonWriter(stringWriter);
+		jsonWriter.setIndent("\t");
+		Streams.write(configData, jsonWriter);
+		stringWriter.write('\n');
+		return Arrays.asList(stringWriter.toString().split("\n"));
 	}
 	
 	@Override

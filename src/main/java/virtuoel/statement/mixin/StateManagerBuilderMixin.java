@@ -1,7 +1,6 @@
 package virtuoel.statement.mixin;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.logging.ILogger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -9,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.service.MixinService;
 
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
@@ -17,7 +17,7 @@ import virtuoel.statement.api.StatementApi;
 @Mixin(StateManager.Builder.class)
 public abstract class StateManagerBuilderMixin
 {
-	@Unique private static final Logger LOGGER = LogManager.getLogger(StatementApi.MOD_ID);
+	@Unique private static final ILogger LOGGER = MixinService.getService().getLogger(StatementApi.MOD_ID);
 	
 	@Shadow abstract <T extends Comparable<T>> void validate(Property<T> property);
 	
