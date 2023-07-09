@@ -30,10 +30,16 @@ Library mod for the Fabric, Forge, and Quilt mod loaders that allows mod develop
 <summary>Show/Hide Supported Minecraft Versions</summary><table width=100%><td>
 
 ### Fabric/Quilt Versions
-Supported Versions of `Statement-x.y.z+1.14.4-1.19.3`:  
-`1.19.3`, `1.19.2`, `1.18.2`, `1.17.1`, `1.16.5`, `1.15.2`, `1.14.4`
+Supported Versions of `Statement-x.y.z+1.14.4-1.20.1`:  
+`1.20.1`, `1.19.4`, `1.19.3`, `1.19.2`, `1.18.2`, `1.17.1`, `1.16.5`, `1.15.2`, `1.14.4`
 
 ### Forge Versions
+
+Supported Versions of `Statement-x.y.z+1.20.1-forge`:  
+`1.20.1`
+
+Supported Versions of `Statement-x.y.z+1.19.4-forge`:  
+`1.19.4`
 
 Supported Versions of `Statement-x.y.z+1.19.3-forge`:  
 `1.19.3`
@@ -104,7 +110,7 @@ dependencies {
 <details open>
 <summary>Show/Hide Dependency Configuration Information</summary><table width=100%><td>
 
-Now that a Maven repository is specified, add `statement_version=x.y.z-w` to your</br>`gradle.properties`, replacing `x.y.z-w` with one of the available</br>version strings from the [list of release tags](../../../tags).
+Now that a Maven repository is specified, add `statement_version=x.y.z-w` to your</br>`gradle.properties`, replacing `x.y.z-w` with one of the available version strings</br>from the [list of release tags](../../../tags).
 
 Lastly, in your `build.gradle`'s `dependencies` block, add the corresponding line from below depending on your mod loader:
 
@@ -134,9 +140,9 @@ modApi("com.github.Virtuoel:Statement:${statement_version}")
 <details>
 <summary>Show/Hide Fix on ForgeGradle</summary><table width=100%><td>
 
-If you're using Forge with ForgeGradle, make sure the `mixingradle` plugin is present and</br>applied:
+If you're using Forge with ForgeGradle, make sure the `mixingradle` plugin is present</br>and applied:
 
-Make sure the following line is present in your `build.gradle`'s `buildscript { repositories {} }` block.
+Make sure the following line is present in your `build.gradle`'s</br>`buildscript { repositories {} }` block.
 
 ```groovy
 maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
@@ -160,9 +166,9 @@ Then regenerate your run configurations with `genEclipseRuns`, `genIntellijRuns`
 
 <summary>Show/Hide Fix on Older ForgeGradle (4 and below)</summary><table width=100%><td>
 
-If you're using Forge with ForgeGradle 4 or older, make sure refmap remapping is enabled in your `build.gradle`'s run</br>configuration blocks.
+If you're using Forge with ForgeGradle 4 or older, make sure refmap remapping is</br>enabled in your `build.gradle`'s run configuration blocks.
 
-Make sure the following lines are present in the `client {}`, `server {}`, and `data {}` run configuration blocks.
+Make sure the following lines are present in the `client {}`, `server {}`, and</br>`data {}` run configuration blocks.
 
 ```groovy
 property 'mixin.env.remapRefMap', 'true'
