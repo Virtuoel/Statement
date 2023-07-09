@@ -3,7 +3,6 @@ package virtuoel.statement.util.config;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,23 +10,23 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.logging.ILogger;
+import org.spongepowered.asm.service.MixinService;
 
 public abstract class ConfigHandler<S> implements Supplier<S>
 {
 	private final String namespace;
-	protected final Logger logger;
+	private final ILogger logger;
 	private final Path configFile;
-	protected final Supplier<S> defaultConfig;
+	private final Supplier<S> defaultConfig;
 	private S cachedConfig = null;
 	private Collection<Runnable> invalidationListeners = new ArrayList<>();
 	
-	public ConfigHandler(String namespace, String path, Supplier<S> defaultConfig)
+	public ConfigHandler(String namespace, Path path, Supplier<S> defaultConfig)
 	{
 		this.namespace = namespace;
-		this.logger = LogManager.getLogger(namespace);
-		this.configFile = Paths.get("./config/").resolve(namespace).resolve(path).normalize();
+		this.logger = MixinService.getService().getLogger(namespace);
+		this.configFile = path;
 		this.defaultConfig = defaultConfig;
 	}
 	
@@ -36,18 +35,23 @@ public abstract class ConfigHandler<S> implements Supplier<S>
 		return namespace;
 	}
 	
-	public void onConfigChanged()
+	public synchronized void onConfigChanged()
 	{
 		if (cachedConfig != null)
 		{
-			save();
+			save(cachedConfig);
 			
-			cachedConfig = null;
-			
-			for (final Runnable listener : invalidationListeners)
-			{
-				listener.run();
-			}
+			invalidate();
+		}
+	}
+	
+	public synchronized void invalidate()
+	{
+		cachedConfig = null;
+		
+		for (final Runnable listener : invalidationListeners)
+		{
+			listener.run();
 		}
 	}
 	
@@ -62,7 +66,7 @@ public abstract class ConfigHandler<S> implements Supplier<S>
 		return cachedConfig != null ? cachedConfig : (cachedConfig = load());
 	}
 	
-	public S load()
+	public synchronized S load()
 	{
 		S configData = null;
 		try
@@ -76,7 +80,7 @@ public abstract class ConfigHandler<S> implements Supplier<S>
 				}
 				catch (Exception e)
 				{
-					final Path configBackup = Paths.get("./config/").resolve(namespace).resolve(configFile.getFileName().toString() + ".bak").normalize();
+					final Path configBackup = configFile.getParent().resolve(configFile.getFileName().toString() + ".bak");
 					logger.warn("Failed to read config for {}. A backup is being made at \"{}\". Resetting to default config.", namespace, configBackup.toString());
 					logger.catching(e);
 					
@@ -87,7 +91,7 @@ public abstract class ConfigHandler<S> implements Supplier<S>
 					catch (IOException e2)
 					{
 						logger.warn("Failed to backup old config for {}.", namespace);
-						logger.catching(e2);
+						throw e2;
 					}
 				}
 			}
@@ -131,7 +135,7 @@ public abstract class ConfigHandler<S> implements Supplier<S>
 	
 	protected abstract S readConfig(Stream<String> lines);
 	
-	protected abstract Iterable<? extends CharSequence> writeConfig(S configData);
+	protected abstract Iterable<? extends CharSequence> writeConfig(S configData) throws IOException;
 	
 	protected abstract S mergeConfigs(S configData, S defaultData);
 }

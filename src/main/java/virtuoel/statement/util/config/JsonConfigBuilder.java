@@ -1,5 +1,6 @@
 package virtuoel.statement.util.config;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +17,7 @@ import com.google.gson.JsonPrimitive;
 
 public class JsonConfigBuilder extends ConfigBuilder<JsonObject, JsonElement, JsonConfigHandler>
 {
-	public JsonConfigBuilder(final String namespace, final String path)
+	public JsonConfigBuilder(final String namespace, final Path path)
 	{
 		super(namespace, path);
 	}
@@ -89,7 +90,7 @@ public class JsonConfigBuilder extends ConfigBuilder<JsonObject, JsonElement, Js
 		return new JsonConfigHandler(
 			namespace,
 			path,
-			() -> populateDefaults(new JsonObject())
+			populateDefaults(JsonObject::new)
 		);
 	}
 }
