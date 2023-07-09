@@ -1,5 +1,6 @@
 package virtuoel.statement.api;
 
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -17,7 +18,7 @@ public class StatementConfig
 	@ApiStatus.Internal
 	public static final JsonConfigBuilder BUILDER = new JsonConfigBuilder(
 		StatementApi.MOD_ID,
-		"config.json"
+		Paths.get("./config/").resolve(StatementApi.MOD_ID).resolve("config.json").normalize()
 	);
 	
 	public static final Client CLIENT = new Client(BUILDER);

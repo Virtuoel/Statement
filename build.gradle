@@ -1,10 +1,11 @@
 plugins {
-	id "dev.architectury.loom" version "1.0.+"
+	id "dev.architectury.loom" version "1.2.+"
 	id "eclipse"
 	id "maven-publish"
 	id "com.github.breadmoirai.github-release" version "2.4.1"
-	id "io.github.juuxel.loom-quiltflower" version "1.8.0"
-	id "com.matthewprenger.cursegradle" version "1.4.0"
+	id "org.ajoberstar.grgit.service" version "5.2.0"
+	id "io.github.juuxel.loom-quiltflower" version "1.10.0"
+	id "io.github.CDAGaming.cursegradle" version "1.6.1"
 	id "com.modrinth.minotaur" version "2.+"
 }
 
@@ -35,15 +36,12 @@ repositories {
 	}
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
 def ENV = System.getenv()
 
 TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
 
 group = project.maven_group
-archivesBaseName = project.archives_base_name
+base.archivesName = project.archives_base_name
 version = project.mod_version + "+" + (ENV.BUILD_NUMBER ? "build.${ENV.BUILD_NUMBER}-" : "") + (project.hasProperty("metadata_minecraft_versions") ? project.metadata_minecraft_versions : project.minecraft_version)
 
 if(project.hasProperty("forge_version")) {
@@ -184,6 +182,7 @@ eclipse {
 
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
+	options.compilerArgs += [ "-Xmaxwarns", "0" ]
 }
 
 tasks.withType(AbstractArchiveTask) {
@@ -193,15 +192,18 @@ tasks.withType(AbstractArchiveTask) {
 
 java {
 	withSourcesJar()
+	
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 jar {
 	from "LICENSE"
 	manifest
 	{
-		attributes "Implementation-Title": project.archivesBaseName
+		attributes "Implementation-Title": base.archivesName.get()
 		attributes "Implementation-Version": project.version
-		attributes "Maven-Artifact": "${project.group}:${project.archivesBaseName}:${project.version}"
+		attributes "Maven-Artifact": "${project.group}:${base.archivesName.get()}:${project.version}"
 		attributes "Built-On-Minecraft": "${project.minecraft_version}"
 		attributes "Built-On-Java": "${System.getProperty("java.vm.version")} (${System.getProperty("java.vm.vendor")})"
 	}
@@ -212,9 +214,9 @@ tasks.named("sourcesJar") {
 	exclude "META-INF/mods.toml"
 	manifest
 	{
-		attributes "Implementation-Title": project.archivesBaseName + "-sources"
+		attributes "Implementation-Title": base.archivesName.get() + "-sources"
 		attributes "Implementation-Version": project.version
-		attributes "Maven-Artifact": "${project.group}:${project.archivesBaseName}:${project.version}:sources"
+		attributes "Maven-Artifact": "${project.group}:${base.archivesName.get()}:${project.version}:sources"
 		attributes "Built-On-Minecraft": "${project.minecraft_version}"
 		attributes "Built-On-Java": "${System.getProperty("java.vm.version")} (${System.getProperty("java.vm.vendor")})"
 	}
@@ -335,9 +337,7 @@ githubRelease {
 		tagName project.mod_version
 	}
 	
-	if(project.hasProperty("github_branch")) {
-		targetCommitish project.github_branch
-	}
+	targetCommitish { grgitService.service.get().grgit.branch.current().name }
 	
 	body generateMarkdownChangelog()
 	
@@ -345,11 +345,12 @@ githubRelease {
 	
 	releaseName project.version
 	
-	releaseAssets = files("${project.buildDir}/libs/${archivesBaseName}-${version}.jar", "${project.buildDir}/libs/${archivesBaseName}-${version}-sources.jar").files
+	releaseAssets = files("${project.buildDir}/libs/${base.archivesName.get()}-${version}.jar", "${project.buildDir}/libs/${base.archivesName.get()}-${version}-sources.jar").files
 }
 
 tasks.named("githubRelease") {
 	dependsOn remapJar
+	dependsOn sourcesJar
 	dependsOn remapSourcesJar
 }
 
@@ -387,37 +388,37 @@ curseforge {
 			}
 			
 			mainArtifact(remapJar) {
-				displayName = "${display_name_prefix}${archives_base_name} ${project.mod_version}"
+				it.displayName = "${display_name_prefix}${archives_base_name} ${project.mod_version}"
 				
 				if(project.hasProperty("curseforge_required_dep_slugs") || project.hasProperty("curseforge_embedded_lib_slugs") || project.hasProperty("curseforge_optional_dep_slugs") || project.hasProperty("curseforge_compatible_tool_slugs") || project.hasProperty("curseforge_incompatible_slugs")) {
 					relations {
 						if(project.hasProperty("curseforge_required_dep_slugs")) {
 							project.curseforge_required_dep_slugs.split(", ").each { String slug ->
-								requiredDependency slug
+								it.requiredDependency slug
 							}
 						}
 						
 						if(project.hasProperty("curseforge_embedded_lib_slugs")) {
 							project.curseforge_embedded_lib_slugs.split(", ").each { String slug ->
-								embeddedLibrary slug
+								it.embeddedLibrary slug
 							}
 						}
 						
 						if(project.hasProperty("curseforge_optional_dep_slugs")) {
 							project.curseforge_optional_dep_slugs.split(", ").each { String slug ->
-								optionalDependency slug
+								it.optionalDependency slug
 							}
 						}
 						
 						if(project.hasProperty("curseforge_compatible_tool_slugs")) {
 							project.curseforge_compatible_tool_slugs.split(", ").each { String slug ->
-								tool slug
+								it.tool slug
 							}
 						}
 						
 						if(project.hasProperty("curseforge_incompatible_slugs")) {
 							project.curseforge_incompatible_slugs.split(", ").each { String slug ->
-								incompatible slug
+								it.incompatible slug
 							}
 						}
 					}
@@ -428,7 +429,7 @@ curseforge {
 			}
 			
 			addArtifact(sourcesJar) {
-				displayName = "${archives_base_name} ${project.mod_version} Source Code"
+				it.displayName = "${archives_base_name} ${project.mod_version} Source Code"
 			}
 		}
 		options {
