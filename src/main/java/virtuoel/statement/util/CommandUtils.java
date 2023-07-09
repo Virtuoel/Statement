@@ -9,6 +9,6 @@ public class CommandUtils
 {
 	public static void sendFeedback(ServerCommandSource source, Supplier<Text> text, boolean broadcastToOps)
 	{
-		source.sendFeedback(text.get(), broadcastToOps);
+		source.sendFeedback(text, broadcastToOps);
 	}
 }
