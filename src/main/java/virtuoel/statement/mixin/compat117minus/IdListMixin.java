@@ -13,15 +13,15 @@ import virtuoel.statement.api.ClearableIdList;
 @Mixin(IdList.class)
 public abstract class IdListMixin<T> implements ClearableIdList
 {
-	@Shadow private int nextId;
-	@Shadow @Final private IdentityHashMap<T, Integer> idMap;
-	@Shadow @Final private List<T> list;
+	@Shadow(remap = false) private int field_11099;
+	@Shadow(remap = false) @Final private IdentityHashMap<T, Integer> field_11100;
+	@Shadow(remap = false) @Final private List<T> field_11098;
 	
 	@Override
 	public void statement_clear()
 	{
-		nextId = 0;
-		idMap.clear();
-		list.clear();
+		field_11099 = 0;
+		field_11100.clear();
+		field_11098.clear();
 	}
 }

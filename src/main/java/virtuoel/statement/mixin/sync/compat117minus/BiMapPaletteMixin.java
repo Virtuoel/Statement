@@ -14,18 +14,18 @@ import virtuoel.statement.Statement;
 @Mixin(BiMapPalette.class)
 public class BiMapPaletteMixin<T>
 {
-	@Shadow @Final @Mutable
-	IdList<T> idList;
+	@Shadow(remap = false) @Final @Mutable
+	IdList<T> field_12821;
 	
-	@ModifyArg(method = "toPacket(Lnet/minecraft/network/PacketByteBuf;)V", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/network/PacketByteBuf;writeVarInt(I)Lnet/minecraft/network/PacketByteBuf;"))
+	@ModifyArg(method = "writePacket(Lnet/minecraft/network/PacketByteBuf;)V", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/network/PacketByteBuf;writeVarInt(I)Lnet/minecraft/network/PacketByteBuf;"))
 	private int toPacketWriteVarIntModify(int id)
 	{
-		return Statement.getSyncedStateId(idList, id).orElse(id);
+		return Statement.getSyncedStateId(field_12821, id).orElse(id);
 	}
 	
 	@ModifyArg(method = "getPacketSize()I", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/network/PacketByteBuf;getVarIntLength(I)I"))
 	private int getPacketSizeGetVarIntSizeBytesModify(int id)
 	{
-		return Statement.getSyncedStateId(idList, id).orElse(id);
+		return Statement.getSyncedStateId(field_12821, id).orElse(id);
 	}
 }

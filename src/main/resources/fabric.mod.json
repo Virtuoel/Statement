@@ -1,9 +1,9 @@
 {
 	"schemaVersion": 1,
 	"id": "statement",
-	"name": "Statement (Forge Version)",
-	"version": "0.0.0+forge",
-	"description": "Forge version of Statement, but you are playing on a Fabric or Quilt instance! Did you download the wrong mod .jar?",
+	"name": "Statement",
+	"version": "${version}",
+	"description": "Library to assist with adding properties to existing block states.",
 	"authors":
 	[
 		"Virtuoel"
@@ -15,13 +15,52 @@
 		"sources": "https://github.com/Virtuoel/Statement"
 	},
 	"license": "MIT",
-	"icon": "statement_icon.png",
+	"icon": "assets/statement/icon.png",
 	"environment": "*",
+	"depends":
+	{
+		"fabricloader": ">=0.14.21",
+		"statement_vanilla_compatibility": "*",
+		"kanos_config": "*"
+	},
 	"entrypoints":
 	{
 		"main":
 		[
-			"virtuoel.statement.util.FabricEntrypoint::onInitialize"
+			"virtuoel.statement.Statement"
+		],
+		"client":
+		[
+			"virtuoel.statement.StatementClient"
+		],
+		"statement":
+		[
+			"virtuoel.statement.Statement"
 		]
-	}
+	},
+	"mixins":
+	[
+		"statement.mixins.json"
+	],
+	"custom":
+	{
+		"modmenu:api": true,
+		"modmenu":
+		{
+			"badges":
+			[
+				"library"
+			]
+		},
+		"quilt_registry":
+		{
+			"disable_state_validation": true
+		}
+	},
+	"jars":
+	[
+		{
+			"file": "META-INF/jars/StatementVanillaCompatibility-1.0.1+1.14.4-1.15.2.jar"
+		}
+	]
 }

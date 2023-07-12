@@ -18,14 +18,14 @@ import virtuoel.statement.Statement;
 @Mixin(PlayerActionResponseS2CPacket.class)
 public class PlayerActionResponseS2CPacketMixin
 {
-	@Shadow @Final @Mutable private BlockState state;
+	@Shadow(remap = false) @Final @Mutable private BlockState field_20322;
 	
-	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/network/packet/c2s/play/PlayerActionC2SPacket$Action;ZLjava/lang/String;)V")
+	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/class_2338;Lnet/minecraft/class_2680;Lnet/minecraft/class_2846$class_2847;ZLjava/lang/String;)V", remap = false)
 	private void onConstruct(BlockPos pos, BlockState state, PlayerActionC2SPacket.Action action, boolean approved, String reason, CallbackInfo info)
 	{
 		Statement.getSyncedBlockStateId(state).ifPresent(id ->
 		{
-			this.state = Block.getStateFromRawId(id);
+			this.field_20322 = Block.getStateFromRawId(id);
 		});
 	}
 }

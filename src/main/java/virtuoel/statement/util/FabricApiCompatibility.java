@@ -1,7 +1,17 @@
 package virtuoel.statement.util;
 
+import java.lang.invoke.CallSite;
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.function.BiFunction;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -14,12 +24,26 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
+import net.fabricmc.fabric.api.event.registry.RegistryAttributeHolder;
+import net.fabricmc.fabric.api.event.registry.RegistryIdRemapCallback;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -27,39 +51,87 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
+import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.IdList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.loading.FMLLoader;
+import virtuoel.kanos_config.api.InvalidatableLazySupplier;
 import virtuoel.statement.Statement;
 import virtuoel.statement.api.StateRefresher;
 
-@EventBusSubscriber(modid = Statement.MOD_ID)
 public class FabricApiCompatibility
 {
-	@SubscribeEvent
-	public static void onServerStarting(final ServerStartingEvent event)
+	private static final BooleanSupplier NETWORKING_LOADED = InvalidatableLazySupplier.of(() -> ModLoaderUtils.isModLoaded("fabric-networking-api-v1"))::get;
+	
+	public static void registerCommands()
 	{
-		if (event.getServer().isDedicated())
+		if (ModLoaderUtils.isModLoaded("fabric-command-api-v2"))
 		{
-			StateRefresher.INSTANCE.reorderBlockStates();
-			StateRefresher.INSTANCE.reorderFluidStates();
+			V2ApiClassloading.registerV2ApiCommands();
+		}
+		else if (ModLoaderUtils.isModLoaded("fabric-command-api-v1"))
+		{
+			registerV1ApiCommands();
 		}
 	}
 	
-	@SubscribeEvent
-	public static void onRegisterCommands(RegisterCommandsEvent event)
+	public static void registerCommands(final CommandDispatcher<ServerCommandSource> dispatcher)
 	{
-		registerCommands(event.getDispatcher());
+		register(dispatcher);
 	}
 	
-	public static void registerCommands(final CommandDispatcher<ServerCommandSource> commandDispatcher)
+	private static class V2ApiClassloading
+	{
+		private static void registerV2ApiCommands()
+		{
+			CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, dedicated) ->
+			{
+				registerCommands(dispatcher);
+			});
+		}
+	}
+	
+	private static void registerV1ApiCommands()
+	{
+		try
+		{
+			final Lookup lookup = MethodHandles.lookup();
+			
+			final Method staticRegister = FabricApiCompatibility.class.getDeclaredMethod("registerV1ApiCommands", CommandDispatcher.class, boolean.class);
+			final MethodHandle staticRegisterHandle = lookup.unreflect(staticRegister);
+			final MethodType staticRegisterType = staticRegisterHandle.type();
+			
+			final Class<?> callbackClass = Class.forName("net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback");
+			
+			@SuppressWarnings("unchecked")
+			final Event<Object> registerEvent = (Event<Object>) callbackClass.getField("EVENT").get(null);
+			
+			final Method register = callbackClass.getDeclaredMethod("register", CommandDispatcher.class, boolean.class);
+			final MethodType registerType = MethodType.methodType(register.getReturnType(), register.getParameterTypes());
+			
+			final MethodType factoryMethodType = MethodType.methodType(callbackClass);
+			
+			final CallSite lambdaFactory = LambdaMetafactory.metafactory(lookup, "register", factoryMethodType, registerType, staticRegisterHandle, staticRegisterType);
+			final MethodHandle factoryInvoker = lambdaFactory.getTarget();
+			
+			final Object eventLambda = factoryInvoker.asType(factoryMethodType).invokeWithArguments(Collections.emptyList());
+			
+			registerEvent.register(eventLambda);
+		}
+		catch (Throwable e)
+		{
+			Statement.LOGGER.catching(e);
+		}
+	}
+	
+	protected static void registerV1ApiCommands(final CommandDispatcher<ServerCommandSource> dispatcher, final boolean dedicated)
+	{
+		registerCommands(dispatcher);
+	}
+	
+	public static void register(final CommandDispatcher<ServerCommandSource> commandDispatcher)
 	{
 		commandDispatcher.register(
 			CommandManager.literal("statement")
@@ -79,7 +151,7 @@ public class FabricApiCompatibility
 			)
 		);
 		
-		if (!FMLLoader.isProduction())
+		if (FabricLoader.getInstance().isDevelopmentEnvironment())
 		{
 			commandDispatcher.register(
 				CommandManager.literal("statement")
@@ -139,7 +211,7 @@ public class FabricApiCompatibility
 		return CommandManager.literal(argumentName)
 			.executes(context ->
 			{
-				return executeValidation(context, packetId, context.getSource().getPlayer(), 100, 0);
+				return executeValidation(context, packetId, context.getSource().getPlayerOrThrow(), 100, 0);
 			})
 			.then(
 				CommandManager.argument("player", EntityArgumentType.player())
@@ -165,10 +237,10 @@ public class FabricApiCompatibility
 	}
 	
 	private static int executeValidation(final CommandContext<ServerCommandSource> context, final Identifier packetId, final ServerPlayerEntity player, final int rate, final int initialId) throws CommandSyntaxException
-	{/*
+	{
 		if (NETWORKING_LOADED.getAsBoolean())
 		{
-			if (StatementPacketHandler.INSTANCE.isRemotePresent(player.networkHandler.connection))
+			if (ServerPlayNetworking.canSend(player, packetId))
 			{
 				final PlayerEntity executor = context.getSource().getPlayerOrThrow();
 				final PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer()).writeUuid(executor.getUuid()).writeVarInt(rate);
@@ -179,7 +251,8 @@ public class FabricApiCompatibility
 				}
 				
 				CommandUtils.sendFeedback(context.getSource(), () -> literal("Running state validation..."), false);
-				player.networkHandler.sendPacket(StatementPacketHandler.INSTANCE.toVanillaPacket(new StateValidationPacket(player, rate, initialId), NetworkDirection.PLAY_TO_CLIENT));
+				
+				ServerPlayNetworking.send(player, packetId, buffer);
 				
 				return 1;
 			}
@@ -193,10 +266,9 @@ public class FabricApiCompatibility
 		{
 			CommandUtils.sendFeedback(context.getSource(), () -> literal("Fabric Networking not found on server."), false);
 			return 0;
-		}*/
-		return 1;
+		}
 	}
-	/*
+	
 	public static void setupServerNetworking()
 	{
 		setupServerStateValidation(Statement.BLOCK_STATE_VALIDATION_PACKET, Block.STATE_IDS, NbtHelper::fromBlockState);
@@ -337,12 +409,19 @@ public class FabricApiCompatibility
 			});
 		});
 	}
-	*/
+	
+	private static final Function<String, Object> LITERAL = LiteralTextContent::new;
+	
 	private static Text literal(final String value, final Object... args)
 	{
+		if (VersionUtils.MINOR < 19)
+		{
+			return (Text) LITERAL.apply(String.format(value, args));
+		}
+		
 		return Text.literal(String.format(value, args));
 	}
-	/*
+	
 	public static void setupClientNetworking()
 	{
 		Client.setupClientStateValidation(Statement.BLOCK_STATE_VALIDATION_PACKET, Block.STATE_IDS, NbtHelper::fromBlockState);
@@ -392,7 +471,7 @@ public class FabricApiCompatibility
 			});
 		}
 	}
-	*/
+	
 	public static NbtCompound fromFluidState(final FluidState state)
 	{
 		return fromState(RegistryUtils.FLUID_REGISTRY, s -> ((StatementFluidStateExtensions) (Object) s).statement_getFluid(), state);
@@ -421,5 +500,19 @@ public class FabricApiCompatibility
 		}
 		
 		return compound;
+	}
+	
+	public static void markRegistryAsModded(Registry<?> registry)
+	{
+		if (VersionUtils.MINOR >= 16)
+		{
+			RegistryAttributeHolder.get(registry).addAttribute(RegistryAttribute.MODDED);
+		}
+	}
+	
+	public static void setupIdRemapCallbacks()
+	{
+		RegistryIdRemapCallback.event(RegistryUtils.BLOCK_REGISTRY).register(s -> StateRefresher.INSTANCE.reorderBlockStates());
+		RegistryIdRemapCallback.event(RegistryUtils.FLUID_REGISTRY).register(s -> StateRefresher.INSTANCE.reorderFluidStates());
 	}
 }

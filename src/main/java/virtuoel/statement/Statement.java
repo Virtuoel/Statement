@@ -23,6 +23,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import net.fabricmc.api.ModInitializer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.Fluid;
@@ -33,20 +34,19 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.IdList;
-import net.minecraftforge.fml.common.Mod;
+import virtuoel.kanos_config.api.InvalidatableLazySupplier;
+import virtuoel.kanos_config.api.JsonConfigBuilder;
+import virtuoel.kanos_config.api.MutableConfigEntry;
 import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.StatementConfig;
-import virtuoel.statement.network.StatementPacketHandler;
+import virtuoel.statement.util.FabricApiCompatibility;
+import virtuoel.statement.util.ModLoaderUtils;
 import virtuoel.statement.util.RegistryUtils;
 import virtuoel.statement.util.StatementPropertyExtensions;
 import virtuoel.statement.util.StatementStateExtensions;
-import virtuoel.statement.util.config.InvalidatableLazySupplier;
-import virtuoel.statement.util.config.JsonConfigBuilder;
-import virtuoel.statement.util.config.MutableConfigEntry;
 
 @ApiStatus.Internal
-@Mod(Statement.MOD_ID)
-public class Statement implements StatementApi
+public class Statement implements ModInitializer, StatementApi
 {
 	public static final String MOD_ID = StatementApi.MOD_ID;
 	
@@ -55,10 +55,29 @@ public class Statement implements StatementApi
 	public Statement()
 	{
 		StatementConfig.BUILDER.config.get();
+	}
+	
+	@Override
+	public void onInitialize()
+	{
+		final boolean fabricCommandsLoaded = ModLoaderUtils.isModLoaded("fabric-command-api-v2") || ModLoaderUtils.isModLoaded("fabric-command-api-v1");
+		final boolean fabricNetworkingLoaded = ModLoaderUtils.isModLoaded("fabric-networking-api-v1");
+		final boolean fabricRegistrySyncLoaded = ModLoaderUtils.isModLoaded("fabric-registry-sync-v0");
 		
-		StatementApi.ENTRYPOINTS.add(this);
+		if (fabricCommandsLoaded)
+		{
+			FabricApiCompatibility.registerCommands();
+		}
 		
-		StatementPacketHandler.init();
+		if (fabricNetworkingLoaded)
+		{
+			FabricApiCompatibility.setupServerNetworking();
+		}
+		
+		if (fabricRegistrySyncLoaded)
+		{
+			FabricApiCompatibility.setupIdRemapCallbacks();
+		}
 	}
 	
 	public static Identifier id(String name)
@@ -68,7 +87,12 @@ public class Statement implements StatementApi
 	
 	public static void markRegistryAsModded(Registry<?> registry)
 	{
-		// NOOP
+		final boolean fabricRegistrySyncLoaded = ModLoaderUtils.isModLoaded("fabric-registry-sync-v0");
+		
+		if (fabricRegistrySyncLoaded)
+		{
+			FabricApiCompatibility.markRegistryAsModded(registry);
+		}
 	}
 	
 	public static final Identifier BLOCK_STATE_VALIDATION_PACKET = id("block_state_validation");
