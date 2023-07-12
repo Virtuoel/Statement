@@ -26,10 +26,10 @@ import net.minecraft.world.BlockView;
 @Mixin(RedstoneWireBlock.class)
 public class RedstoneWireBlockMixin
 {
-	@Shadow(remap = false) @Final @Mutable
+	@Shadow @Final @Mutable
 	private Map<BlockState, VoxelShape> field_24416;
 	
-	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/class_4970$class_2251;)V", remap = false)
+	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/block/AbstractBlock$Settings;)V")
 	private void onConstruct(Block.Settings settings, CallbackInfo info)
 	{
 		if (field_24416 instanceof ImmutableMap)
@@ -38,7 +38,7 @@ public class RedstoneWireBlockMixin
 		}
 	}
 	
-	@Inject(at = @At("RETURN"), method = "method_9530", cancellable = true, remap = false)
+	@Inject(at = @At("RETURN"), method = "getOutlineShape", cancellable = true)
 	private void onGetOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context, CallbackInfoReturnable<VoxelShape> info)
 	{
 		if (info.getReturnValue() == null)

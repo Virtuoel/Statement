@@ -1,5 +1,6 @@
 package virtuoel.statement.api;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.OptionalInt;
 import java.util.function.BiFunction;
@@ -8,14 +9,13 @@ import java.util.function.Function;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.collection.IdList;
 
 public interface StatementApi
 {
 	public static final String MOD_ID = "statement";
 	
-	public static final Collection<StatementApi> ENTRYPOINTS = FabricLoader.getInstance().getEntrypoints(MOD_ID, StatementApi.class);
+	public static final Collection<StatementApi> ENTRYPOINTS = new ArrayList<>();
 	
 	default <S> boolean shouldDeferState(IdList<S> idList, S state)
 	{

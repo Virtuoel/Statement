@@ -1,5 +1,6 @@
 package virtuoel.statement.api;
 
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -7,18 +8,17 @@ import java.util.function.Supplier;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.FluidState;
-import virtuoel.kanos_config.api.JsonConfigBuilder;
 import virtuoel.statement.Statement;
+import virtuoel.statement.util.config.JsonConfigBuilder;
 
 public class StatementConfig
 {
 	@ApiStatus.Internal
 	public static final JsonConfigBuilder BUILDER = new JsonConfigBuilder(
 		StatementApi.MOD_ID,
-		FabricLoader.getInstance().getConfigDir().resolve(StatementApi.MOD_ID).resolve("config.json").normalize()
+		Paths.get("./config/").resolve(StatementApi.MOD_ID).resolve("config.json").normalize()
 	);
 	
 	public static final Client CLIENT = new Client(BUILDER);

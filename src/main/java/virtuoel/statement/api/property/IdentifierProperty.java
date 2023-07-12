@@ -4,9 +4,10 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 
+import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 
-public class IdentifierProperty extends VanillaCompatibleProperty<Identifier> implements MutableProperty<Identifier>
+public class IdentifierProperty extends Property<Identifier> implements MutableProperty<Identifier>
 {
 	private final Collection<Identifier> values = new LinkedHashSet<>();
 	
