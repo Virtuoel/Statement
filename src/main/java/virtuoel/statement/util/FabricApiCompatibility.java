@@ -1,29 +1,11 @@
 package virtuoel.statement.util;
 
-import java.lang.invoke.CallSite;
-import java.lang.invoke.LambdaMetafactory;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Map.Entry;
-import java.util.UUID;
-import java.util.function.BiFunction;
-import java.util.function.BooleanSupplier;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.spongepowered.asm.mixin.MixinEnvironment;
-
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -57,9 +39,21 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.IdList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 import virtuoel.kanos_config.api.InvalidatableLazySupplier;
 import virtuoel.statement.Statement;
 import virtuoel.statement.api.StateRefresher;
+
+import java.lang.invoke.*;
+import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class FabricApiCompatibility
 {
@@ -200,7 +194,9 @@ public class FabricApiCompatibility
 						stringBuilder.append(']');
 					}
 					
-					context.getSource().sendFeedback(literal("%s (%d) @ %d, %d, %d", stringBuilder.toString(), idList.getRawId(state), pos.getX(), pos.getY(), pos.getZ()), false);
+					context.getSource().sendFeedback(
+							() -> literal("%s (%d) @ %d, %d, %d", stringBuilder.toString(), idList.getRawId(state), pos.getX(), pos.getY(), pos.getZ()), false
+					);
 					return 1;
 				})
 			);
@@ -250,7 +246,7 @@ public class FabricApiCompatibility
 					buffer.writeVarInt(initialId + i);
 				}
 				
-				context.getSource().sendFeedback(literal("Running state validation..."), false);
+				context.getSource().sendFeedback(() -> literal("Running state validation..."), false);
 				
 				ServerPlayNetworking.send(player, packetId, buffer);
 				
@@ -258,13 +254,13 @@ public class FabricApiCompatibility
 			}
 			else
 			{
-				context.getSource().sendFeedback(literal("Error: Target player cannot receive state validation packet."), false);
+				context.getSource().sendFeedback(() -> literal("Error: Target player cannot receive state validation packet."), false);
 				return 0;
 			}
 		}
 		else
 		{
-			context.getSource().sendFeedback(literal("Fabric Networking not found on server."), false);
+			context.getSource().sendFeedback(() -> literal("Fabric Networking not found on server."), false);
 			return 0;
 		}
 	}
