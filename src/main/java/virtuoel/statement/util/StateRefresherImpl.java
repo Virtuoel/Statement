@@ -274,9 +274,11 @@ public class StateRefresherImpl implements StateRefresher
 			}
 		}
 		
+		PolymerCompatibility.preRecalculation(stateIdList);
 		((ClearableIdList) stateIdList).statement_clear();
 		initialStates.forEach(stateIdList::add);
 		deferredStates.forEach(stateIdList::add);
+		PolymerCompatibility.postRecalculation(stateIdList);
 		
 		NetworkUtils.setAutoRead(lastAutoRead);
 	}
