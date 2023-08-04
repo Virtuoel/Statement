@@ -51,6 +51,7 @@
 	],
 	"client":
 	[
+		"client.ClientConnectionAccessor",
 		"client.ClientPlayNetworkHandlerMixin"
 	],
 	"server":

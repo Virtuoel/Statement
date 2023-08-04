@@ -236,6 +236,8 @@ public class StateRefresherImpl implements StateRefresher
 	@Override
 	public <O, V extends Comparable<V>, S extends State<O, S>> void reorderStates(final Iterable<O> registry, final IdList<S> stateIdList, final Function<O, StateManager<O, S>> stateManagerGetter)
 	{
+		final boolean lastAutoRead = NetworkUtils.setAutoRead(false);
+		
 		final Iterable<O> entries;
 		
 		if (registry instanceof Registry)
@@ -275,6 +277,8 @@ public class StateRefresherImpl implements StateRefresher
 		((ClearableIdList) stateIdList).statement_clear();
 		initialStates.forEach(stateIdList::add);
 		deferredStates.forEach(stateIdList::add);
+		
+		NetworkUtils.setAutoRead(lastAutoRead);
 	}
 	
 	private Boolean parallel = null;
