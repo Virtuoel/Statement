@@ -24,9 +24,9 @@ public class HydrogenCompatibility
 		
 		if (this.enabled)
 		{
-			this.classConstructorsClass = getClass("me.jellysquid.mods.hydrogen.common.jvm.ClassConstructors");
+			this.classConstructorsClass = ReflectionUtils.getClass("me.jellysquid.mods.hydrogen.common.jvm.ClassConstructors");
 			
-			this.createFastImmutableMap = getMethod(classConstructorsClass, "createFastImmutableMap");
+			this.createFastImmutableMap = ReflectionUtils.getMethod(classConstructorsClass, "createFastImmutableMap");
 		}
 		else
 		{
@@ -55,36 +55,5 @@ public class HydrogenCompatibility
 		}
 		
 		return entries;
-	}
-	
-	private static Optional<Method> getMethod(final Optional<Class<?>> classObj, final String methodName, Class<?>... args)
-	{
-		return classObj.map(c ->
-		{
-			try
-			{
-				final Method m = c.getMethod(methodName, args);
-				m.setAccessible(true);
-				return m;
-			}
-			catch (SecurityException | NoSuchMethodException e)
-			{
-				
-			}
-			return null;
-		});
-	}
-	
-	private static Optional<Class<?>> getClass(final String className)
-	{
-		try
-		{
-			return Optional.of(Class.forName(className));
-		}
-		catch (ClassNotFoundException e)
-		{
-			
-		}
-		return Optional.empty();
 	}
 }
