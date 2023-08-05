@@ -34,12 +34,12 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 		
 		if (this.enabled)
 		{
-			this.orderingClass = getClass("pl.asie.foamfix.state.PropertyOrdering");
-			this.factoryClass = getClass("pl.asie.foamfix.state.FoamyStateFactory$Factory");
-			this.stateClass = getClass("pl.asie.foamfix.state.FoamyBlockStateMapped");
-			this.valueMapperClass = getClass("pl.asie.foamfix.state.PropertyValueMapperImpl");
+			this.orderingClass = ReflectionUtils.getClass("pl.asie.foamfix.state.PropertyOrdering");
+			this.factoryClass = ReflectionUtils.getClass("pl.asie.foamfix.state.FoamyStateFactory$Factory");
+			this.stateClass = ReflectionUtils.getClass("pl.asie.foamfix.state.FoamyBlockStateMapped");
+			this.valueMapperClass = ReflectionUtils.getClass("pl.asie.foamfix.state.PropertyValueMapperImpl");
 			
-			this.propertyEntryMap = getField(orderingClass, "entryMap").map(f ->
+			this.propertyEntryMap = ReflectionUtils.getField(orderingClass, "entryMap").map(f ->
 			{
 				try
 				{
@@ -54,8 +54,8 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 				return null;
 			});
 			
-			this.factoryMapper = getField(factoryClass, "mapper");
-			this.stateOwner = getField(stateClass, "owner");
+			this.factoryMapper = ReflectionUtils.getField(factoryClass, "mapper");
+			this.stateOwner = ReflectionUtils.getField(stateClass, "owner");
 		}
 		else
 		{
@@ -172,36 +172,5 @@ public class FoamFixCompatibilityImpl implements FoamFixCompatibility
 				});
 			});
 		}
-	}
-	
-	private static Optional<Field> getField(final Optional<Class<?>> classObj, final String fieldName)
-	{
-		return classObj.map(c ->
-		{
-			try
-			{
-				final Field f = c.getDeclaredField(fieldName);
-				f.setAccessible(true);
-				return f;
-			}
-			catch (SecurityException | NoSuchFieldException e)
-			{
-				
-			}
-			return null;
-		});
-	}
-	
-	private static Optional<Class<?>> getClass(final String className)
-	{
-		try
-		{
-			return Optional.of(Class.forName(className));
-		}
-		catch (ClassNotFoundException e)
-		{
-			
-		}
-		return Optional.empty();
 	}
 }
