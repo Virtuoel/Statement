@@ -4,8 +4,8 @@ import io.netty.channel.Channel;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import virtuoel.statement.mixin.client.ClientConnectionAccessor;
+import virtuoel.statement.mixin.client.ClientPlayNetworkHandlerAccessor;
 
 public class NetworkUtils
 {
@@ -13,11 +13,11 @@ public class NetworkUtils
 	{
 		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT)
 		{
-			final ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+			final ClientPlayNetworkHandlerAccessor networkHandler = (ClientPlayNetworkHandlerAccessor) MinecraftClient.getInstance().getNetworkHandler();
 			
 			if (networkHandler != null)
 			{
-				final Channel channel = ((ClientConnectionAccessor) networkHandler.getConnection()).getChannel();
+				final Channel channel = ((ClientConnectionAccessor) networkHandler.statement$getConnection()).statement$getChannel();
 				
 				if (channel != null)
 				{
