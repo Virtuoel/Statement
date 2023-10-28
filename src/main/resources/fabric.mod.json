@@ -19,7 +19,7 @@
 	"environment": "*",
 	"depends":
 	{
-		"fabricloader": ">=0.14.21",
+		"fabricloader": ">=0.14.22",
 		"statement_vanilla_compatibility": "*",
 		"kanos_config": "*"
 	},
