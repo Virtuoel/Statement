@@ -1,4 +1,4 @@
-package virtuoel.statement.mixin.sync.compat118plus;
+package virtuoel.statement.mixin.sync.compat1202plus;
 
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -8,17 +8,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 import net.minecraft.util.collection.IndexedIterable;
-import net.minecraft.world.chunk.BiMapPalette;
+import net.minecraft.world.chunk.ArrayPalette;
 import virtuoel.statement.Statement;
 
-@Mixin(BiMapPalette.class)
-public class BiMapPaletteMixin<T>
+@Mixin(ArrayPalette.class)
+public class ArrayPaletteMixin<T>
 {
 	@Shadow @Final @Mutable
 	IndexedIterable<T> idList;
 	
-	@ModifyArg(method = "writePacket(Lnet/minecraft/network/PacketByteBuf;)V", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/network/PacketByteBuf;writeVarInt(I)Lnet/minecraft/network/PacketByteBuf;"))
-	private int toPacketWriteVarIntModify(int id)
+	@ModifyArg(method = "getPacketSize()I", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/network/encoding/VarInts;getSizeInBytes(I)I"))
+	private int getPacketSizeGetVarIntSizeBytesModify(int id)
 	{
 		return Statement.getSyncedStateId(idList, id, IndexedIterable::getRawId, IndexedIterable::get, IndexedIterable::size).orElse(id);
 	}

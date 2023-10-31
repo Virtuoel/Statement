@@ -47,13 +47,18 @@
 		"sync.compat117minus.BiMapPaletteMixin",
 		"sync.compat118.PlayerActionResponseS2CPacketMixin",
 		"sync.compat118plus.ArrayPaletteMixin",
-		"sync.compat118plus.BiMapPaletteMixin"
+		"sync.compat118plus.BiMapPaletteMixin",
+		"sync.compat118plus.compat1201minus.ArrayPaletteMixin",
+		"sync.compat118plus.compat1201minus.BiMapPaletteMixin",
+		"sync.compat1202plus.ArrayPaletteMixin",
+		"sync.compat1202plus.BiMapPaletteMixin"
 	],
 	"client":
 	[
 		"client.ClientConnectionAccessor",
-		"client.ClientPlayNetworkHandlerAccessor",
-		"client.ClientPlayNetworkHandlerMixin"
+		"client.ClientPlayNetworkHandlerMixin",
+		"client.compat1201minus.ClientPlayNetworkHandlerMixin",
+		"client.compat1202plus.ClientPlayNetworkHandlerMixin"
 	],
 	"server":
 	[
