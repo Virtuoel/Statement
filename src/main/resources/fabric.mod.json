@@ -2,7 +2,7 @@
 	"schemaVersion": 1,
 	"id": "statement",
 	"name": "Statement (NeoForge Version)",
-	"version": "0.0.0+forge",
+	"version": "0.0.0+neoforge",
 	"description": "NeoForge version of Statement, but you are playing on a Fabric or Quilt instance! Did you download the wrong mod .jar?",
 	"authors":
 	[
