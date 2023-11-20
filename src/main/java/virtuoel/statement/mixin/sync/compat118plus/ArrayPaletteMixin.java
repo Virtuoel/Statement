@@ -22,10 +22,4 @@ public class ArrayPaletteMixin<T>
 	{
 		return Statement.getSyncedStateId(idList, id, IndexedIterable::getRawId, IndexedIterable::get, IndexedIterable::size).orElse(id);
 	}
-	
-	@ModifyArg(method = "getPacketSize()I", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/network/PacketByteBuf;getVarIntLength(I)I"))
-	private int getPacketSizeGetVarIntSizeBytesModify(int id)
-	{
-		return Statement.getSyncedStateId(idList, id, IndexedIterable::getRawId, IndexedIterable::get, IndexedIterable::size).orElse(id);
-	}
 }

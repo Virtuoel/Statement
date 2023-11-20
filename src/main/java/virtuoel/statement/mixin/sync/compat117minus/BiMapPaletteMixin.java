@@ -23,7 +23,7 @@ public class BiMapPaletteMixin<T>
 		return Statement.getSyncedStateId(idList, id).orElse(id);
 	}
 	
-	@ModifyArg(method = "getPacketSize()I", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/network/PacketByteBuf;getVarIntLength(I)I"))
+	@ModifyArg(method = "getPacketSize()I", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/class_2540;method_10815(I)I", remap = false))
 	private int getPacketSizeGetVarIntSizeBytesModify(int id)
 	{
 		return Statement.getSyncedStateId(idList, id).orElse(id);

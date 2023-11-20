@@ -1,12 +1,12 @@
 package virtuoel.statement.network;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.network.NetworkEvent;
 
 public class StateValidationPacket
 {
@@ -40,27 +40,25 @@ public class StateValidationPacket
 		}
 	}
 	
-	public static void handle(StateValidationPacket msg, Supplier<NetworkEvent.Context> ctx)
+	public static void handle(StateValidationPacket msg, NetworkEvent.Context ctx)
 	{
 		// NYI
 		
-		ctx.get().enqueueWork(() ->
+		ctx.enqueueWork(() ->
 		{
-			DistExecutor.unsafeRunForDist(() -> () ->
+			if (FMLEnvironment.dist == Dist.CLIENT)
 			{
+				// client
 				// NYI
-				
-				return "client";
-			},
-			() -> () ->
+			}
+			else
 			{
+				// server
 				// NYI
-				
-				return "server";
-			});
+			}
 		});
 		
-		ctx.get().setPacketHandled(true);
+		ctx.setPacketHandled(true);
 		
 	}
 	

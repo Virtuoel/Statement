@@ -2,9 +2,9 @@ package virtuoel.statement.util;
 
 import io.netty.channel.Channel;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraft.network.ClientConnection;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import virtuoel.statement.mixin.client.ClientConnectionAccessor;
 
 public class NetworkUtils
@@ -13,11 +13,12 @@ public class NetworkUtils
 	{
 		if (FMLEnvironment.dist == Dist.CLIENT)
 		{
-			final ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+			@SuppressWarnings("unchecked")
+			final ClientPlayNetworkHandlerExtensions<ClientConnection> networkHandler = (ClientPlayNetworkHandlerExtensions<ClientConnection>) MinecraftClient.getInstance().getNetworkHandler();
 			
 			if (networkHandler != null)
 			{
-				final Channel channel = ((ClientConnectionAccessor) networkHandler.getConnection()).getChannel();
+				final Channel channel = ((ClientConnectionAccessor) networkHandler.statement_getConnection()).statement$getChannel();
 				
 				if (channel != null)
 				{

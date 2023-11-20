@@ -12,3 +12,5 @@ authors="Virtuoel"
 description='''
 Library to assist with adding properties to existing block states.
 '''
+[[mixins]]
+config="statement.mixins.json"

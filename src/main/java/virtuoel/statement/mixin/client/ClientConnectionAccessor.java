@@ -10,5 +10,5 @@ import net.minecraft.network.ClientConnection;
 public interface ClientConnectionAccessor
 {
 	@Accessor("channel")
-	Channel getChannel();
+	Channel statement$getChannel();
 }

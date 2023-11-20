@@ -33,7 +33,7 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.IdList;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.fml.common.Mod;
 import virtuoel.statement.api.StatementApi;
 import virtuoel.statement.api.StatementConfig;
 import virtuoel.statement.network.StatementPacketHandler;

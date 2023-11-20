@@ -25,7 +25,7 @@ public class StateManagerMixin<O, S extends State<O, S>> implements RefreshableS
 	@Unique BiFunction<O, ImmutableMap<Property<?>, Comparable<?>>, S> statement_stateFunction;
 	
 	@SuppressWarnings("unchecked")
-	@Inject(at = @At("RETURN"), method = "<init>")
+	@Inject(at = @At("RETURN"), method = "<init>", remap = false)
 	private void onConstruct(Object object, StateManager.Factory<O, S> factory, Map<String, Property<?>> map, CallbackInfo info)
 	{
 		statement_factory = factory;

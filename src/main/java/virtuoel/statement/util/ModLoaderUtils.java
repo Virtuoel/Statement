@@ -1,6 +1,6 @@
 package virtuoel.statement.util;
 
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLLoader;
 
 public class ModLoaderUtils
 {
