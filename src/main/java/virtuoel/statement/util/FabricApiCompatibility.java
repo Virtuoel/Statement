@@ -6,9 +6,12 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
@@ -51,7 +54,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.State;
 import net.minecraft.state.property.Property;
-import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.IdList;
@@ -410,13 +412,21 @@ public class FabricApiCompatibility
 		});
 	}
 	
-	private static final Function<String, Object> LITERAL = LiteralTextContent::new;
+	private static final Class<?> LITERAL_TEXT = VersionUtils.MINOR < 19 ? ReflectionUtils.getClass(FabricLoader.getInstance().getMappingResolver().mapClassName("intermediary", "net.minecraft.class_2585")).orElse(null) : null;
+	private static final Constructor<?> LITERAL = ReflectionUtils.getConstructor(Optional.ofNullable(LITERAL_TEXT), String.class).orElse(null);
 	
 	private static Text literal(final String value, final Object... args)
 	{
 		if (VersionUtils.MINOR < 19)
 		{
-			return (Text) LITERAL.apply(String.format(value, args));
+			try
+			{
+				return (Text) LITERAL.newInstance(String.format(value, args));
+			}
+			catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+			{
+				
+			}
 		}
 		
 		return Text.literal(String.format(value, args));

@@ -1,4 +1,4 @@
-package virtuoel.statement.mixin.compat118plus;
+package virtuoel.statement.mixin.compat1203plus;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.util.collection.IdList;
 import virtuoel.statement.api.ClearableIdList;
 
@@ -14,7 +14,7 @@ import virtuoel.statement.api.ClearableIdList;
 public abstract class IdListMixin<T> implements ClearableIdList
 {
 	@Shadow private int nextId;
-	@Shadow @Final private Object2IntMap<T> idMap;
+	@Shadow @Final private Reference2IntMap<T> idMap;
 	@Shadow @Final private List<T> list;
 	
 	@Override

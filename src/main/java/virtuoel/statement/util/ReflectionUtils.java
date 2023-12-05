@@ -1,5 +1,6 @@
 package virtuoel.statement.util;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -65,6 +66,21 @@ public final class ReflectionUtils
 				return m;
 			}
 			catch (SecurityException | NoSuchMethodException e)
+			{
+				return null;
+			}
+		});
+	}
+	
+	public static <T> Optional<Constructor<T>> getConstructor(final Optional<Class<T>> clazz, final Class<?>... params)
+	{
+		return clazz.map(c ->
+		{
+			try
+			{
+				return c.getConstructor(params);
+			}
+			catch (NoSuchMethodException | SecurityException e)
 			{
 				return null;
 			}
