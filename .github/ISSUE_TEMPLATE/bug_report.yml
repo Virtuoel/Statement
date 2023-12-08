@@ -18,9 +18,10 @@ body:
       You may select more than one."
       multiple: true
       options:
+        - 1.20.4
+        - 1.20.2
         - 1.20.1
         - 1.19.4
-        - 1.19.3
         - 1.19.2
         - 1.18.2
         - 1.17.1
@@ -44,9 +45,10 @@ body:
       label: Mod loader
       description: What mod loader were you using?
       options:
-        - Fabric
-        - Forge
         - Quilt
+        - NeoForge
+        - Forge
+        - Fabric
     validations:
       required: true
   - type: input
