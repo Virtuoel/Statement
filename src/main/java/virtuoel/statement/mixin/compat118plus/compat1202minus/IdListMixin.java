@@ -1,4 +1,4 @@
-package virtuoel.statement.mixin.compat118plus;
+package virtuoel.statement.mixin.compat118plus.compat1202minus;
 
 import java.util.List;
 

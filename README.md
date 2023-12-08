@@ -1,6 +1,6 @@
 
 # Statement
-Library mod for the Fabric, Forge, and Quilt mod loaders that allows mod developers to modify blockstates of existing blocks.  
+Library mod for the Quilt, NeoForge, Forge, and Fabric mod loaders that allows mod developers to modify blockstates of existing blocks.  
 
 # Information for Players
 <details open>
@@ -30,8 +30,16 @@ Library mod for the Fabric, Forge, and Quilt mod loaders that allows mod develop
 <summary>Show/Hide Supported Minecraft Versions</summary><table width=100%><td>
 
 ### Fabric/Quilt Versions
-Supported Versions of `Statement-x.y.z+1.14.4-1.20.1`:  
-`1.20.1`, `1.19.4`, `1.19.3`, `1.19.2`, `1.18.2`, `1.17.1`, `1.16.5`, `1.15.2`, `1.14.4`
+Supported Versions of `Statement-x.y.z+1.14.4-1.20.4`:  
+`1.20.4`, `1.20.2`, `1.20.1`, `1.19.4`, `1.19.2`, `1.18.2`, `1.17.1`, `1.16.5`, `1.15.2`, `1.14.4`
+
+### NeoForge Versions
+
+Supported Versions of `Statement-x.y.z+1.20.4-neoforge`:  
+`1.20.4`
+
+Supported Versions of `Statement-x.y.z+1.20.2-neoforge`:  
+`1.20.2`
 
 ### Forge Versions
 
@@ -40,9 +48,6 @@ Supported Versions of `Statement-x.y.z+1.20.1-forge`:
 
 Supported Versions of `Statement-x.y.z+1.19.4-forge`:  
 `1.19.4`
-
-Supported Versions of `Statement-x.y.z+1.19.3-forge`:  
-`1.19.3`
 
 Supported Versions of `Statement-x.y.z+1.19.2-forge`:  
 `1.19.2`
@@ -114,12 +119,18 @@ Now that a Maven repository is specified, add `statement_version=x.y.z-w` to you
 
 Lastly, in your `build.gradle`'s `dependencies` block, add the corresponding line from below depending on your mod loader:
 
-#### Developing for Fabric with Loom
+#### Developing for Quilt/Fabric with Loom
 
 ```groovy
 modApi("com.github.Virtuoel:Statement:${statement_version}", {
 	exclude group: "net.fabricmc.fabric-api"
 })
+```
+
+#### Developing for NeoForge with NeoGradle
+
+```groovy
+implementation "com.github.Virtuoel:Statement:${statement_version}"
 ```
 
 #### Developing for Forge with ForgeGradle
