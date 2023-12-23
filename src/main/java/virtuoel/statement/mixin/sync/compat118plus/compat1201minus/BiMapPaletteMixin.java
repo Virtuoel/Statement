@@ -17,7 +17,7 @@ public class BiMapPaletteMixin<T>
 	@Shadow @Final @Mutable
 	IndexedIterable<T> idList;
 	
-	@ModifyArg(method = "getPacketSize()I", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/class_2540/method_10815(I)I", remap = false))
+	@ModifyArg(method = "getPacketSize()I", at = @At(value = "INVOKE", ordinal = 1, target = "Lnet/minecraft/class_2540;method_10815(I)I", remap = false))
 	private int getPacketSizeGetVarIntSizeBytesModify(int id)
 	{
 		return Statement.getSyncedStateId(idList, id, IndexedIterable::getRawId, IndexedIterable::get, IndexedIterable::size).orElse(id);
